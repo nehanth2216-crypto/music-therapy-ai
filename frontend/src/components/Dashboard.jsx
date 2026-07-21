@@ -24,6 +24,8 @@ ChartJS.register(
   Filler
 );
 
+const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
+
 export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
