@@ -1,0 +1,250 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-primary: 'Outfit', sans-serif;
+  --font-secondary: 'Plus Jakarta Sans', sans-serif;
+
+  /* Color Palette - HSL Tailored Neon & Slate */
+  --bg-deep: hsl(260, 30%, 6%);
+  --bg-surface: hsla(260, 20%, 12%, 0.65);
+  --bg-surface-hover: hsla(260, 20%, 16%, 0.8);
+  
+  --primary-glow: hsla(280, 100%, 60%, 0.15);
+  --primary: hsl(280, 85%, 65%);
+  --primary-light: hsl(280, 100%, 75%);
+  
+  --accent-cyan: hsl(185, 100%, 50%);
+  --accent-cyan-glow: hsla(185, 100%, 50%, 0.2);
+  
+  --accent-emerald: hsl(145, 100%, 60%);
+  --accent-emerald-glow: hsla(145, 100%, 60%, 0.2);
+  
+  --accent-rose: hsl(345, 100%, 60%);
+  
+  --text-primary: hsl(210, 20%, 98%);
+  --text-secondary: hsl(210, 14%, 75%);
+  --text-muted: hsl(210, 10%, 55%);
+  
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-neon: hsla(280, 85%, 65%, 0.3);
+  --shadow-neon: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --blur-amount: 16px;
+  
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.15s ease-out;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 10% 20%, hsla(280, 100%, 50%, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, hsla(185, 100%, 50%, 0.08) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-neon);
+  border-radius: 4px;
+  border: 2px solid var(--bg-deep);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: blur(var(--blur-amount));
+  -webkit-backdrop-filter: blur(var(--blur-amount));
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  box-shadow: var(--shadow-neon);
+  transition: var(--transition-smooth);
+}
+
+.glass-panel:hover {
+  border-color: var(--border-neon);
+  box-shadow: 0 8px 32px 0 var(--primary-glow);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: var(--transition-smooth);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Button & Form Accents */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: var(--bg-deep);
+  border: none;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px 0 var(--primary-glow);
+  transition: var(--transition-smooth);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 hsla(280, 100%, 65%, 0.4);
+  opacity: 0.95;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-glass);
+  font-family: var(--font-primary);
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-neon);
+}
+
+.input-field {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-secondary);
+  font-size: 0.95rem;
+  width: 100%;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 10px 0 var(--primary-glow);
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 5px var(--accent-cyan-glow); }
+  50% { box-shadow: 0 0 20px var(--accent-cyan-glow); }
+  100% { box-shadow: 0 0 5px var(--accent-cyan-glow); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes bounceHeight {
+  0%, 100% { height: 10%; }
+  50% { height: 80%; }
+}
+
+/* Visualizer Bars */
+.visualizer-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  height: 40px;
+  width: 120px;
+}
+
+.visualizer-bar {
+  width: 4px;
+  height: 10%;
+  background: linear-gradient(to top, var(--primary), var(--accent-cyan));
+  border-radius: 2px;
+  animation: bounceHeight 1.2s ease-in-out infinite;
+}
+
+.visualizer-bar:nth-child(2) { animation-delay: 0.2s; }
+.visualizer-bar:nth-child(3) { animation-delay: 0.4s; }
+.visualizer-bar:nth-child(4) { animation-delay: 0.1s; }
+.visualizer-bar:nth-child(5) { animation-delay: 0.3s; }
+.visualizer-bar:nth-child(6) { animation-delay: 0.5s; }
+
+/* Grid / Responsive Layouts */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+}
+
+@media (min-width: 992px) {
+  .dashboard-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Sliders */
+.slider-custom {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.slider-custom::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--primary);
+  transition: var(--transition-fast);
+}
+
+.slider-custom::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
