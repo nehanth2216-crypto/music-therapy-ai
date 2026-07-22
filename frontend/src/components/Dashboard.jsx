@@ -24,12 +24,7 @@ ChartJS.register(
   Filler
 );
 
-const SUPPORTED_LANGUAGES = [
-  "English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", 
-  "Bengali", "Marathi", "Gujarati", "Odia", "Assamese", "Urdu", "Sanskrit", 
-  "Korean", "Japanese", "Chinese", "Spanish", "French", "German", "Italian", 
-  "Arabic", "Turkish", "Portuguese", "Russian"
-];
+const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"];
 
 const LYRICS_DATABASE = {
   "Samayama": {

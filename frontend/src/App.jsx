@@ -1,12 +1,11 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, LogOut, Disc, ClipboardList, BarChart3, User, Sparkles, Key, CheckCircle, ArrowLeft, Settings, Shield, Bot } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
-
-const Dashboard = lazy(() => import('./components/Dashboard'));
-const Survey = lazy(() => import('./components/Survey'));
-const ModelComparison = lazy(() => import('./components/ModelComparison'));
-const UserProfileModal = lazy(() => import('./components/UserProfileModal'));
-const AIChatAssistant = lazy(() => import('./components/AIChatAssistant'));
+import Dashboard from './components/Dashboard';
+import Survey from './components/Survey';
+import ModelComparison from './components/ModelComparison';
+import UserProfileModal from './components/UserProfileModal';
+import AIChatAssistant from './components/AIChatAssistant';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8000/api`;
 const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
@@ -542,35 +541,22 @@ export default function App() {
     );
   };
 
-  const ViewFallback = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '45vh', gap: '1rem' }}>
-      <Disc className="spin" style={{ color: 'var(--primary)', width: '38px', height: '38px' }} />
-      <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Loading HarmonyRec Modules...</span>
-    </div>
-  );
-
   const renderActiveView = () => {
-    return (
-      <Suspense fallback={<ViewFallback />}>
-        {(() => {
-          switch (currentView) {
-            case 'dashboard':
-              return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
-            case 'chatbot':
-              return <AIChatAssistant token={token} apiBaseUrl={API_BASE_URL} onPlayTrack={(track) => {
-                changeView('dashboard');
-                window.dispatchEvent(new CustomEvent('harmonyrec_play_track', { detail: track }));
-              }} />;
-            case 'survey':
-              return <Survey token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
-            case 'analytics':
-              return <ModelComparison token={token} apiBaseUrl={API_BASE_URL} />;
-            default:
-              return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
-          }
-        })()}
-      </Suspense>
-    );
+    switch (currentView) {
+      case 'dashboard':
+        return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
+      case 'chatbot':
+        return <AIChatAssistant token={token} apiBaseUrl={API_BASE_URL} onPlayTrack={(track) => {
+          changeView('dashboard');
+          window.dispatchEvent(new CustomEvent('harmonyrec_play_track', { detail: track }));
+        }} />;
+      case 'survey':
+        return <Survey token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
+      case 'analytics':
+        return <ModelComparison token={token} apiBaseUrl={API_BASE_URL} />;
+      default:
+        return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
+    }
   };
 
   if (!token) {
@@ -710,18 +696,16 @@ export default function App() {
 
       {/* User Profile & Settings Modal */}
       {isProfileOpen && (
-        <Suspense fallback={null}>
-          <UserProfileModal
-            isOpen={isProfileOpen}
-            onClose={() => setIsProfileOpen(false)}
-            token={token}
-            apiBaseUrl={API_BASE_URL}
-            onProfileUpdated={(updated) => {
-              setUserProfile(updated);
-              if (updated.username) setUsername(updated.username);
-            }}
-          />
-        </Suspense>
+        <UserProfileModal
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+          token={token}
+          apiBaseUrl={API_BASE_URL}
+          onProfileUpdated={(updated) => {
+            setUserProfile(updated);
+            if (updated.username) setUsername(updated.username);
+          }}
+        />
       )}
       
       {/* Footer */}

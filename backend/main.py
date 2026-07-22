@@ -98,12 +98,7 @@ SLEEP_QUALITIES = ["Good", "Fair", "Poor"]
 ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"]
 GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"]
 PLAYLISTS = ["playlist_1", "playlist_2", "playlist_3", "playlist_4", "playlist_5"]
-SUPPORTED_LANGUAGES = [
-    "English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", 
-    "Bengali", "Marathi", "Gujarati", "Odia", "Assamese", "Urdu", "Sanskrit", 
-    "Korean", "Japanese", "Chinese", "Spanish", "French", "German", "Italian", 
-    "Arabic", "Turkish", "Portuguese", "Russian"
-]
+SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"]
 
 PLAYLIST_THEME_MAPPING = {
     "playlist_1": {"name": "Lofi & Calm Pop", "query": "lofi hip hop chill study beats"},
