@@ -297,12 +297,28 @@ def fetch_hybrid_recommendations(
     if cached:
         return cached
 
-    # Query variations ensuring exact Language, Genre, and Mood alignment
+    # Dynamic search matrix tapping into thousands of catalog tracks across top artists, albums, movies, and soundscapes
+    artist_keywords = {
+        "Telugu": ["Sid Sriram", "Anirudh Ravichander", "Hesham Abdul Wahab", "A.R. Rahman", "S.S. Thaman", "Devi Sri Prasad", "Anurag Kulkarni", "Armaan Malik", "M.M. Keeravani", "Shreya Ghoshal"],
+        "Hindi": ["Arijit Singh", "Pritam", "Shreya Ghoshal", "Atif Aslam", "A.R. Rahman", "Mohit Chauhan", "Sonu Nigam", "Jubin Nautiyal", "B Praak", "Neha Kakkar"],
+        "Tamil": ["Anirudh Ravichander", "A.R. Rahman", "Yuvan Shankar Raja", "Harris Jayaraj", "Sid Sriram", "Dhanush", "Santhosh Narayanan", "G.V. Prakash Kumar", "Pradeep Kumar", "Jonita Gandhi"],
+        "Malayalam": ["Hesham Abdul Wahab", "Sushin Shyam", "Vijay Yesudas", "K.S. Chithra", "Job Kurian", "Vineeth Sreenivasan", "Shaan Rahman", "Gopi Sundar", "Pradeep Kumar", "Sooraj Santhosh"],
+        "English": ["Marconi Union", "The Chainsmokers", "Ed Sheeran", "Taylor Swift", "Coldplay", "Lofi Girl", "Ludovico Einaudi", "Yiruma", "Hans Zimmer", "Max Richter"]
+    }
+
+    lang_artists = artist_keywords.get(language, artist_keywords["English"])
+
     search_queries = [
         f"{genre} {mood}",
         f"{mood} soundtrack",
         f"{genre} hits",
-        f"top {genre} songs"
+        f"top {genre} songs",
+        f"{lang_artists[0]} {genre}",
+        f"{lang_artists[1]} {mood}",
+        f"{lang_artists[2]} melody",
+        f"{lang_artists[3]} hits",
+        f"{genre} acoustic relaxation",
+        f"{mood} instrumental"
     ]
 
     all_tracks = []
@@ -325,7 +341,7 @@ def fetch_hybrid_recommendations(
     for q in search_queries:
         if len(all_tracks) >= limit:
             break
-        tracks = fetch_itunes_tracks(query=q, limit=25, language=language, genre=genre)
+        tracks = fetch_itunes_tracks(query=q, limit=30, language=language, genre=genre)
         for t in tracks:
             t_title = (t.get("title") or "").lower()
             if t_title and t_title not in seen_titles:
