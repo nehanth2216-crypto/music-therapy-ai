@@ -280,5 +280,21 @@ class TestHarmonyRecBackend(unittest.TestCase):
         self.assertIn("timeline", data)
         self.assertTrue(len(data["timeline"]) > 0)
 
+    def test_13_multi_language_recommendations(self):
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+        # Test fetching recommendations in Telugu
+        resp = self.client.get("/api/recommend/by-language?language=Telugu", headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["language"], "Telugu")
+        self.assertTrue(len(data["tracks"]) > 0)
+
+        # Test fetching recommendations in Korean
+        resp = self.client.get("/api/recommend/by-language?language=Korean", headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["language"], "Korean")
+        self.assertTrue(len(data["tracks"]) > 0)
+
 if __name__ == "__main__":
     unittest.main()

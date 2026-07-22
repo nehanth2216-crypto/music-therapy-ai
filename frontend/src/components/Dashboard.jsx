@@ -25,13 +25,16 @@ ChartJS.register(
 );
 
 const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
+const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", "Bengali", "Marathi", "Korean", "Japanese", "Spanish"];
 
 export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Audio Player State
+  // Audio Player & Language Filter State
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [filterLoading, setFilterLoading] = useState(false);
   const [currentTracks, setCurrentTracks] = useState([]);
   const [activeTrackIndex, setActiveTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -127,6 +130,27 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  const handleLanguageChange = async (lang) => {
+    setSelectedLanguage(lang);
+    setFilterLoading(true);
+    try {
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const res = await fetch(`${apiBaseUrl}/recommend/by-language?language=${encodeURIComponent(lang)}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.tracks && data.tracks.length > 0) {
+          setCurrentTracks(data.tracks);
+          setActiveTrackIndex(0);
+          setIsPlaying(false);
+        }
+      }
+    } catch (err) {
+      console.warn("Error fetching language tracks:", err);
+    } finally {
+      setFilterLoading(false);
+    }
+  };
 
   // HTML5 Audio playback logic
   useEffect(() => {
@@ -556,7 +580,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
             
             {/* Custom Premium Audio Player */}
             <div className="glass-panel" style={{ padding: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Music style={{ color: 'var(--primary)', width: '18px', height: '18px' }} />
                   Therapeutic Audio Player
@@ -564,6 +588,47 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                   Mood Match: <strong style={{ color: 'var(--accent-cyan)' }}>97%</strong>
                 </span>
+              </div>
+
+              {/* Multi-Language Recommendation Filter Bar */}
+              <div style={{
+                marginBottom: '1.5rem',
+                background: 'rgba(0, 0, 0, 0.25)',
+                padding: '0.85rem 1.15rem',
+                borderRadius: '16px',
+                border: '1px solid var(--border-glass)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                    🌐 Language Recommendations Filter:
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
+                    Active: <strong>{selectedLanguage}</strong>
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  {SUPPORTED_LANGUAGES.map(lang => (
+                    <button
+                      key={lang}
+                      onClick={() => handleLanguageChange(lang)}
+                      disabled={filterLoading}
+                      style={{
+                        padding: '0.35rem 0.8rem',
+                        borderRadius: '20px',
+                        border: '1px solid',
+                        borderColor: selectedLanguage === lang ? 'var(--primary)' : 'rgba(255, 255, 255, 0.1)',
+                        background: selectedLanguage === lang ? 'var(--primary)' : 'rgba(255, 255, 255, 0.04)',
+                        color: selectedLanguage === lang ? '#ffffff' : 'var(--text-secondary)',
+                        fontSize: '0.82rem',
+                        fontWeight: selectedLanguage === lang ? 700 : 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {lang}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {activeTrack ? (

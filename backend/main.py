@@ -85,6 +85,7 @@ SLEEP_QUALITIES = ["Good", "Fair", "Poor"]
 ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"]
 GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"]
 PLAYLISTS = ["playlist_1", "playlist_2", "playlist_3", "playlist_4", "playlist_5"]
+SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", "Bengali", "Marathi", "Korean", "Japanese", "Spanish"]
 
 PLAYLIST_THEME_MAPPING = {
     "playlist_1": {"name": "Lofi & Calm Pop", "query": "lofi hip hop chill study beats"},
@@ -121,6 +122,61 @@ MOCK_LIBRARY = {
         {"title": "Summer Anthem", "artist": "Dance Club", "duration": "3:10", "album_image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&h=150&fit=crop", "play_url": "https://open.spotify.com/track/6UaR2v567dGg36329", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3"},
         {"title": "Good Times Pop", "artist": "Pop Hits", "duration": "2:55", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&h=150&fit=crop", "play_url": "https://open.spotify.com/track/6UaR2v567dGg36329", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3"},
         {"title": "Electric Workout", "artist": "Synth Pop Collective", "duration": "3:30", "album_image": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=150&h=150&fit=crop", "play_url": "https://open.spotify.com/track/6UaR2v567dGg36329", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
+    ]
+}
+
+# Multi-Language Curated Track Libraries
+MULTI_LANG_LIBRARY = {
+    "Telugu": [
+        {"title": "Samayama (Peaceful Instrumental)", "artist": "Telugu Soundscapes", "duration": "4:12", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"},
+        {"title": "Kanulanu Thaake (Lofi Chill)", "artist": "Tollywood Lofi Beats", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"},
+        {"title": "Pranam (Classical Flute)", "artist": "Carnatic Flute Ensemble", "duration": "5:10", "album_image": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"},
+        {"title": "Oke Oka Lokam (Acoustic Guitar)", "artist": "Telugu Acoustic Sessions", "duration": "3:30", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"}
+    ],
+    "Hindi": [
+        {"title": "Kesariya (Lofi Flip)", "artist": "Bollywood Lofi Club", "duration": "3:15", "album_image": "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"},
+        {"title": "Raabta (Unplugged Acoustic)", "artist": "Arijit Singh Acoustic", "duration": "4:05", "album_image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"},
+        {"title": "Tum Hi Ho (Piano Relaxation)", "artist": "Hindi Classical Piano", "duration": "4:30", "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3"},
+        {"title": "Pee Loon (Ambient Chill)", "artist": "Sufi Ambient Beats", "duration": "3:50", "album_image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"}
+    ],
+    "Tamil": [
+        {"title": "Neeyum Naanum (Midnight Lofi)", "artist": "Kollywood Soundscape", "duration": "3:40", "album_image": "https://images.unsplash.com/photo-1486572788966-cfd3df1f5b42?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"},
+        {"title": "Moongil Thottam (Veena Ambient)", "artist": "A.R. Rahman Instrumental", "duration": "4:50", "album_image": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"},
+        {"title": "Venmegam (Acoustic Soft)", "artist": "Tamil Acoustic Trio", "duration": "3:25", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3"}
+    ],
+    "Kannada": [
+        {"title": "Neenade Naa (Sandalwood Lofi)", "artist": "Sandalwood Beats", "duration": "3:35", "album_image": "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3"},
+        {"title": "Singara Siriye (Soft Instrumental)", "artist": "Kannada Instrumental Collective", "duration": "4:15", "album_image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3"}
+    ],
+    "Malayalam": [
+        {"title": "Darshana (Acoustic Unplugged)", "artist": "Malayalam Indie Sessions", "duration": "3:55", "album_image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3"},
+        {"title": "Pavizha Mazha (Rain Meditation)", "artist": "Kerala Rain Ambient", "duration": "4:20", "album_image": "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3"}
+    ],
+    "Punjabi": [
+        {"title": "Pasoori (Lofi Sunset)", "artist": "Punjabi Lofi Chill", "duration": "3:30", "album_image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3"},
+        {"title": "Soch (Acoustic Strings)", "artist": "Punjabi Acoustic Strings", "duration": "4:00", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
+    ],
+    "Bengali": [
+        {"title": "Mayabono Biharini (Rabindra Sangeet Ambient)", "artist": "Bengali Classical Chill", "duration": "4:45", "album_image": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"},
+        {"title": "Tomake Chai (Acoustic Guitar)", "artist": "Kolkata Acoustic Sessions", "duration": "3:40", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"}
+    ],
+    "Marathi": [
+        {"title": "Radha Hi Bawari (Flute Soundscape)", "artist": "Marathi Bamboo Flute", "duration": "4:10", "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"},
+        {"title": "Man Udhan Varyache (Acoustic)", "artist": "Marathi Folk Acoustic", "duration": "3:50", "album_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"}
+    ],
+    "Korean": [
+        {"title": "Spring Day (K-Lofi Study)", "artist": "K-Pop Lofi Collective", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"},
+        {"title": "Through the Night (Piano Soft)", "artist": "Korean Chill Piano", "duration": "4:12", "album_image": "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3"},
+        {"title": "Breathe (Calm OST)", "artist": "K-Drama Soundscape", "duration": "4:30", "album_image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"}
+    ],
+    "Japanese": [
+        {"title": "Ghibli Lofi Piano (Totoro Theme)", "artist": "Tokyo Lofi Station", "duration": "3:55", "album_image": "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"},
+        {"title": "First Love (Acoustic Cover)", "artist": "Japanese Acoustic Sessions", "duration": "4:20", "album_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"},
+        {"title": "Sparkle (Ambient Piano)", "artist": "Anime Chillout Orchestra", "duration": "5:00", "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3"}
+    ],
+    "Spanish": [
+        {"title": "Despacito (Calm Spanish Guitar)", "artist": "Spanish Acoustic Guitar", "duration": "3:50", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3"},
+        {"title": "Volver A Empezar (Lofi Latina)", "artist": "Latino Lofi Club", "duration": "3:20", "album_image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&h=150&fit=crop", "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3"}
     ]
 }
 
@@ -164,57 +220,55 @@ def get_spotify_access_token(client_id: str, client_secret: str) -> Optional[str
         print(f"Exception during Spotify token fetch: {e}")
         return None
 
-def fetch_spotify_tracks(query: str, limit: int = 8) -> List[dict]:
+def fetch_spotify_tracks(query: str, limit: int = 8, language: str = "English") -> List[dict]:
     client_id = os.getenv("SPOTIFY_CLIENT_ID")
     client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
     
-    if not client_id or not client_secret:
-        print("Spotify credentials missing in .env. Falling back to Mock Library.")
-        return []
-        
-    try:
-        # 1. Get access token (cached)
-        token = get_spotify_access_token(client_id, client_secret)
-        if not token:
-            return []
-            
-        # 2. Search tracks
-        search_url = "https://api.spotify.com/v1/search"
-        headers = {"Authorization": f"Bearer {token}"}
-        params = {"q": query, "type": "track", "limit": limit}
-        
-        search_resp = requests.get(search_url, headers=headers, params=params, timeout=5)
-        if search_resp.status_code != 200:
-            print(f"Spotify track search failed. Status code: {search_resp.status_code}")
-            return []
-            
-        items = search_resp.json().get("tracks", {}).get("items", [])
-        
-        tracks = []
-        for item in items:
-            # Format duration from ms to mm:ss
-            duration_ms = item.get("duration_ms", 0)
-            minutes = duration_ms // 60000
-            seconds = (duration_ms % 60000) // 1000
-            duration_str = f"{minutes}:{seconds:02d}"
-            
-            # Album image
-            images = item.get("album", {}).get("images", [])
-            album_img = images[0].get("url") if images else "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"
-            
-            tracks.append({
-                "title": item.get("name"),
-                "artist": ", ".join([a.get("name") for a in item.get("artists", [])]),
-                "duration": duration_str,
-                "album_image": album_img,
-                "play_url": item.get("external_urls", {}).get("spotify"),
-                "preview_url": item.get("preview_url") # Note: Spotify preview_url is sometimes null
-            })
-            
-        return tracks
-    except Exception as e:
-        print(f"Exception during Spotify fetch: {e}")
-        return []
+    # Append language search term to query if language is specified and not default English
+    search_query = f"{language} {query}" if language and language != "English" else query
+
+    if client_id and client_secret:
+        try:
+            # 1. Get access token (cached)
+            token = get_spotify_access_token(client_id, client_secret)
+            if token:
+                # 2. Search tracks
+                search_url = "https://api.spotify.com/v1/search"
+                headers = {"Authorization": f"Bearer {token}"}
+                params = {"q": search_query, "type": "track", "limit": limit}
+                
+                search_resp = requests.get(search_url, headers=headers, params=params, timeout=5)
+                if search_resp.status_code == 200:
+                    items = search_resp.json().get("tracks", {}).get("items", [])
+                    tracks = []
+                    for item in items:
+                        # Format duration from ms to mm:ss
+                        duration_ms = item.get("duration_ms", 0)
+                        minutes = duration_ms // 60000
+                        seconds = (duration_ms % 60000) // 1000
+                        duration_str = f"{minutes}:{seconds:02d}"
+                        
+                        # Album image
+                        images = item.get("album", {}).get("images", [])
+                        album_img = images[0].get("url") if images else "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"
+                        
+                        tracks.append({
+                            "title": item.get("name"),
+                            "artist": ", ".join([a.get("name") for a in item.get("artists", [])]),
+                            "duration": duration_str,
+                            "album_image": album_img,
+                            "play_url": item.get("external_urls", {}).get("spotify"),
+                            "preview_url": item.get("preview_url") or "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+                        })
+                    if tracks:
+                        return tracks
+        except Exception as e:
+            print(f"Exception during Spotify fetch: {e}")
+
+    # Fallback to curated multi-language mock library
+    if language in MULTI_LANG_LIBRARY:
+        return MULTI_LANG_LIBRARY[language]
+    return MOCK_LIBRARY.get(query, MOCK_LIBRARY["playlist_1"])
 
 # Pydantic Schemas
 class UserSignup(BaseModel):
@@ -555,7 +609,7 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current
     playlist_name = theme_info["name"]
     query = theme_info["query"]
     
-    tracks = fetch_spotify_tracks(query, limit=8)
+    tracks = fetch_spotify_tracks(query, limit=8, language=survey.language_pref)
     if not tracks:
         print(f"Fetching from Spotify failed or credentials missing. Loading mock tracks for {result_playlist}.")
         tracks = MOCK_LIBRARY.get(result_playlist, MOCK_LIBRARY["playlist_1"])
@@ -949,6 +1003,24 @@ def get_mood_history(
         
     events.sort(key=lambda x: x["timestamp"])
     return {"user_id": current_user.id, "timeline": events}
+
+@app.get("/api/recommend/by-language")
+def get_recommendations_by_language(
+    language: str = "English",
+    playlist_key: Optional[str] = "playlist_1",
+    current_user: User = Depends(get_current_user)
+):
+    playlist_type = playlist_key if playlist_key in PLAYLIST_THEME_MAPPING else "playlist_1"
+    theme_info = PLAYLIST_THEME_MAPPING[playlist_type]
+    query = theme_info["query"]
+    
+    tracks = fetch_spotify_tracks(query, limit=8, language=language)
+    return {
+        "language": language,
+        "playlist_key": playlist_type,
+        "playlist_name": theme_info["name"],
+        "tracks": tracks
+    }
 
 if __name__ == "__main__":
     import uvicorn
