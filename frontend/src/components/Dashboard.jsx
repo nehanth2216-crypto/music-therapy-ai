@@ -218,8 +218,11 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Audio Player, Lyrics, and Language Filter State
+  // Audio Player, Lyrics, and Multi-Filter Search Engine State
   const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [selectedGenre, setSelectedGenre] = useState('Lo-fi');
+  const [selectedMood, setSelectedMood] = useState('Calming');
+  const [filterQuery, setFilterQuery] = useState('');
   const [filterLoading, setFilterLoading] = useState(false);
   const [currentTracks, setCurrentTracks] = useState([]);
   const [activeTrackIndex, setActiveTrackIndex] = useState(0);
@@ -349,12 +352,15 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     return () => window.removeEventListener('harmonyrec_play_track', handleCustomPlay);
   }, []);
 
-  const handleLanguageChange = async (lang) => {
+  const handleMultiFilterSearch = async (lang = selectedLanguage, genre = selectedGenre, mood = selectedMood, query = filterQuery) => {
     setSelectedLanguage(lang);
+    setSelectedGenre(genre);
+    setSelectedMood(mood);
     setFilterLoading(true);
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      const res = await fetch(`${apiBaseUrl}/recommend/by-language?language=${encodeURIComponent(lang)}`, { headers });
+      const url = `${apiBaseUrl}/recommend/by-language?language=${encodeURIComponent(lang)}&genre=${encodeURIComponent(genre)}&mood=${encodeURIComponent(mood)}&query=${encodeURIComponent(query)}`;
+      const res = await fetch(url, { headers });
       if (res.ok) {
         const data = await res.json();
         const parsed = parseTracksArray(data.tracks);
@@ -365,7 +371,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         }
       }
     } catch (err) {
-      console.warn("Error fetching language tracks:", err);
+      console.warn("Error fetching filtered tracks:", err);
     } finally {
       setFilterLoading(false);
     }
@@ -861,30 +867,33 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                 </span>
               </div>
 
-              {/* Multi-Language Recommendation Filter Bar */}
+              {/* Multi-Language & Multi-Filter Intelligent Recommendation Suite */}
               <div style={{
                 marginBottom: '1.5rem',
-                background: 'rgba(0, 0, 0, 0.25)',
-                padding: '0.85rem 1.15rem',
-                borderRadius: '16px',
-                border: '1px solid var(--border-glass)'
+                background: 'rgba(0, 0, 0, 0.3)',
+                padding: '1.25rem',
+                borderRadius: '20px',
+                border: '1px solid var(--border-neon)'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                    🌐 Language Recommendations Filter:
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Sparkles style={{ width: '16px', height: '16px', color: 'var(--primary)' }} />
+                    Multilingual Recommendation Engine
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
-                    Active: <strong>{selectedLanguage}</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                    Matching: <strong>{selectedLanguage}</strong> • <strong>{selectedMood}</strong> • <strong>{selectedGenre}</strong>
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+
+                {/* Language Pills */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1rem' }}>
                   {SUPPORTED_LANGUAGES.map(lang => (
                     <button
                       key={lang}
-                      onClick={() => handleLanguageChange(lang)}
+                      onClick={() => handleMultiFilterSearch(lang, selectedGenre, selectedMood, filterQuery)}
                       disabled={filterLoading}
                       style={{
-                        padding: '0.35rem 0.8rem',
+                        padding: '0.35rem 0.85rem',
                         borderRadius: '20px',
                         border: '1px solid',
                         borderColor: selectedLanguage === lang ? 'var(--primary)' : 'rgba(255, 255, 255, 0.1)',
@@ -899,6 +908,60 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       {lang}
                     </button>
                   ))}
+                </div>
+
+                {/* Multi-Filter Row: Mood, Genre & Instant Search */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '0.75rem', alignItems: 'center' }}>
+                  <div>
+                    <label className="input-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Mood</label>
+                    <select
+                      className="input-field"
+                      value={selectedMood}
+                      onChange={(e) => handleMultiFilterSearch(selectedLanguage, selectedGenre, e.target.value, filterQuery)}
+                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+                    >
+                      {MOODS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="input-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Genre</label>
+                    <select
+                      className="input-field"
+                      value={selectedGenre}
+                      onChange={(e) => handleMultiFilterSearch(selectedLanguage, e.target.value, selectedMood, filterQuery)}
+                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+                    >
+                      {["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop", "Melody", "Soundtrack", "Acoustic"].map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="input-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Search Song or Artist</label>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="Search song, movie, artist..."
+                        value={filterQuery}
+                        onChange={(e) => setFilterQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleMultiFilterSearch(selectedLanguage, selectedGenre, selectedMood, filterQuery);
+                        }}
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+                      />
+                      <button
+                        className="btn-primary"
+                        onClick={() => handleMultiFilterSearch(selectedLanguage, selectedGenre, selectedMood, filterQuery)}
+                        disabled={filterLoading}
+                        style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px' }}
+                      >
+                        Filter
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 

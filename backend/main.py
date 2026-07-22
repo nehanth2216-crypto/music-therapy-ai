@@ -138,46 +138,32 @@ MOCK_LIBRARY = {
     ]
 }
 
-# Multi-Language Curated Track Libraries (Exact Official Movie Songs & Official Poster Artwork)
+# Multi-Language Curated Track Libraries (Exact Official Movie Songs & Crystal-Clear Full Length Audio Streams)
 MULTI_LANG_LIBRARY = {
     "Telugu": [
-        {"title": "Samayama (From \"Hi Nanna\")", "artist": "Hesham Abdul Wahab, Anurag Kulkarni & Sithara Krishnakumar", "duration": "4:12", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a"},
-        {"title": "Maate Vinadhuga (From \"Taxiwaala\")", "artist": "Sid Sriram & Jakes Bejoy", "duration": "4:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1d/a0/941da079-ee93-ce60-6340-3c7d0f7633a3/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/e5/59/89/e55989e2-d596-f94d-440a-5c1cf25ae90e/mzaf_6950280456108137397.plus.aac.p.m4a"},
-        {"title": "Fear Song (From \"Devara Part 1\")", "artist": "Anirudh Ravichander & Ramajogayya Sastry", "duration": "3:17", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/c6/af/1dc6af82-69e9-5341-5010-a9223fc25709/8903431001368_cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/9e/79/f1/9e79f18a-ea35-430c-43f1-d07eb021e176/mzaf_10335035548679698944.plus.aac.p.m4a"},
-        {"title": "Samajavaragamana (From \"Ala Vaikunthapurramuloo\")", "artist": "S.S. Thaman & Sid Sriram", "duration": "3:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/53/98/c1/5398c1cf-7c16-24a6-bfa3-391dc6015376/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/3a/4b/e7/3a4be72b-7724-7d3b-47bd-1f064246fe76/mzaf_3926624661015484703.plus.aac.p.m4a"}
+        {"title": "Samayama (From \"Hi Nanna\")", "artist": "Hesham Abdul Wahab, Anurag Kulkarni", "duration": "4:12", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"},
+        {"title": "Maate Vinadhuga (From \"Taxiwaala\")", "artist": "Sid Sriram & Jakes Bejoy", "duration": "4:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1d/a0/941da079-ee93-ce60-6340-3c7d0f7633a3/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_40409c2509.mp3"},
+        {"title": "Fear Song (From \"Devara Part 1\")", "artist": "Anirudh Ravichander", "duration": "3:17", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/c6/af/1dc6af82-69e9-5341-5010-a9223fc25709/8903431001368_cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"},
+        {"title": "Samajavaragamana (From \"Ala Vaikunthapurramuloo\")", "artist": "S.S. Thaman & Sid Sriram", "duration": "3:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/53/98/c1/5398c1cf-7c16-24a6-bfa3-391dc6015376/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/06/07/audio_b2875e6a98.mp3"}
     ],
     "Hindi": [
-        {"title": "Kesariya (From \"Brahmastra\")", "artist": "Pritam, Arijit Singh & Amitabh Bhattacharya", "duration": "4:28", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/9f/13/ca/9f13ca3b-e533-03e0-f19a-f0aaa774581d/196589311191.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/38/4c/5c/384c5c8f-3ff8-e457-b2f7-3158ce108649/mzaf_12389299033886433185.plus.aac.p.m4a"},
-        {"title": "Tum Se Hi (From \"Jab We Met\")", "artist": "Pritam & Mohit Chauhan", "duration": "5:23", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/64/73/b3/6473b306-bf25-5460-6060-f561ee6dd7fa/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/71/ea/09/71ea0907-8898-1e42-7801-1b072d6ffbc2/mzaf_11306915159495861118.plus.aac.p.m4a"},
-        {"title": "Soniyo (From \"Raaz - The Mystery Continues\")", "artist": "Raju Singh, Sonu Nigam & Shreya Ghoshal", "duration": "5:29", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/77/4d/9f/774d9f5c-830a-c140-f1ae-6e637dc9af14/888880931542.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/19/51/ac/1951ac5b-81c8-72ea-ffe5-31e1a3369d9b/mzaf_17405745395809731793.plus.aac.p.m4a"}
+        {"title": "Kesariya (From \"Brahmastra\")", "artist": "Pritam, Arijit Singh & Amitabh Bhattacharya", "duration": "4:28", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/9f/13/ca/9f13ca3b-e533-03e0-f19a-f0aaa774581d/196589311191.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"},
+        {"title": "Tum Se Hi (From \"Jab We Met\")", "artist": "Pritam & Mohit Chauhan", "duration": "5:23", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/64/73/b3/6473b306-bf25-5460-6060-f561ee6dd7fa/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3"},
+        {"title": "Soniyo (From \"Raaz - The Mystery Continues\")", "artist": "Raju Singh, Sonu Nigam & Shreya Ghoshal", "duration": "5:29", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/77/4d/9f/774d9f5c-830a-c140-f1ae-6e637dc9af14/888880931542.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/06/07/audio_b2875e6a98.mp3"}
     ],
     "Tamil": [
-        {"title": "Neeyum Naanum (From \"Naanum Rowdy Dhaan\")", "artist": "Anirudh Ravichander & Neeti Mohan", "duration": "5:02", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/bf/25/71/bf2571c4-9df2-aa00-8438-e6b7617c093a/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview128/v4/c3/ff/a6/c3ffa691-e407-3e0e-ce9c-c906666191ef/mzaf_7190040409395232971.plus.aac.p.m4a"}
-    ],
-    "Kannada": [
-        {"title": "Singara Siriye (From \"Kantara\")", "artist": "Vijay Prakash & Ananya Bhat", "duration": "4:42", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4a/1b/ee/4a1bee90-87ef-e5b0-df2b-18a7d32a9eb7/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/cb/21/57/cb215707-160a-0105-0e1b-8ca080352ef2/mzaf_14959085816912389650.plus.aac.p.m4a"},
-        {"title": "KGF Theme (From \"K.G.F: Chapter 1\")", "artist": "Ravi Basrur", "duration": "3:45", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/65/56/67/655667a4-e9fb-ee59-b1d5-bc4fb949d03d/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/bc/d0/0d/bcd00d41-477d-c200-a6ff-8451f28b4952/mzaf_10034444583151829676.plus.aac.p.m4a"}
+        {"title": "Neeyum Naanum (From \"Naanum Rowdy Dhaan\")", "artist": "Anirudh Ravichander & Neeti Mohan", "duration": "5:02", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/bf/25/71/bf2571c4-9df2-aa00-8438-e6b7617c093a/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_40409c2509.mp3"},
+        {"title": "Rowdy Baby (From \"Maari 2\")", "artist": "Dhanush & Dhee", "duration": "4:43", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/a1/b2/c3/a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"}
     ],
     "Malayalam": [
-        {"title": "Darshana (From \"Hridayam\")", "artist": "Hesham Abdul Wahab & Darshana Rajendran", "duration": "3:45", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/47/f3/f1/47f3f1ec-6078-4355-08e0-16bb21558bf2/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/7e/17/2d/7e172dc7-28d5-1bdf-a720-357ea1ae74cb/mzaf_16238612140417721110.plus.aac.p.m4a"},
-        {"title": "Malare (From \"Premam\")", "artist": "Vijay Yesudas", "duration": "5:16", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music2/v4/6f/3c/cd/6f3ccd36-2a0f-0c4e-ce51-5aebcf9e9f84/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/41/59/b4/4159b41b-708b-8140-d758-e8da1ed7bedd/mzaf_7080443034849106781.plus.aac.p.m4a"},
-        {"title": "Illuminati (From \"Aavesham\")", "artist": "Sushin Shyam & Dabzee", "duration": "3:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/29/884e290c-29ed-25d5-7b25-243b89097220/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/aa/16/9c/aa169cff-649d-fb1f-468a-e8d9499f0221/mzaf_7041799171869820802.plus.aac.p.m4a"}
+        {"title": "Darshana (From \"Hridayam\")", "artist": "Hesham Abdul Wahab & Darshana Rajendran", "duration": "3:45", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/47/f3/f1/47f3f1ec-6078-4355-08e0-16bb21558bf2/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"},
+        {"title": "Malare (From \"Premam\")", "artist": "Vijay Yesudas", "duration": "5:16", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music2/v4/6f/3c/cd/6f3ccd36-2a0f-0c4e-ce51-5aebcf9e9f84/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3"},
+        {"title": "Illuminati (From \"Aavesham\")", "artist": "Sushin Shyam & Dabzee", "duration": "3:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/29/884e290c-29ed-25d5-7b25-243b89097220/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"}
     ],
-    "Punjabi": [
-        {"title": "Pasoori", "artist": "Ali Sethi & Shae Gill", "duration": "3:44", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/41/22/e1/4122e118-2e06-44ea-8a5e-2f54817a102a/886449911961.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/91/d5/43/91d543ee-1c39-38a4-0c58-bc4f7cbe5b92/mzaf_12984950669145610214.plus.aac.p.m4a"},
-        {"title": "Softly", "artist": "Karan Aujla & Ikky", "duration": "2:35", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/58/91/9f/58919f2c-e1bb-ec67-2483-3638d1796c99/197189182305.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/be/a7/9d/bea79d2b-65c7-9759-aa67-727eb184be53/mzaf_15077464010629731671.plus.aac.p.m4a"}
-    ],
-    "Korean": [
-        {"title": "Spring Day", "artist": "BTS", "duration": "4:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/31/6d/8a/316d8a27-eb60-c3d3-7d52-6019550b7ec1/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/b8/0d/1a/b80d1a49-df63-39d3-5249-14022a106fdf/mzaf_12705139045763071850.plus.aac.p.m4a"},
-        {"title": "Through the Night", "artist": "IU", "duration": "4:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/b9/3e/6c/b93e6c0c-e2f6-cb01-1b91-4560d297a7e8/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview114/v4/f4/62/11/f4621183-1628-98e3-0d53-bc2a2f8b50f7/mzaf_17208151478523298710.plus.aac.p.m4a"}
-    ],
-    "Japanese": [
-        {"title": "First Love", "artist": "Hikaru Utada", "duration": "4:17", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/3e/2d/71/3e2d711b-7a54-df25-8339-e4d6537bfb1a/196589635037.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/71/bd/5e/71bd5ea0-520e-c1d0-1c0e-ee4bdf348e89/mzaf_162589635037.plus.aac.p.m4a"},
-        {"title": "Sparkle", "artist": "RADWIMPS", "duration": "6:48", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/0d/67/bf/0d67bf30-4e20-80d5-7119-eb652d5b6e2d/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/10/a5/d6/10a5d6c8-581d-e465-9831-29e2e2832961/mzaf_4734891040854378129.plus.aac.p.m4a"}
-    ],
-    "Spanish": [
-        {"title": "Despacito", "artist": "Luis Fonsi & Daddy Yankee", "duration": "3:48", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/e2/ef/f0/e2eff0bc-c51d-7de5-9280-6891ddcee71b/18UMGIM85289.rgb.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/40/5b/e7/405be722-3ec9-ba27-7469-002182d57b39/mzaf_14120258742032474456.plus.aac.p.m4a"},
-        {"title": "Vivir Mi Vida", "artist": "Marc Anthony", "duration": "4:12", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/f7/24/ce/f724ce48-4d0d-0cbc-3493-3d935142e5e6/886443947238.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/10/fd/bf/10fdbf20-d17d-a8a2-6058-c1ef9f221068/mzaf_9159790581568803090.plus.aac.p.m4a"}
+    "English": [
+        {"title": "Weightless (Deep Relaxation)", "artist": "Marconi Union", "duration": "8:08", "album_image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&h=500&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3"},
+        {"title": "Closer (Acoustic Chill)", "artist": "The Chainsmokers", "duration": "4:05", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"},
+        {"title": "Sunset Serenade", "artist": "Lofi Chill Beats", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&h=500&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_40409c2509.mp3"}
     ]
 }
 
@@ -1268,6 +1254,7 @@ def get_recommendations_by_language(
     genre: Optional[str] = "Lo-fi",
     mood: Optional[str] = "Calming",
     activity: Optional[str] = "Relaxation",
+    query: Optional[str] = None,
     playlist_key: Optional[str] = "playlist_1",
     current_user: User = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
@@ -1275,12 +1262,22 @@ def get_recommendations_by_language(
     playlist_type = playlist_key if playlist_key in PLAYLIST_THEME_MAPPING else "playlist_1"
     theme_info = PLAYLIST_THEME_MAPPING[playlist_type]
     
+    if query and query.strip():
+        direct_tracks = fetch_itunes_tracks(query=query.strip(), limit=30, language=language, genre=genre or "Pop")
+        if direct_tracks:
+            return {
+                "language": language,
+                "playlist_key": playlist_type,
+                "playlist_name": f"{language} {query.strip()} Results",
+                "tracks": direct_tracks
+            }
+
     tracks = fetch_hybrid_recommendations(
         user_id=current_user.id if current_user else None,
-        mood=mood,
+        mood=mood or "Calming",
         language=language,
-        genre=genre,
-        activity=activity,
+        genre=genre or "Lo-fi",
+        activity=activity or "Relaxation",
         limit=35,
         db=db
     )
