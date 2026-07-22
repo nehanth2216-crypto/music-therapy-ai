@@ -5,6 +5,7 @@ const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
 const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
 const ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"];
 const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
+const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
 const LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"];
 
 export default function Survey({ token, apiBaseUrl, onViewChange }) {
