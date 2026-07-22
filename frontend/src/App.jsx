@@ -9,12 +9,17 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://${window.locat
 const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
-  const [username, setUsername] = useState(localStorage.getItem('username') || '');
+  const [token, setToken] = useState(() => localStorage.getItem('token') || '');
+  const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
   const [userProfile, setUserProfile] = useState(null);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'survey', 'analytics'
+  const [currentView, setCurrentView] = useState(() => localStorage.getItem('harmonyrec_current_view') || 'dashboard'); // 'dashboard', 'survey', 'analytics'
   const [authMode, setAuthMode] = useState('login'); // 'login', 'signup', 'forgot', 'reset'
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  
+  const changeView = (viewName) => {
+    setCurrentView(viewName);
+    localStorage.setItem('harmonyrec_current_view', viewName);
+  };
   
   // Auth Form State
   const [authUsername, setAuthUsername] = useState('');
@@ -36,7 +41,7 @@ export default function App() {
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
-      localStorage.setItem('username', username);
+      if (username) localStorage.setItem('username', username);
       verifySession(token);
     } else {
       localStorage.removeItem('token');
@@ -54,12 +59,13 @@ export default function App() {
         const profileData = await response.json();
         setUserProfile(profileData);
         setUsername(profileData.username);
-      } else {
+        localStorage.setItem('username', profileData.username);
+      } else if (response.status === 401 || response.status === 403) {
         // Token is invalid or expired
         handleLogout();
       }
     } catch (err) {
-      // Backend unavailable or network issue; keep offline token state if needed
+      // Backend temporarily offline or network glitch; retain session
       console.warn("Could not verify session with backend:", err);
     }
   };
@@ -74,10 +80,11 @@ export default function App() {
     setAuthPassword('');
     setAuthError('');
     setAuthSuccess('');
-    setCurrentView('dashboard');
+    changeView('dashboard');
     setIsProfileOpen(false);
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('harmonyrec_current_view');
   };
 
   const handleAuthSubmit = async (e) => {
@@ -537,13 +544,13 @@ export default function App() {
   const renderActiveView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={setCurrentView} />;
+        return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
       case 'survey':
-        return <Survey token={token} apiBaseUrl={API_BASE_URL} onViewChange={setCurrentView} />;
+        return <Survey token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
       case 'analytics':
         return <ModelComparison token={token} apiBaseUrl={API_BASE_URL} />;
       default:
-        return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={setCurrentView} />;
+        return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
     }
   };
 
@@ -572,7 +579,7 @@ export default function App() {
         justifyContent: 'space-between',
         background: 'rgba(20, 16, 32, 0.75)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => setCurrentView('dashboard')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => changeView('dashboard')}>
           <Disc className="spin" style={{ color: 'var(--primary)', width: '28px', height: '28px' }} />
           <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.3px' }}>
             Harmony<span style={{ color: 'var(--primary)' }}>Rec</span>
@@ -583,7 +590,7 @@ export default function App() {
         <nav style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
             id="nav-dashboard-btn"
-            onClick={() => setCurrentView('dashboard')}
+            onClick={() => changeView('dashboard')}
             className={currentView === 'dashboard' ? 'btn-primary' : 'btn-secondary'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
           >
@@ -593,7 +600,7 @@ export default function App() {
           
           <button 
             id="nav-survey-btn"
-            onClick={() => setCurrentView('survey')}
+            onClick={() => changeView('survey')}
             className={currentView === 'survey' ? 'btn-primary' : 'btn-secondary'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
           >
@@ -603,7 +610,7 @@ export default function App() {
           
           <button 
             id="nav-analytics-btn"
-            onClick={() => setCurrentView('analytics')}
+            onClick={() => changeView('analytics')}
             className={currentView === 'analytics' ? 'btn-primary' : 'btn-secondary'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
           >
