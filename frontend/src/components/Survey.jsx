@@ -70,13 +70,14 @@ export default function Survey({ token, apiBaseUrl, onViewChange }) {
   };
 
   const getSymptomTag = (playlistName) => {
-    if (playlistName.includes("Classical")) {
+    const nameStr = (playlistName || "").toString();
+    if (nameStr.includes("Classical")) {
       return { label: 'Deep Sleep & Relaxation Assist', color: 'var(--accent-cyan)' };
-    } else if (playlistName.includes("Nature")) {
+    } else if (nameStr.includes("Nature")) {
       return { label: 'Anxiety grounding / Mindfulness', color: 'var(--accent-emerald)' };
-    } else if (playlistName.includes("Instrumental")) {
+    } else if (nameStr.includes("Instrumental")) {
       return { label: 'Stress reduction / Calming focus', color: 'var(--primary)' };
-    } else if (playlistName.includes("Pop")) {
+    } else if (nameStr.includes("Pop")) {
       return { label: 'Energy booster / Exhaustion recovery', color: 'var(--accent-rose)' };
     } else {
       return { label: 'Study focus / Balanced mood', color: 'var(--text-secondary)' };
