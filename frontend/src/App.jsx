@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, LogOut, Disc, ClipboardList, BarChart3, User, Sparkles, Key, CheckCircle, ArrowLeft, Settings, Shield } from 'lucide-react';
+import { ShieldCheck, LogOut, Disc, ClipboardList, BarChart3, User, Sparkles, Key, CheckCircle, ArrowLeft, Settings, Shield, Bot } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Survey from './components/Survey';
 import ModelComparison from './components/ModelComparison';
 import UserProfileModal from './components/UserProfileModal';
+import AIChatAssistant from './components/AIChatAssistant';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8000/api`;
 const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
@@ -12,7 +13,7 @@ export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token') || '');
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
   const [userProfile, setUserProfile] = useState(null);
-  const [currentView, setCurrentView] = useState(() => localStorage.getItem('harmonyrec_current_view') || 'dashboard'); // 'dashboard', 'survey', 'analytics'
+  const [currentView, setCurrentView] = useState(() => localStorage.getItem('harmonyrec_current_view') || 'dashboard'); // 'dashboard', 'chatbot', 'survey', 'analytics'
   const [authMode, setAuthMode] = useState('login'); // 'login', 'signup', 'forgot', 'reset'
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
@@ -545,6 +546,11 @@ export default function App() {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
+      case 'chatbot':
+        return <AIChatAssistant token={token} apiBaseUrl={API_BASE_URL} onPlayTrack={(track) => {
+          changeView('dashboard');
+          window.dispatchEvent(new CustomEvent('harmonyrec_play_track', { detail: track }));
+        }} />;
       case 'survey':
         return <Survey token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
       case 'analytics':
@@ -596,6 +602,16 @@ export default function App() {
           >
             <Sparkles style={{ width: '16px', height: '16px' }} />
             Dashboard
+          </button>
+
+          <button 
+            id="nav-chatbot-btn"
+            onClick={() => changeView('chatbot')}
+            className={currentView === 'chatbot' ? 'btn-primary' : 'btn-secondary'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+          >
+            <Bot style={{ width: '16px', height: '16px' }} />
+            AI Assistant
           </button>
           
           <button 

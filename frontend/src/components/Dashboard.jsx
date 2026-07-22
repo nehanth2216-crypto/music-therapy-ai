@@ -320,6 +320,22 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   useEffect(() => {
     fetchDashboardData();
+
+    const handleCustomPlay = (e) => {
+      if (e.detail) {
+        const customTrack = e.detail;
+        setCurrentTracks([customTrack]);
+        setActiveTrackIndex(0);
+        setIsPlaying(true);
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.play().catch(() => {});
+          }
+        }, 100);
+      }
+    };
+    window.addEventListener('harmonyrec_play_track', handleCustomPlay);
+    return () => window.removeEventListener('harmonyrec_play_track', handleCustomPlay);
   }, []);
 
   const handleLanguageChange = async (lang) => {
