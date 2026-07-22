@@ -271,6 +271,17 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   const audioRef = useRef(null);
 
+  const parseTracksArray = (raw) => {
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    return [];
+  };
+
   const fetchDashboardData = async () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
@@ -289,11 +300,11 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         resJournals.ok ? resJournals.json() : Promise.resolve([])
       ]);
 
-      if (resHistory.ok) {
+      if (resHistory.ok && Array.isArray(historyData)) {
         setHistory(historyData);
         if (historyData.length > 0) {
           const latest = historyData[historyData.length - 1];
-          setCurrentTracks(latest.tracks || []);
+          setCurrentTracks(parseTracksArray(latest.tracks));
           setCurrentMoodState(latest.result_state || 'Calming');
           setLatestSurveyId(latest.id);
           // Set feedback default if already submitted
@@ -302,11 +313,11 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         }
       }
 
-      if (resFavs.ok) {
+      if (resFavs.ok && Array.isArray(favsData)) {
         setFavorites(favsData);
       }
 
-      if (resJournals.ok) {
+      if (resJournals.ok && Array.isArray(journalData)) {
         setJournals(journalData);
       }
 
@@ -345,8 +356,9 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
       const res = await fetch(`${apiBaseUrl}/recommend/by-language?language=${encodeURIComponent(lang)}`, { headers });
       if (res.ok) {
         const data = await res.json();
-        if (data.tracks && data.tracks.length > 0) {
-          setCurrentTracks(data.tracks);
+        const parsed = parseTracksArray(data.tracks);
+        if (parsed.length > 0) {
+          setCurrentTracks(parsed);
           setActiveTrackIndex(0);
           setIsPlaying(false);
         }

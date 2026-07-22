@@ -17,7 +17,10 @@ export default class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     this.setState({ hasError: false, error: null });
-    window.location.reload();
+    try {
+      localStorage.removeItem('harmonyrec_current_view');
+    } catch (e) {}
+    window.location.href = window.location.origin + window.location.pathname;
   };
 
   render() {
