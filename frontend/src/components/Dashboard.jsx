@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Clock, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX, Shuffle, Repeat, Repeat1 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Clock, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX, Shuffle, Repeat, Repeat1, X } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -27,12 +27,198 @@ ChartJS.register(
 const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
 const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", "Bengali", "Marathi", "Korean", "Japanese", "Spanish"];
 
+const LYRICS_DATABASE = {
+  "Samayama": {
+    subtitles: [
+      { time: 0, text: "🎵 సమయమా కాస్త ఆగవా... నిమిషమా నాతో మాట్లాడవా..." },
+      { time: 10, text: "🎵 ప్రశాంతమైన ఈ గాలిలో... కలల అలలు తేలే వేళలో..." },
+      { time: 20, text: "🎵 మౌనం మైమరపించే ఈ క్షణం... మనసుకు లభించే శాంతి అమృతం..." },
+      { time: 30, text: "🎵 హృదయం తేలియాడే రాగమై... శాంతిని పంచే తరంగమై..." }
+    ],
+    full: `[Verse 1 - Telugu]
+సమయమా కాస్త ఆగవా...
+నిమిషమా నాతో మాట్లాడవా...
+ప్రశాంతమైన ఈ గాలిలో...
+కలల అలలు తేలే వేళలో...
+
+[Chorus]
+మౌనం మైమరపించే ఈ క్షణం...
+మనసుకు లభించే శాంతి అమృతం...
+హృదయం తేలియాడే రాగమై...
+శాంతిని పంచే తరంగమై...`
+  },
+  "Kanulanu Thaake": {
+    subtitles: [
+      { time: 0, text: "🎵 కనులను తాకే చినుకుల హరివిల్లు..." },
+      { time: 10, text: "🎵 మనసును నింపే తియ్యని మైమరపు..." },
+      { time: 20, text: "🎵 సాయంత్రపు వెలుగులో లయల సవ్వడి..." },
+      { time: 30, text: "🎵 ప్రశాంతతే మనకు నిజమైన సొగసు..." }
+    ],
+    full: `[Verse 1 - Telugu]
+కనులను తాకే చినుకుల హరివిల్లు...
+మనసును నింపే తియ్యని మైమరపు...
+సాయంత్రపు వెలుగులో లయల సవ్వడి...
+
+[Chorus]
+ప్రశాంతతే మనకు నిజమైన సొగసు...
+శాంతిగా శ్వాస తీసుకో...
+ప్రతి క్షణం ఒక అద్భుతం...`
+  },
+  "Kesariya": {
+    subtitles: [
+      { time: 0, text: "🎵 केसरिया तेरा इश्क है पिया... रंग जाऊं जो मैं हाथ लगाऊं..." },
+      { time: 10, text: "🎵 दिन बीते सारा तेरी फिक्र में... रैन सारी तेरी खैर मनाऊं..." },
+      { time: 20, text: "🎵 ओ रब्बा वी सब को संभाले... शांत मन से राह दिखाए..." },
+      { time: 30, text: "🎵 मधुर संगीत की छांव में... सुकून की सांस ले आज..." }
+    ],
+    full: `[Verse 1 - Hindi]
+केसरिया तेरा इश्क है पिया...
+रंग जाऊं जो मैं हाथ लगाऊं...
+दिन बीते सारा तेरी फिक्र में...
+रैन सारी तेरी खैर मनाऊं...
+
+[Chorus]
+ओ रब्बा वी सब को संभाले...
+शांत मन से राह दिखाए...
+मधुर संगीत की छांव में...
+सुकून की सांस ले आज...`
+  },
+  "Tum Hi Ho": {
+    subtitles: [
+      { time: 0, text: "🎵 हम तेरे बिन अब रह नहीं सकते... तेरे बिना क्या वजूद मेरा..." },
+      { time: 10, text: "🎵 तुझसे जुदा गर हो जाएंगे... तो खुद से ही हो जाएंगे जुदा..." },
+      { time: 20, text: "🎵 क्योंकि तुम ही हो... अब तुम ही हो... जिंदगी अब तुम ही हो..." },
+      { time: 30, text: "🎵 चैन भी... मेरा दर्द भी... मेरी आशिकी अब तुम ही हो..." }
+    ],
+    full: `[Verse 1 - Hindi]
+हम तेरे बिन अब रह नहीं सकते...
+तेरे बिना क्या वजूद मेरा...
+तुझसे जुदा गर हो जाएंगे...
+तो खुद से ही हो जाएंगे जुदा...
+
+[Chorus]
+क्योंकि तुम ही हो... अब तुम ही हो...
+जिंदगी अब तुम ही हो...
+चैन भी... मेरा दर्द भी...
+मेरी आशिकी अब तुम ही हो...`
+  },
+  "Neeyum Naanum": {
+    subtitles: [
+      { time: 0, text: "🎵 நீயும் நானும் சேர்ந்தே செல்லும் பாதை யாவும்..." },
+      { time: 10, text: "🎵 அமைதியான இந்த இரவில் மன அமைதி பெறுவோம்..." },
+      { time: 20, text: "🎵 இசை தரும் சாந்தம் இதயத்தில் சேரும்..." },
+      { time: 30, text: "🎵 தூய்மையான மூச்சில் அமைதி பிறக்கும்..." }
+    ],
+    full: `[Verse 1 - Tamil]
+நீயும் நானும் சேர்ந்தே செல்லும் பாதை யாவும்...
+அமைதியான இந்த இரவில் மன அமைதி பெறுவோம்...
+
+[Chorus]
+இசை தரும் சாந்தம் இதயத்தில் சேரும்...
+தூய்மையான மூச்சில் அமைதி பிறக்கும்...`
+  },
+  "Spring Day": {
+    subtitles: [
+      { time: 0, text: "🎵 보고 싶다... 이렇게 말하니까 더 보고 싶다..." },
+      { time: 10, text: "🎵 추운 겨울 끝을 지나... 다시 봄날이 올 때까지..." },
+      { time: 20, text: "🎵 마음의 평화를 찾아... 아침 햇살처럼..." },
+      { time: 30, text: "🎵 따뜻한 바람에 눈을 감고 쉬어가길..." }
+    ],
+    full: `[Verse 1 - Korean]
+보고 싶다... 이렇게 말하니까 더 보고 싶다...
+추운 겨울 끝을 지나... 다시 봄날이 올 때까지...
+
+[Chorus]
+마음의 평화를 찾아... 아침 햇살처럼...
+따뜻한 바람에 눈을 감고 쉬어가길...`
+  },
+  "Ghibli Lofi": {
+    subtitles: [
+      { time: 0, text: "🎵 静かな森の中で風がそよぐ..." },
+      { time: 10, text: "🎵 心を落ち着かせて、深い呼吸を..." },
+      { time: 20, text: "🎵 優しく流れるピアノのメロディー..." },
+      { time: 30, text: "🎵 心の平和が訪れる場所へ..." }
+    ],
+    full: `[Verse 1 - Japanese]
+静かな森の中で風がそよぐ...
+心を落ち着かせて、深い呼吸を...
+
+[Chorus]
+優しく流れるピアノのメロディー...
+心の平和が訪れる場所へ...`
+  },
+  "Despacito": {
+    subtitles: [
+      { time: 0, text: "🎵 Sí, sabes que ya llevo un rato mirándote..." },
+      { time: 10, text: "🎵 Despacito... quiero respirar tu cuello despacito..." },
+      { time: 20, text: "🎵 Deja que te diga cosas al oído..." },
+      { time: 30, text: "🎵 Para que te acuerdes si no estás conmigo..." }
+    ],
+    full: `[Verse 1 - Spanish]
+Sí, sabes que ya llevo un rato mirándote...
+Tengo que bailar contigo hoy...
+
+[Chorus]
+Despacito... quiero respirar tu cuello despacito...
+Deja que te diga cosas al oído...
+Para que te acuerdes si no estás conmigo...`
+  },
+  "Weightless Lofi": {
+    subtitles: [
+      { time: 0, text: "🎵 Close your eyes, let the heavy thoughts drift away..." },
+      { time: 10, text: "🎵 A gentle breeze through the quiet afternoon sky..." },
+      { time: 20, text: "🎵 Soft piano notes guiding your mind to peaceful calm..." },
+      { time: 30, text: "🎵 Breathe in deep... breathe out slow..." }
+    ],
+    full: `[Verse 1 - English]
+Close your eyes, let the heavy thoughts drift away...
+A gentle breeze through the quiet afternoon sky...
+Soft piano notes guiding your mind to peaceful calm...
+
+[Chorus]
+Breathe in deep... breathe out slow...
+Feel the weightlessness of peace...
+Your mind is clear, safe, and restored.`
+  }
+};
+
+const getTrackLyricsData = (track) => {
+  if (!track || !track.title) {
+    return {
+      subtitles: [{ time: 0, text: "🎵 Calming soundscape playing..." }],
+      full: "🎵 Enjoy the relaxing therapeutic music."
+    };
+  }
+  const key = Object.keys(LYRICS_DATABASE).find(k => track.title.toLowerCase().includes(k.toLowerCase()));
+  if (key && LYRICS_DATABASE[key]) {
+    return LYRICS_DATABASE[key];
+  }
+  // Generic therapeutic lyrics structure for any track title
+  return {
+    subtitles: [
+      { time: 0, text: `🎵 ${track.title} — Soft harmonies soothing your mind...` },
+      { time: 10, text: `🎵 ${track.artist || 'AI Therapy'} — Breathe in deeply & feel the peaceful rhythm...` },
+      { time: 20, text: `🎵 Letting go of stress & tension with every beat...` },
+      { time: 30, text: `🎵 Finding clarity, inner balance, and deep relaxation...` }
+    ],
+    full: `[Verse 1 - ${track.title}]
+${track.title} by ${track.artist || 'Therapeutic Artist'}
+Soft harmonies soothing your mind...
+Breathe in deeply & feel the peaceful rhythm...
+
+[Chorus]
+Letting go of stress & tension with every beat...
+Finding clarity, inner balance, and deep relaxation...
+Your mind is at peace.`
+  };
+};
+
 export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Audio Player & Language Filter State
+  // Audio Player, Lyrics, and Language Filter State
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [filterLoading, setFilterLoading] = useState(false);
   const [currentTracks, setCurrentTracks] = useState([]);
@@ -43,7 +229,9 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
-  const [repeatMode, setRepeatMode] = useState('all'); // 'none' | 'all' | 'one'
+  const [repeatMode, setRepeatMode] = useState('all');
+  const [showLyricsModal, setShowLyricsModal] = useState(false);
+  const [lyricsTab, setLyricsTab] = useState('full'); // 'full' | 'subtitles'
   const [currentMoodState, setCurrentMoodState] = useState('None');
   const [latestSurveyId, setLatestSurveyId] = useState(null);
   
@@ -790,6 +978,38 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     className="slider-custom"
                     style={{ width: '100%', cursor: 'pointer' }}
                   />
+
+                  {/* Live Karaoke / Subtitle Line */}
+                  <div style={{
+                    marginTop: '0.85rem',
+                    textAlign: 'center',
+                    padding: '0.6rem 1rem',
+                    background: 'rgba(0, 0, 0, 0.35)',
+                    borderRadius: '12px',
+                    border: '1px dashed var(--border-glass)',
+                    minHeight: '42px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)'
+                  }}>
+                    <span style={{
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: 'var(--accent-cyan)',
+                      letterSpacing: '0.3px',
+                      transition: 'all 0.3s ease'
+                    }}>
+                      {(() => {
+                        const lyricsData = getTrackLyricsData(activeTrack);
+                        const subs = lyricsData?.subtitles || [];
+                        for (let i = subs.length - 1; i >= 0; i--) {
+                          if (currentTime >= subs[i].time) return subs[i].text;
+                        }
+                        return subs[0]?.text || `🎵 ${activeTrack.title} — Relax & enjoy the music...`;
+                      })()}
+                    </span>
+                  </div>
                 </div>
               )}
 
@@ -846,8 +1066,8 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                   </button>
                 </div>
 
-                {/* Volume Control Slider & Save Favorite */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                {/* Volume Control Slider, View Lyrics & Save Favorite */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                   {/* Volume Control */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(0, 0, 0, 0.2)', padding: '0.35rem 0.75rem', borderRadius: '20px', border: '1px solid var(--border-glass)' }}>
                     <button onClick={toggleMute} style={{ background: 'none', border: 'none', color: isMuted ? 'var(--accent-rose)' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title={isMuted ? "Unmute" : "Mute"}>
@@ -867,6 +1087,26 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       style={{ width: '75px', accentColor: 'var(--primary)', cursor: 'pointer' }}
                     />
                   </div>
+
+                  {/* Lyrics Button */}
+                  {activeTrack && (
+                    <button
+                      className="btn-primary"
+                      onClick={() => setShowLyricsModal(true)}
+                      style={{
+                        padding: '0.45rem 0.9rem',
+                        fontSize: '0.85rem',
+                        borderRadius: '20px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%)'
+                      }}
+                    >
+                      <BookOpen style={{ width: '15px', height: '15px' }} />
+                      Lyrics
+                    </button>
+                  )}
 
                   {/* Save Favorite Track */}
                   {activeTrack && (
@@ -1256,6 +1496,158 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
           </div>
 
+        </div>
+      )}
+
+      {/* Lyrics & Subtitles Glassmorphic Modal */}
+      {showLyricsModal && activeTrack && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="glass-panel" style={{
+            width: '100%',
+            maxWidth: '520px',
+            maxHeight: '85vh',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '1.75rem',
+            borderRadius: '24px',
+            position: 'relative',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+            border: '1px solid var(--border-glass)'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BookOpen style={{ color: 'var(--primary)', width: '20px', height: '20px' }} />
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Song Lyrics & Subtitles</h3>
+              </div>
+              <button
+                onClick={() => setShowLyricsModal(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+              >
+                <X style={{ width: '22px', height: '22px' }} />
+              </button>
+            </div>
+
+            {/* Active Track Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              background: 'rgba(0, 0, 0, 0.25)',
+              padding: '0.85rem 1rem',
+              borderRadius: '16px',
+              border: '1px solid var(--border-glass)',
+              marginBottom: '1rem'
+            }}>
+              <img
+                src={activeTrack.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"}
+                alt="Track Cover"
+                style={{ width: '56px', height: '56px', borderRadius: '10px', objectFit: 'cover' }}
+              />
+              <div>
+                <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.15rem' }}>{activeTrack.title}</h4>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{activeTrack.artist}</p>
+              </div>
+            </div>
+
+            {/* Tab Selector */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', background: 'rgba(255,255,255,0.03)', padding: '0.25rem', borderRadius: '12px' }}>
+              <button
+                onClick={() => setLyricsTab('full')}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: lyricsTab === 'full' ? 'var(--primary)' : 'transparent',
+                  color: lyricsTab === 'full' ? '#fff' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Full Lyrics
+              </button>
+              <button
+                onClick={() => setLyricsTab('subtitles')}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: lyricsTab === 'subtitles' ? 'var(--primary)' : 'transparent',
+                  color: lyricsTab === 'subtitles' ? '#fff' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Subtitles & Karaoke
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              background: 'rgba(0, 0, 0, 0.3)',
+              padding: '1.25rem',
+              borderRadius: '14px',
+              border: '1px solid var(--border-glass)'
+            }}>
+              {lyricsTab === 'full' ? (
+                <pre style={{
+                  fontFamily: 'inherit',
+                  whiteSpace: 'pre-wrap',
+                  fontSize: '0.95rem',
+                  lineHeight: '1.7',
+                  color: 'var(--text-primary)',
+                  margin: 0
+                }}>
+                  {getTrackLyricsData(activeTrack).full}
+                </pre>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {getTrackLyricsData(activeTrack).subtitles.map((sub, idx) => {
+                    const isActive = currentTime >= sub.time && (idx === getTrackLyricsData(activeTrack).subtitles.length - 1 || currentTime < getTrackLyricsData(activeTrack).subtitles[idx + 1].time);
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          padding: '0.65rem 0.85rem',
+                          borderRadius: '8px',
+                          background: isActive ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                          borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent',
+                          color: isActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+                          fontWeight: isActive ? 700 : 400,
+                          fontSize: '0.92rem',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginRight: '0.5rem' }}>
+                          [{formatTime(sub.time)}]
+                        </span>
+                        {sub.text}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
