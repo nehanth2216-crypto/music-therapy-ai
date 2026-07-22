@@ -19,11 +19,14 @@ from backend.database import (
     DailyJournal,
     FavoriteTrack
 )
+from datetime import datetime, timedelta
 from backend.auth import (
     get_password_hash,
     verify_password,
     create_access_token,
-    get_current_user
+    get_current_user,
+    generate_reset_token,
+    REMEMBER_ME_EXPIRE_DAYS
 )
 
 # Initialize Database on Startup
@@ -215,15 +218,49 @@ class UserSignup(BaseModel):
     username: str
     email: EmailStr
     password: str
+    full_name: Optional[str] = None
+    fav_genre: Optional[str] = "Lo-fi"
 
 class UserLogin(BaseModel):
     username: str
     password: str
+    remember_me: Optional[bool] = False
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
     username: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    fav_genre: Optional[str] = "Lo-fi"
+
+class UserProfileResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    full_name: Optional[str] = None
+    fav_genre: Optional[str] = "Lo-fi"
+    language_pref: Optional[str] = "English"
+    default_activity: Optional[str] = "Relaxation"
+    created_at: Optional[str] = None
+
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    fav_genre: Optional[str] = "Lo-fi"
+    language_pref: Optional[str] = "English"
+    default_activity: Optional[str] = "Relaxation"
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email_or_username: str
+
+class ResetPasswordSubmit(BaseModel):
+    reset_token: str
+    new_password: str
 
 class SurveySubmit(BaseModel):
     age: int
@@ -269,26 +306,146 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
         )
         
     hashed_pwd = get_password_hash(user_data.password)
-    new_user = User(username=user_data.username, email=user_data.email, hashed_password=hashed_pwd)
+    new_user = User(
+        username=user_data.username,
+        email=user_data.email,
+        hashed_password=hashed_pwd,
+        full_name=user_data.full_name,
+        fav_genre=user_data.fav_genre or "Lo-fi"
+    )
     
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     
     token = create_access_token(data={"sub": new_user.username})
-    return {"access_token": token, "token_type": "bearer", "username": new_user.username}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "username": new_user.username,
+        "email": new_user.email,
+        "full_name": new_user.full_name,
+        "fav_genre": new_user.fav_genre
+    }
 
 @app.post("/api/auth/login", response_model=TokenResponse)
 def login(login_data: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == login_data.username).first()
+    # Support login via username OR email
+    user = db.query(User).filter((User.username == login_data.username) | (User.email == login_data.username)).first()
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password"
+            detail="Incorrect username/email or password"
         )
         
-    token = create_access_token(data={"sub": user.username})
-    return {"access_token": token, "token_type": "bearer", "username": user.username}
+    expires_delta = timedelta(days=REMEMBER_ME_EXPIRE_DAYS) if login_data.remember_me else None
+    token = create_access_token(data={"sub": user.username}, expires_delta=expires_delta)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "username": user.username,
+        "email": user.email,
+        "full_name": user.full_name,
+        "fav_genre": user.fav_genre or "Lo-fi"
+    }
+
+@app.get("/api/auth/me", response_model=UserProfileResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "fav_genre": current_user.fav_genre or "Lo-fi",
+        "language_pref": current_user.language_pref or "English",
+        "default_activity": current_user.default_activity or "Relaxation",
+        "created_at": current_user.created_at.strftime("%Y-%m-%d %H:%M") if current_user.created_at else None
+    }
+
+@app.put("/api/auth/profile", response_model=UserProfileResponse)
+def update_profile(
+    profile_data: UserProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if profile_data.email and profile_data.email != current_user.email:
+        existing = db.query(User).filter(User.email == profile_data.email).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email is already taken by another account.")
+        current_user.email = profile_data.email
+
+    if profile_data.full_name is not None:
+        current_user.full_name = profile_data.full_name
+    if profile_data.fav_genre is not None:
+        current_user.fav_genre = profile_data.fav_genre
+    if profile_data.language_pref is not None:
+        current_user.language_pref = profile_data.language_pref
+    if profile_data.default_activity is not None:
+        current_user.default_activity = profile_data.default_activity
+
+    db.commit()
+    db.refresh(current_user)
+
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "fav_genre": current_user.fav_genre or "Lo-fi",
+        "language_pref": current_user.language_pref or "English",
+        "default_activity": current_user.default_activity or "Relaxation",
+        "created_at": current_user.created_at.strftime("%Y-%m-%d %H:%M") if current_user.created_at else None
+    }
+
+@app.post("/api/auth/change-password")
+def change_password(
+    pwd_data: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not verify_password(pwd_data.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect.")
+    
+    if len(pwd_data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters.")
+
+    current_user.hashed_password = get_password_hash(pwd_data.new_password)
+    db.commit()
+    return {"status": "success", "message": "Password updated successfully!"}
+
+@app.post("/api/auth/forgot-password")
+def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter((User.email == req.email_or_username) | (User.username == req.email_or_username)).first()
+    if not user:
+        # Avoid user enumeration attack; return success message anyway
+        return {"status": "success", "message": "If an account matching the details exists, password reset instructions have been generated."}
+    
+    reset_tok = generate_reset_token()
+    user.reset_token = reset_tok
+    user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": "Password reset token generated successfully.",
+        "reset_token": reset_tok
+    }
+
+@app.post("/api/auth/reset-password")
+def reset_password(req: ResetPasswordSubmit, db: Session = Depends(get_db)):
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+
+    user = db.query(User).filter(User.reset_token == req.reset_token).first()
+    if not user or not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+
+    user.hashed_password = get_password_hash(req.new_password)
+    user.reset_token = None
+    user.reset_token_expires = None
+    db.commit()
+
+    return {"status": "success", "message": "Password reset successfully! You can now log in with your new password."}
 
 @app.post("/api/recommend/survey")
 def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

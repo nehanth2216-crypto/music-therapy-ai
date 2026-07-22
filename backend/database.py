@@ -39,6 +39,12 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    full_name = Column(String, nullable=True)
+    fav_genre = Column(String, default="Lo-fi", nullable=True)
+    language_pref = Column(String, default="English", nullable=True)
+    default_activity = Column(String, default="Relaxation", nullable=True)
+    reset_token = Column(String, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     surveys = relationship("SurveyResponse", back_populates="user")
@@ -106,6 +112,25 @@ class FavoriteTrack(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    # Lightweight schema migration for existing SQLite/Postgres tables
+    from sqlalchemy import inspect, text
+    inspector = inspect(engine)
+    if "users" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("users")]
+        with engine.connect() as conn:
+            if "full_name" not in columns:
+                conn.execute(text("ALTER TABLE users ADD COLUMN full_name VARCHAR"))
+            if "fav_genre" not in columns:
+                conn.execute(text("ALTER TABLE users ADD COLUMN fav_genre VARCHAR DEFAULT 'Lo-fi'"))
+            if "language_pref" not in columns:
+                conn.execute(text("ALTER TABLE users ADD COLUMN language_pref VARCHAR DEFAULT 'English'"))
+            if "default_activity" not in columns:
+                conn.execute(text("ALTER TABLE users ADD COLUMN default_activity VARCHAR DEFAULT 'Relaxation'"))
+            if "reset_token" not in columns:
+                conn.execute(text("ALTER TABLE users ADD COLUMN reset_token VARCHAR"))
+            if "reset_token_expires" not in columns:
+                conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP"))
+            conn.commit()
 
 def get_db():
     db = SessionLocal()

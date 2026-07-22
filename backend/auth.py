@@ -1,4 +1,5 @@
 import os
+import secrets
 import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
@@ -10,7 +11,11 @@ from backend.database import get_db, User
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "harmonyrec_super_secret_key_13579")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours default
+REMEMBER_ME_EXPIRE_DAYS = 30 # 30 days for Remember Me
+
+def generate_reset_token() -> str:
+    return secrets.token_urlsafe(32)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 

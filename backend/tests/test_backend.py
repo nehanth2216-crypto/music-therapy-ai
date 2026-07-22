@@ -173,5 +173,60 @@ class TestHarmonyRecBackend(unittest.TestCase):
         self.assertIn("reply", data)
         self.assertTrue("breathing" in data["reply"].lower() or "anxiety" in data["reply"].lower() or "stress" in data["reply"].lower())
 
+    def test_09_profile_and_password_features(self):
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+        
+        # GET /api/auth/me
+        resp = self.client.get("/api/auth/me", headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        user_info = resp.json()
+        self.assertEqual(user_info["username"], "testuser")
+        self.assertEqual(user_info["email"], "testuser@example.com")
+        
+        # PUT /api/auth/profile
+        update_payload = {
+            "full_name": "Test User Pro",
+            "fav_genre": "Classical",
+            "default_activity": "Studying"
+        }
+        resp = self.client.put("/api/auth/profile", json=update_payload, headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["full_name"], "Test User Pro")
+        self.assertEqual(data["fav_genre"], "Classical")
+        
+        # POST /api/auth/change-password
+        change_pwd_payload = {
+            "current_password": "securepassword123",
+            "new_password": "newsecurepassword456"
+        }
+        resp = self.client.post("/api/auth/change-password", json=change_pwd_payload, headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        
+        # Verify login with new password
+        login_resp = self.client.post("/api/auth/login", json={"username": "testuser", "password": "newsecurepassword456"})
+        self.assertEqual(login_resp.status_code, 200)
+        type(self).auth_token = login_resp.json()["access_token"]
+        
+    def test_10_forgot_and_reset_password(self):
+        # Request forgot password
+        resp = self.client.post("/api/auth/forgot-password", json={"email_or_username": "testuser@example.com"})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("reset_token", data)
+        reset_tok = data["reset_token"]
+        
+        # Reset password
+        reset_payload = {
+            "reset_token": reset_tok,
+            "new_password": "resetpassword789"
+        }
+        resp = self.client.post("/api/auth/reset-password", json=reset_payload)
+        self.assertEqual(resp.status_code, 200)
+        
+        # Login with reset password
+        login_resp = self.client.post("/api/auth/login", json={"username": "testuser", "password": "resetpassword789"})
+        self.assertEqual(login_resp.status_code, 200)
+
 if __name__ == "__main__":
     unittest.main()
