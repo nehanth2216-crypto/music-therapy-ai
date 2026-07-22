@@ -896,6 +896,8 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                   {/* Album Cover Art */}
                   <div style={{ position: 'relative', width: '120px', height: '120px' }}>
                     <img 
+                      loading="lazy"
+                      decoding="async"
                       src={activeTrack.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"} 
                       alt="Album art" 
                       style={{
@@ -1145,7 +1147,20 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                 Curated Recommendations
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {currentTracks.map((track, idx) => (
+                {filterLoading ? (
+                  Array.from({ length: 4 }).map((_, sIdx) => (
+                    <div
+                      key={sIdx}
+                      className="pulse"
+                      style={{
+                        height: '60px',
+                        borderRadius: '12px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid var(--border-glass)'
+                      }}
+                    />
+                  ))
+                ) : currentTracks.map((track, idx) => (
                   <div 
                     key={idx}
                     className="track-queue-item"
@@ -1163,6 +1178,8 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                       <img 
+                        loading="lazy"
+                        decoding="async"
                         src={track.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"} 
                         alt="" 
                         style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
@@ -1569,6 +1586,8 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
               marginBottom: '1rem'
             }}>
               <img
+                loading="lazy"
+                decoding="async"
                 src={activeTrack.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"}
                 alt="Track Cover"
                 style={{ width: '56px', height: '56px', borderRadius: '10px', objectFit: 'cover' }}

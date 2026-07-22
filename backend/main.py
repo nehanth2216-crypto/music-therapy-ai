@@ -204,7 +204,25 @@ def get_spotify_access_token(client_id: str, client_secret: str) -> Optional[str
         print(f"Exception during Spotify token fetch: {e}")
         return None
 
+TRACK_CACHE = {}
+CACHE_TTL_SECONDS = 3600
+
+def get_cached_tracks(cache_key: str) -> Optional[List[dict]]:
+    if cache_key in TRACK_CACHE:
+        data, timestamp = TRACK_CACHE[cache_key]
+        if time.time() - timestamp < CACHE_TTL_SECONDS:
+            return data
+    return None
+
+def set_cached_tracks(cache_key: str, tracks: List[dict]):
+    TRACK_CACHE[cache_key] = (tracks, time.time())
+
 def fetch_itunes_tracks(query: str, limit: int = 8, language: str = "English") -> List[dict]:
+    cache_key = f"itunes_{language}_{query}_{limit}"
+    cached = get_cached_tracks(cache_key)
+    if cached:
+        return cached
+
     try:
         search_term = f"{language} {query}" if language and language != "English" else query
         url = "https://itunes.apple.com/search"
@@ -241,6 +259,7 @@ def fetch_itunes_tracks(query: str, limit: int = 8, language: str = "English") -
                     "play_url": item.get("trackViewUrl")
                 })
             if tracks:
+                set_cached_tracks(cache_key, tracks)
                 return tracks
     except Exception as e:
         print(f"Exception during iTunes track fetch: {e}")

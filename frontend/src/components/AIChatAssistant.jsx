@@ -269,6 +269,8 @@ export default function AIChatAssistant({ token, apiBaseUrl, onPlayTrack }) {
                           }}
                         >
                           <img
+                            loading="lazy"
+                            decoding="async"
                             src={track.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop"}
                             alt={track.title}
                             style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover' }}
