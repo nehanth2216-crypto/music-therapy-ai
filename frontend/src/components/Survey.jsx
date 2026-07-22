@@ -31,19 +31,21 @@ export default function Survey({ token, apiBaseUrl, onViewChange }) {
     setError('');
     
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token && token.trim() !== '') {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${apiBaseUrl}/recommend/survey`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: headers,
         body: JSON.stringify({
-          age: parseInt(age),
+          age: parseInt(age) || 25,
           gender: gender,
           mood: mood,
-          stress: parseInt(stress),
+          stress: parseInt(stress) || 5,
           sleep_quality: sleepQuality,
-          anxiety: parseInt(anxiety),
+          anxiety: parseInt(anxiety) || 5,
           fav_genre: favGenre,
           language_pref: languagePref,
           activity: activity
@@ -58,7 +60,8 @@ export default function Survey({ token, apiBaseUrl, onViewChange }) {
       setResult(data);
       setStep(3);
     } catch (err) {
-      setError(err.message);
+      console.error("Survey submission error:", err);
+      setError(err.message || 'Failed to submit survey. Please try again.');
     } finally {
       setLoading(false);
     }

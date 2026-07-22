@@ -752,12 +752,21 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
         genre_idx
     ]], dtype=float)
     
-    # Scale features
-    feature_scaled = scaler.transform(feature_arr)
-    
-    # Predict playlist
-    pred_idx = recommendation_model.predict(feature_scaled)[0]
-    result_playlist = PLAYLISTS[int(pred_idx)]
+    # Scale features & Predict playlist safely
+    try:
+        feature_scaled = scaler.transform(feature_arr)
+        pred_idx = recommendation_model.predict(feature_scaled)[0]
+        result_playlist = PLAYLISTS[int(pred_idx)]
+    except Exception as e:
+        print(f"ML Model prediction fallback triggered: {e}")
+        if survey.stress >= 8 or survey.anxiety >= 8:
+            result_playlist = "playlist_2"
+        elif survey.mood == "Sad":
+            result_playlist = "playlist_3"
+        elif survey.activity == "Studying":
+            result_playlist = "playlist_1"
+        else:
+            result_playlist = "playlist_1"
     
     # Create DB entry
     response_record = SurveyResponse(
