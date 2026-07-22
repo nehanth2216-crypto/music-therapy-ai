@@ -238,6 +238,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [currentMoodState, setCurrentMoodState] = useState('None');
   const [latestSurveyId, setLatestSurveyId] = useState(null);
   
+  // Catalog pagination (Load More)
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogLoadingMore, setCatalogLoadingMore] = useState(false);
+  
   // Favorite tracks
   const [favorites, setFavorites] = useState([]);
   
@@ -357,6 +361,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     setSelectedGenre(genre);
     setSelectedMood(mood);
     setFilterLoading(true);
+    setCatalogPage(1);
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       const url = `${apiBaseUrl}/recommend/by-language?language=${encodeURIComponent(lang)}&genre=${encodeURIComponent(genre)}&mood=${encodeURIComponent(mood)}&query=${encodeURIComponent(query)}`;
@@ -374,6 +379,30 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
       console.warn("Error fetching filtered tracks:", err);
     } finally {
       setFilterLoading(false);
+    }
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = catalogPage + 1;
+    setCatalogLoadingMore(true);
+    try {
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const url = `${apiBaseUrl}/catalog/browse?language=${encodeURIComponent(selectedLanguage)}&genre=${encodeURIComponent(selectedGenre)}&mood=${encodeURIComponent(selectedMood)}&page=${nextPage}&limit=50`;
+      const res = await fetch(url, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        const newTracks = parseTracksArray(data.tracks);
+        if (newTracks.length > 0) {
+          const existingTitles = new Set(currentTracks.map(t => (t.title || '').toLowerCase()));
+          const unique = newTracks.filter(t => !existingTitles.has((t.title || '').toLowerCase()));
+          setCurrentTracks(prev => [...prev, ...unique]);
+          setCatalogPage(nextPage);
+        }
+      }
+    } catch (err) {
+      console.warn("Error loading more tracks:", err);
+    } finally {
+      setCatalogLoadingMore(false);
     }
   };
 
@@ -1220,6 +1249,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
             <div className="glass-panel" style={{ padding: '1.5rem 2rem' }}>
               <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 Curated Recommendations
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, marginLeft: '0.25rem' }}>({currentTracks.length} songs loaded)</span>
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {filterLoading ? (
@@ -1276,8 +1306,31 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       </div>
                     </div>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{track.duration}</span>
+                      <a
+                        href={track.youtube_search_url || `https://www.youtube.com/results?search_query=${encodeURIComponent((track.title || '') + ' ' + (track.artist || ''))}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        title="Play full song on YouTube"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '6px',
+                          background: 'rgba(255, 0, 0, 0.12)',
+                          border: '1px solid rgba(255, 0, 0, 0.25)',
+                          color: '#ff4444',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        ▶ YouTube
+                      </a>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1290,6 +1343,31 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Load More Songs Button */}
+              <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+                <button
+                  className="btn-secondary"
+                  onClick={handleLoadMore}
+                  disabled={catalogLoadingMore}
+                  style={{
+                    padding: '0.65rem 2rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    borderRadius: '12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    opacity: catalogLoadingMore ? 0.6 : 1
+                  }}
+                >
+                  {catalogLoadingMore ? (
+                    <><span className="pulse" style={{ width: '14px', height: '14px', borderRadius: '50%', display: 'inline-block', background: 'var(--primary)' }} />Loading more songs...</>
+                  ) : (
+                    <>🎵 Load More Songs</>  
+                  )}
+                </button>
               </div>
             </div>
 

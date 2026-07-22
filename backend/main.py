@@ -203,7 +203,7 @@ def get_spotify_access_token(client_id: str, client_secret: str) -> Optional[str
         return None
 
 TRACK_CACHE = {}
-CACHE_TTL_SECONDS = 3600
+CACHE_TTL_SECONDS = 21600  # 6 hours for broader catalog reuse
 
 def get_cached_tracks(cache_key: str) -> Optional[List[dict]]:
     if cache_key in TRACK_CACHE:
@@ -214,6 +214,11 @@ def get_cached_tracks(cache_key: str) -> Optional[List[dict]]:
 
 def set_cached_tracks(cache_key: str, tracks: List[dict]):
     TRACK_CACHE[cache_key] = (tracks, time.time())
+
+def make_yt_url(title: str, artist: str) -> str:
+    """Generate a YouTube search URL for a given song title and artist."""
+    q = requests.utils.quote(f"{title} {artist}")
+    return f"https://www.youtube.com/results?search_query={q}"
 
 def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", genre: str = "Pop") -> List[dict]:
     cache_key = f"itunes_{language}_{genre}_{query}_{limit}"
@@ -283,13 +288,167 @@ def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", 
         print(f"Exception during iTunes track fetch: {e}")
     return []
 
+def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", genre: str = "Pop") -> List[dict]:
+    """Fetch tracks from Deezer public API — 90M+ catalog, no auth required."""
+    cache_key = f"deezer_{language}_{genre}_{query}_{limit}"
+    cached = get_cached_tracks(cache_key)
+    if cached:
+        return cached
+    try:
+        lang_prefix = language if language != "English" else ""
+        search_term = f"{lang_prefix} {query}".strip()
+        url = "https://api.deezer.com/search"
+        params = {"q": search_term, "limit": limit, "order": "RANKING"}
+        resp = requests.get(url, params=params, timeout=8)
+        if resp.status_code == 200:
+            results = resp.json().get("data", [])
+            tracks = []
+            for item in results:
+                preview_url = item.get("preview")
+                if not preview_url:
+                    continue
+                album = item.get("album", {})
+                artist = item.get("artist", {})
+                duration_s = item.get("duration", 0)
+                minutes = duration_s // 60
+                seconds = duration_s % 60
+                duration_str = f"{minutes}:{seconds:02d}" if duration_s > 0 else "3:30"
+                cover = album.get("cover_xl") or album.get("cover_big") or album.get("cover_medium") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+                tracks.append({
+                    "title": item.get("title", ""),
+                    "artist": artist.get("name", "Unknown Artist"),
+                    "album": album.get("title", "Unknown Album"),
+                    "language": language,
+                    "genre": genre,
+                    "duration": duration_str,
+                    "release_year": "2024",
+                    "album_image": cover,
+                    "preview_url": preview_url,
+                    "play_url": item.get("link", "")
+                })
+            if tracks:
+                set_cached_tracks(cache_key, tracks)
+                return tracks
+    except Exception as e:
+        print(f"Exception during Deezer track fetch: {e}")
+    return []
+
+# Comprehensive movie soundtrack keyword catalog per language
+MOVIE_CATALOG = {
+    "Telugu": [
+        "RRR", "Pushpa", "Hi Nanna", "Devara", "Kalki 2898 AD", "Tillu Square",
+        "Guntur Kaaram", "Ala Vaikunthapurramuloo", "Samajavaragamana", "Taxiwaala",
+        "Dear Comrade", "Fidaa", "Arjun Reddy", "Geetha Govindam", "Bharat Ane Nenu",
+        "Baahubali", "Eega", "Magadheera", "Rangasthalam", "Jersey",
+        "Uppena", "DJ Tillu", "Sye Raa Narasimha Reddy", "V", "Vakeel Saab",
+        "Maguva Maguva", "Ramuloo Ramulaa", "Naatu Naatu", "Srivalli", "Oo Antava"
+    ],
+    "Hindi": [
+        "Brahmastra", "Animal", "Jawan", "Dunki", "Fighter", "Stree 2",
+        "Pathaan", "Rocky Aur Rani", "Tu Jhoothi Main Makkaar", "Bhediya",
+        "Kesariya", "Raataan Lambiyan", "Tum Se Hi", "Aaj Ki Raat",
+        "Jab We Met", "Ae Dil Hai Mushkil", "Tamasha", "Rockstar", "Highway",
+        "Lootera", "Udaan", "Barfi", "Queen", "Dangal",
+        "Dil Chahta Hai", "Lagaan", "Rang De Basanti", "3 Idiots", "PK",
+        "Kabir Singh", "Uri", "Bard of Blood", "Mirzapur OST", "Sacred Games OST"
+    ],
+    "Tamil": [
+        "Leo", "Jailer", "Vettaiyan", "Kalki 2898 AD Tamil", "Vijay Antony hits",
+        "Vikram", "Varisu", "Thunivu", "Beast", "Doctor",
+        "Annaatthe", "Master", "Soorarai Pottru", "Karnan", "Jai Bhim",
+        "Mandela", "Irudhi Suttru", "Kabali", "Enthiran", "2.0",
+        "Neeyum Naanum", "Vinnaithaandi Varuvaayaa", "OK Kanmani", "Mersal", "Bigil",
+        "Kaithi", "Thadam", "96", "Oh My Kadavule", "Sarpatta Parambarai"
+    ],
+    "Malayalam": [
+        "Manjummel Boys", "Marco", "Lucifer", "Drishyam 2", "Minnal Murali",
+        "Joji", "The Great Indian Kitchen", "Kumbalangi Nights", "Ee.Ma.Yau", "Angamaly Diaries",
+        "Premam", "Bangalore Days", "Charlie", "Ennu Ninte Moideen", "How Old Are You",
+        "Oru Indian Pranayakatha", "Virus", "Forensic", "Nayattu", "C U Soon",
+        "Varane Avashyamund", "Thanneer Mathan Dinangal", "Sudani from Nigeria", "Varathan", "Iyobinte Pusthakam",
+        "Vineeth Sreenivasan songs", "Gopi Sundar melody", "Hesham Abdul Wahab hits", "Sushin Shyam OST", "Bijibal songs"
+    ],
+    "English": [
+        "lofi hip hop study beats", "chill ambient relaxation", "piano sleep music",
+        "indie pop 2024", "acoustic guitar chill", "nature sounds meditation",
+        "jazz coffee morning", "classical healing piano", "Ed Sheeran", "Coldplay",
+        "Taylor Swift", "Billie Eilish", "Harry Styles", "Olivia Rodrigo", "The Weeknd",
+        "Post Malone", "Dua Lipa", "Adele", "Sam Smith", "Lewis Capaldi",
+        "ambient electronic", "lo-fi beats focus", "deep focus work music", "Hans Zimmer", "Max Richter",
+        "Yiruma piano", "Brian Eno ambient", "Marconi Union weightless", "binaural beats relaxation", "healing frequencies 432hz"
+    ]
+}
+
+ARTIST_CATALOG = {
+    "Telugu": [
+        "Sid Sriram", "Anirudh Ravichander", "Hesham Abdul Wahab", "A.R. Rahman",
+        "S.S. Thaman", "Devi Sri Prasad", "Anurag Kulkarni", "M.M. Keeravani",
+        "Shreya Ghoshal Telugu", "Armaan Malik Telugu", "Haricharan", "Jonita Gandhi Telugu",
+        "Karthik Telugu", "Yazin Nizar", "Ramya Behara", "Madhu Priya",
+        "Kaala Bhairava", "Naresh Iyer", "Geetha Madhuri", "Mohana Bhogaraju"
+    ],
+    "Hindi": [
+        "Arijit Singh", "Pritam", "Shreya Ghoshal", "Atif Aslam", "A.R. Rahman Hindi",
+        "Mohit Chauhan", "Sonu Nigam", "Jubin Nautiyal", "B Praak", "Neha Kakkar",
+        "Vishal Shekhar", "Amit Trivedi", "Shankar Ehsaan Loy", "Armaan Malik",
+        "Monali Thakur", "Asees Kaur", "Rahul Jain", "Darshan Raval", "Papon", "Shilpa Rao"
+    ],
+    "Tamil": [
+        "Anirudh Ravichander", "A.R. Rahman Tamil", "Yuvan Shankar Raja", "Harris Jayaraj",
+        "Sid Sriram Tamil", "Dhanush", "Santhosh Narayanan", "G.V. Prakash Kumar",
+        "Pradeep Kumar Tamil", "Jonita Gandhi", "Bombay Jayashri", "Shreya Ghoshal Tamil",
+        "Karthik Tamil", "Haricharan Tamil", "Naresh Iyer Tamil", "Benny Dayal",
+        "Andrea Jeremiah", "Chinmayi", "Tippu", "Velmurugan"
+    ],
+    "Malayalam": [
+        "Hesham Abdul Wahab", "Sushin Shyam", "Vijay Yesudas", "K.S. Chithra",
+        "Job Kurian", "Vineeth Sreenivasan", "Shaan Rahman", "Gopi Sundar",
+        "Pradeep Kumar Malayalam", "Sooraj Santhosh", "Bijibal", "Ouseppachan",
+        "Rathish Vega", "Sithara Krishnakumar", "Sujatha Mohan", "Unni Menon",
+        "M.G. Sreekumar", "Haricharan Malayalam", "Zia Ul Haq", "Rahul Raj"
+    ],
+    "English": [
+        "Marconi Union", "Coldplay", "Ed Sheeran", "Taylor Swift", "Billie Eilish",
+        "The Weeknd", "Harry Styles", "Olivia Rodrigo", "Post Malone", "Dua Lipa",
+        "Ludovico Einaudi", "Yiruma", "Hans Zimmer", "Max Richter", "Brian Eno",
+        "Adele", "Sam Smith", "Lewis Capaldi", "Shawn Mendes", "Charlie Puth"
+    ]
+}
+
+def build_search_matrix(language: str, genre: str, mood: str, activity: str) -> List[str]:
+    """Build a comprehensive 30+ query search matrix for maximum catalog depth."""
+    movies = MOVIE_CATALOG.get(language, MOVIE_CATALOG["English"])
+    artists = ARTIST_CATALOG.get(language, ARTIST_CATALOG["English"])
+
+    queries = [
+        # Genre + Mood combos
+        f"{genre} {mood}",
+        f"{mood} {genre} music",
+        f"{genre} songs {mood}",
+        f"best {genre} {activity}",
+        f"{mood} instrumental {genre}",
+        f"{genre} acoustic relaxation",
+        f"{mood} melody",
+        f"{activity} music {genre}",
+    ]
+
+    # Top movie soundtracks (up to 15)
+    for movie in movies[:15]:
+        queries.append(f"{movie} soundtrack")
+
+    # Top artists (up to 10)
+    for artist in artists[:10]:
+        queries.append(f"{artist} {mood}")
+
+    return queries
+
 def fetch_hybrid_recommendations(
     user_id: Optional[int] = None,
     mood: str = "Calming",
     language: str = "English",
     genre: str = "Lo-fi",
     activity: str = "Relaxation",
-    limit: int = 35,
+    limit: int = 50,
     db: Session = None
 ) -> List[dict]:
     cache_key = f"hybrid_{user_id}_{mood}_{language}_{genre}_{activity}_{limit}"
@@ -297,29 +456,7 @@ def fetch_hybrid_recommendations(
     if cached:
         return cached
 
-    # Dynamic search matrix tapping into thousands of catalog tracks across top artists, albums, movies, and soundscapes
-    artist_keywords = {
-        "Telugu": ["Sid Sriram", "Anirudh Ravichander", "Hesham Abdul Wahab", "A.R. Rahman", "S.S. Thaman", "Devi Sri Prasad", "Anurag Kulkarni", "Armaan Malik", "M.M. Keeravani", "Shreya Ghoshal"],
-        "Hindi": ["Arijit Singh", "Pritam", "Shreya Ghoshal", "Atif Aslam", "A.R. Rahman", "Mohit Chauhan", "Sonu Nigam", "Jubin Nautiyal", "B Praak", "Neha Kakkar"],
-        "Tamil": ["Anirudh Ravichander", "A.R. Rahman", "Yuvan Shankar Raja", "Harris Jayaraj", "Sid Sriram", "Dhanush", "Santhosh Narayanan", "G.V. Prakash Kumar", "Pradeep Kumar", "Jonita Gandhi"],
-        "Malayalam": ["Hesham Abdul Wahab", "Sushin Shyam", "Vijay Yesudas", "K.S. Chithra", "Job Kurian", "Vineeth Sreenivasan", "Shaan Rahman", "Gopi Sundar", "Pradeep Kumar", "Sooraj Santhosh"],
-        "English": ["Marconi Union", "The Chainsmokers", "Ed Sheeran", "Taylor Swift", "Coldplay", "Lofi Girl", "Ludovico Einaudi", "Yiruma", "Hans Zimmer", "Max Richter"]
-    }
-
-    lang_artists = artist_keywords.get(language, artist_keywords["English"])
-
-    search_queries = [
-        f"{genre} {mood}",
-        f"{mood} soundtrack",
-        f"{genre} hits",
-        f"top {genre} songs",
-        f"{lang_artists[0]} {genre}",
-        f"{lang_artists[1]} {mood}",
-        f"{lang_artists[2]} melody",
-        f"{lang_artists[3]} hits",
-        f"{genre} acoustic relaxation",
-        f"{mood} instrumental"
-    ]
+    search_queries = build_search_matrix(language=language, genre=genre, mood=mood, activity=activity)
 
     all_tracks = []
     seen_titles = set()
@@ -338,12 +475,30 @@ def fetch_hybrid_recommendations(
         except Exception:
             pass
 
+    # --- iTunes Pass (primary multilingual source) ---
     for q in search_queries:
-        if len(all_tracks) >= limit:
+        if len(all_tracks) >= limit * 2:  # gather 2x for quality ranking
             break
-        tracks = fetch_itunes_tracks(query=q, limit=30, language=language, genre=genre)
+        tracks = fetch_itunes_tracks(query=q, limit=50, language=language, genre=genre)
         for t in tracks:
-            t_title = (t.get("title") or "").lower()
+            t_title = (t.get("title") or "").lower().strip()
+            if t_title and t_title not in seen_titles:
+                seen_titles.add(t_title)
+                score = 0
+                artist = (t.get("artist") or "").lower()
+                if any(fa in artist for fa in fav_artists if fa):
+                    score += 5
+                t["hybrid_score"] = score
+                all_tracks.append(t)
+
+    # --- Deezer Pass (secondary source for broader catalog depth) ---
+    deezer_queries = search_queries[:8]  # use top 8 queries for Deezer
+    for q in deezer_queries:
+        if len(all_tracks) >= limit * 3:
+            break
+        deezer_tracks = fetch_deezer_tracks(query=q, limit=50, language=language, genre=genre)
+        for t in deezer_tracks:
+            t_title = (t.get("title") or "").lower().strip()
             if t_title and t_title not in seen_titles:
                 seen_titles.add(t_title)
                 score = 0
@@ -355,6 +510,7 @@ def fetch_hybrid_recommendations(
 
     all_tracks.sort(key=lambda x: x.get("hybrid_score", 0), reverse=True)
 
+    # Fallback to curated library if still empty
     if len(all_tracks) < 5 and language in MULTI_LANG_LIBRARY:
         for t in MULTI_LANG_LIBRARY[language]:
             t_title = (t.get("title") or "").lower()
@@ -1279,13 +1435,23 @@ def get_recommendations_by_language(
     theme_info = PLAYLIST_THEME_MAPPING[playlist_type]
     
     if query and query.strip():
-        direct_tracks = fetch_itunes_tracks(query=query.strip(), limit=30, language=language, genre=genre or "Pop")
-        if direct_tracks:
+        # Merge iTunes + Deezer results for query searches for maximum catalog depth
+        itunes_tracks = fetch_itunes_tracks(query=query.strip(), limit=50, language=language, genre=genre or "Pop")
+        deezer_tracks = fetch_deezer_tracks(query=f"{language} {query.strip()}", limit=50, language=language, genre=genre or "Pop")
+        seen = set()
+        merged = []
+        for t in itunes_tracks + deezer_tracks:
+            title_key = (t.get("title") or "").lower().strip()
+            if title_key and title_key not in seen:
+                seen.add(title_key)
+                t["youtube_search_url"] = make_yt_url(t.get("title", ""), t.get("artist", ""))
+                merged.append(t)
+        if merged:
             return {
                 "language": language,
                 "playlist_key": playlist_type,
-                "playlist_name": f"{language} {query.strip()} Results",
-                "tracks": direct_tracks
+                "playlist_name": f"{language} — {query.strip()} Results",
+                "tracks": merged[:60]
             }
 
     tracks = fetch_hybrid_recommendations(
@@ -1294,7 +1460,7 @@ def get_recommendations_by_language(
         language=language,
         genre=genre or "Lo-fi",
         activity=activity or "Relaxation",
-        limit=35,
+        limit=50,
         db=db
     )
     return {
@@ -1302,6 +1468,78 @@ def get_recommendations_by_language(
         "playlist_key": playlist_type,
         "playlist_name": f"{language} {theme_info['name']}",
         "tracks": tracks
+    }
+
+@app.get("/api/catalog/browse")
+def browse_catalog(
+    language: str = "English",
+    genre: Optional[str] = "Lo-fi",
+    mood: Optional[str] = "Calming",
+    activity: Optional[str] = "Relaxation",
+    query: Optional[str] = None,
+    page: int = 1,
+    limit: int = 50,
+    current_user: User = Depends(get_optional_current_user),
+    db: Session = Depends(get_db)
+):
+    """Paginated catalog browser — returns fresh tracks per page for infinite scroll."""
+    if query and query.strip():
+        # Text search across both iTunes and Deezer
+        itunes_tracks = fetch_itunes_tracks(query=query.strip(), limit=limit * 2, language=language, genre=genre or "Pop")
+        deezer_tracks = fetch_deezer_tracks(query=f"{language} {query.strip()}", limit=limit * 2, language=language, genre=genre or "Pop")
+        seen = set()
+        merged = []
+        for t in itunes_tracks + deezer_tracks:
+            title_key = (t.get("title") or "").lower().strip()
+            if title_key and title_key not in seen:
+                seen.add(title_key)
+                t["youtube_search_url"] = make_yt_url(t.get("title", ""), t.get("artist", ""))
+                merged.append(t)
+        start = (page - 1) * limit
+        page_tracks = merged[start:start + limit]
+        return {
+            "language": language,
+            "page": page,
+            "total_fetched": len(merged),
+            "tracks": page_tracks
+        }
+
+    # Build full search matrix and paginate it
+    # Each page uses a different slice of the movie/artist catalog
+    movies = MOVIE_CATALOG.get(language, MOVIE_CATALOG["English"])
+    artists = ARTIST_CATALOG.get(language, ARTIST_CATALOG["English"])
+
+    # Rotate movies & artists by page number to always return fresh content
+    movie_offset = ((page - 1) * 5) % len(movies)
+    artist_offset = ((page - 1) * 3) % len(artists)
+
+    page_queries = [
+        f"{genre or 'Pop'} {mood or 'Calming'}",
+        f"{mood or 'Calming'} {genre or 'Pop'} music",
+        f"{activity or 'Relaxation'} music {genre or 'Pop'}",
+    ]
+    for movie in movies[movie_offset:movie_offset + 5]:
+        page_queries.append(f"{movie} soundtrack")
+    for artist in artists[artist_offset:artist_offset + 3]:
+        page_queries.append(f"{artist} {mood or 'Calming'}")
+
+    all_tracks = []
+    seen = set()
+    for q in page_queries:
+        tracks = fetch_itunes_tracks(query=q, limit=limit, language=language, genre=genre or "Pop")
+        dz_tracks = fetch_deezer_tracks(query=q, limit=limit, language=language, genre=genre or "Pop")
+        for t in tracks + dz_tracks:
+            title_key = (t.get("title") or "").lower().strip()
+            if title_key and title_key not in seen:
+                seen.add(title_key)
+                t["youtube_search_url"] = make_yt_url(t.get("title", ""), t.get("artist", ""))
+                all_tracks.append(t)
+
+    return {
+        "language": language,
+        "page": page,
+        "total_fetched": len(all_tracks),
+        "tracks": all_tracks[:limit]
     }
 
 if __name__ == "__main__":
