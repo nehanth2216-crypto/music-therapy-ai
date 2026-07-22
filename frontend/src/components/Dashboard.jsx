@@ -954,7 +954,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
               {activeTrack && (
                 <audio
                   ref={audioRef}
-                  src={activeTrack.preview_url || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
+                  src={activeTrack.preview_url || "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"}
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={handleTrackEnded}
                 />
