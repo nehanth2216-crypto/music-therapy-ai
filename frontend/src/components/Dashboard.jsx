@@ -24,6 +24,7 @@ ChartJS.register(
   Filler
 );
 
+const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
 const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"];
 
 const LYRICS_DATABASE = {
