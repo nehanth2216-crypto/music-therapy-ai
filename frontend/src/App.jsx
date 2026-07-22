@@ -401,21 +401,6 @@ export default function App() {
                       required
                     />
                   </div>
-
-                  <div style={{ marginBottom: '1.25rem' }}>
-                    <label className="input-label" htmlFor="genre-input">Preferred Music Style</label>
-                    <select
-                      id="genre-input"
-                      className="input-field"
-                      value={authFavGenre}
-                      onChange={(e) => setAuthFavGenre(e.target.value)}
-                      style={{ appearance: 'none' }}
-                    >
-                      {GENRES.map(g => (
-                        <option key={g} value={g} style={{ background: '#1c1830' }}>{g}</option>
-                      ))}
-                    </select>
-                  </div>
                 </>
               )}
               
