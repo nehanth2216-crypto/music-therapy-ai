@@ -28,7 +28,7 @@ export default function App() {
 
   // Password Recovery State
   const [forgotInput, setForgotInput] = useState('');
-  const [generatedResetToken, setGeneratedResetToken] = useState('');
+  const [foundAccount, setFoundAccount] = useState(null);
   const [resetTokenInput, setResetTokenInput] = useState('');
   const [newPasswordInput, setNewPasswordInput] = useState('');
 
@@ -140,6 +140,7 @@ export default function App() {
     e.preventDefault();
     setAuthError('');
     setAuthSuccess('');
+    setFoundAccount(null);
     try {
       const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
@@ -147,15 +148,15 @@ export default function App() {
         body: JSON.stringify({ email_or_username: forgotInput })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Failed to process request');
+      if (!response.ok) throw new Error(data.detail || 'No account found matching that username or email address');
       
-      if (data.reset_token) {
-        setGeneratedResetToken(data.reset_token);
-        setResetTokenInput(data.reset_token);
-        setAuthSuccess('Reset token generated! You can now reset your password below.');
-      } else {
-        setAuthSuccess(data.message);
-      }
+      setFoundAccount({
+        username: data.username,
+        email: data.email,
+        reset_token: data.reset_token
+      });
+      setResetTokenInput(data.reset_token || '');
+      setAuthSuccess(`Account verified for ${data.username} (${data.email})`);
     } catch (err) {
       setAuthError(err.message);
     }
@@ -170,17 +171,20 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          reset_token: resetTokenInput,
+          username_or_email: foundAccount?.username || forgotInput,
+          reset_token: resetTokenInput || foundAccount?.reset_token,
           new_password: newPasswordInput
         })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || 'Failed to reset password');
 
-      setAuthSuccess('Password reset successfully! Please sign in with your new password.');
+      setAuthSuccess(`Password for ${data.username || foundAccount?.username} updated successfully! Sign in below.`);
+      setAuthUsername(data.username || foundAccount?.username || '');
       setAuthMode('login');
       setAuthPassword(newPasswordInput);
-      setGeneratedResetToken('');
+      setFoundAccount(null);
+      setForgotInput('');
       setResetTokenInput('');
       setNewPasswordInput('');
     } catch (err) {
@@ -229,13 +233,13 @@ export default function App() {
             AI-Curated Music Therapy & Mental Wellness
           </p>
 
-          {/* Forgot Password Flow */}
+          {/* Forgot & Reset Password Flow */}
           {authMode === 'forgot' && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
                 <button
                   type="button"
-                  onClick={() => { setAuthMode('login'); setAuthError(''); setAuthSuccess(''); }}
+                  onClick={() => { setAuthMode('login'); setAuthError(''); setAuthSuccess(''); setFoundAccount(null); }}
                   style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
                 >
                   <ArrowLeft style={{ width: '16px', height: '16px' }} /> Back to Sign In
@@ -244,57 +248,79 @@ export default function App() {
 
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Reset Your Password</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                Enter your registered email address or username to receive password reset instructions.
+                Enter your registered username or email address to verify your account and set a new password.
               </p>
 
-              <form onSubmit={handleForgotSubmit}>
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <label className="input-label" htmlFor="forgot-input">Email or Username</label>
-                  <input
-                    id="forgot-input"
-                    className="input-field"
-                    type="text"
-                    placeholder="Enter email or username"
-                    value={forgotInput}
-                    onChange={(e) => setForgotInput(e.target.value)}
-                    required
-                  />
-                </div>
-
-                {authError && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-rose)', color: 'var(--accent-rose)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.25rem', fontSize: '0.875rem' }}>
-                    {authError}
+              {!foundAccount ? (
+                <form onSubmit={handleForgotSubmit}>
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <label className="input-label" htmlFor="forgot-input">Username or Email Address</label>
+                    <input
+                      id="forgot-input"
+                      className="input-field"
+                      type="text"
+                      placeholder="e.g. nehanth or name@example.com"
+                      value={forgotInput}
+                      onChange={(e) => setForgotInput(e.target.value)}
+                      required
+                    />
                   </div>
-                )}
 
-                {authSuccess && (
-                  <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid var(--accent-emerald)', color: 'var(--accent-emerald)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.25rem', fontSize: '0.875rem' }}>
-                    {authSuccess}
-                  </div>
-                )}
+                  {authError && (
+                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-rose)', color: 'var(--accent-rose)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.25rem', fontSize: '0.875rem' }}>
+                      {authError}
+                    </div>
+                  )}
 
-                <button className="btn-primary" type="submit" style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}>
-                  <Key style={{ width: '16px', height: '16px' }} />
-                  Request Password Reset
-                </button>
-              </form>
-
-              {generatedResetToken && (
-                <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-glass)' }}>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)', marginBottom: '0.75rem', fontWeight: 600 }}>
-                    Reset token generated for evaluation:
-                  </p>
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem', borderRadius: '8px', fontSize: '0.8rem', wordBreak: 'break-all', fontFamily: 'monospace', color: 'var(--primary)', marginBottom: '1rem' }}>
-                    {generatedResetToken}
-                  </div>
-                  <button
-                    onClick={() => { setAuthMode('reset'); setAuthError(''); setAuthSuccess(''); }}
-                    className="btn-secondary"
-                    style={{ width: '100%', justifyContent: 'center' }}
-                  >
-                    Proceed to Reset Password
+                  <button className="btn-primary" type="submit" style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}>
+                    <Key style={{ width: '16px', height: '16px' }} />
+                    Find Account & Reset Password
                   </button>
-                </div>
+                </form>
+              ) : (
+                <form onSubmit={handleResetSubmit}>
+                  {/* Account Found Details Box */}
+                  <div style={{
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid var(--accent-emerald)',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    marginBottom: '1.25rem'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--accent-emerald)', fontWeight: 700, fontSize: '0.9rem' }}>
+                      <CheckCircle style={{ width: '18px', height: '18px' }} /> Account Verified
+                    </div>
+                    <div style={{ fontSize: '0.88rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
+                      <strong>Username:</strong> {foundAccount.username}
+                    </div>
+                    <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                      <strong>Email:</strong> {foundAccount.email}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label className="input-label" htmlFor="new-password-input">New Password</label>
+                    <input
+                      id="new-password-input"
+                      className="input-field"
+                      type="password"
+                      placeholder="Enter new password (min. 6 characters)"
+                      value={newPasswordInput}
+                      onChange={(e) => setNewPasswordInput(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {authError && (
+                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-rose)', color: 'var(--accent-rose)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.25rem', fontSize: '0.875rem' }}>
+                      {authError}
+                    </div>
+                  )}
+
+                  <button className="btn-primary" type="submit" style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}>
+                    Update & Save New Password
+                  </button>
+                </form>
               )}
             </div>
           )}

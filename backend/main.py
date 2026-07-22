@@ -262,7 +262,8 @@ class ForgotPasswordRequest(BaseModel):
     email_or_username: str
 
 class ResetPasswordSubmit(BaseModel):
-    reset_token: str
+    username_or_email: Optional[str] = None
+    reset_token: Optional[str] = None
     new_password: str
 
 class HistoryRecordItem(BaseModel):
@@ -440,8 +441,10 @@ def change_password(
 def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter((User.email == req.email_or_username) | (User.username == req.email_or_username)).first()
     if not user:
-        # Avoid user enumeration attack; return success message anyway
-        return {"status": "success", "message": "If an account matching the details exists, password reset instructions have been generated."}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found matching that username or email address."
+        )
     
     reset_tok = generate_reset_token()
     user.reset_token = reset_tok
@@ -450,7 +453,9 @@ def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
 
     return {
         "status": "success",
-        "message": "Password reset token generated successfully.",
+        "message": f"Account found for {user.username}.",
+        "username": user.username,
+        "email": user.email,
         "reset_token": reset_tok
     }
 
@@ -459,16 +464,26 @@ def reset_password(req: ResetPasswordSubmit, db: Session = Depends(get_db)):
     if len(req.new_password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
 
-    user = db.query(User).filter(User.reset_token == req.reset_token).first()
-    if not user or not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
-        raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+    user = None
+    if req.reset_token:
+        user = db.query(User).filter(User.reset_token == req.reset_token).first()
+    
+    if not user and req.username_or_email:
+        user = db.query(User).filter((User.username == req.username_or_email) | (User.email == req.username_or_email)).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token / account request.")
 
     user.hashed_password = get_password_hash(req.new_password)
     user.reset_token = None
     user.reset_token_expires = None
     db.commit()
 
-    return {"status": "success", "message": "Password reset successfully! You can now log in with your new password."}
+    return {
+        "status": "success",
+        "message": f"Password for {user.username} reset successfully! You can now log in.",
+        "username": user.username
+    }
 
 @app.post("/api/recommend/survey")
 def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
