@@ -57,9 +57,26 @@ export default class ErrorBoundary extends React.Component {
             <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.5rem' }}>
               Something went wrong
             </h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.75rem', lineHeight: '1.5' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.25rem', lineHeight: '1.5' }}>
               HarmonyRec encountered a transient rendering error. Click below to refresh your session safely.
             </p>
+
+            {this.state.error && (
+              <div style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                border: '1px solid var(--accent-rose)',
+                padding: '0.75rem',
+                borderRadius: '8px',
+                color: '#f87171',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                wordBreak: 'break-word',
+                marginBottom: '1.5rem',
+                textAlign: 'left'
+              }}>
+                {this.state.error.toString()}
+              </div>
+            )}
 
             <button
               onClick={this.handleReset}
