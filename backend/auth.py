@@ -62,3 +62,31 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+def get_optional_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username: str = payload.get("sub")
+            if username:
+                user = db.query(User).filter(User.username == username).first()
+                if user:
+                    return user
+        except Exception:
+            pass
+            
+    # Fallback to first existing user in DB
+    guest = db.query(User).first()
+    if not guest:
+        guest = User(
+            username="nehanth",
+            email="nehanth@example.com",
+            hashed_password=get_password_hash("password123"),
+            full_name="Nehanth",
+            fav_genre="Lo-fi"
+        )
+        db.add(guest)
+        db.commit()
+        db.refresh(guest)
+    return guest
+

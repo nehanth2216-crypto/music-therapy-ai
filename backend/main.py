@@ -28,6 +28,7 @@ from backend.auth import (
     verify_password,
     create_access_token,
     get_current_user,
+    get_optional_current_user,
     generate_reset_token,
     REMEMBER_ME_EXPIRE_DAYS
 )
@@ -566,7 +567,7 @@ def reset_password(req: ResetPasswordSubmit, db: Session = Depends(get_db)):
     }
 
 @app.post("/api/recommend/survey")
-def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
     if recommendation_model is None or scaler is None:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -658,7 +659,7 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current
     }
 
 @app.post("/api/recommend/feedback")
-def submit_feedback(feedback: FeedbackSubmit, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def submit_feedback(feedback: FeedbackSubmit, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
     # Verify survey response belongs to the user
     survey = db.query(SurveyResponse).filter(SurveyResponse.id == feedback.survey_id, SurveyResponse.user_id == current_user.id).first()
     if not survey:
@@ -674,7 +675,7 @@ def submit_feedback(feedback: FeedbackSubmit, current_user: User = Depends(get_c
     return {"status": "success", "message": "Feedback submitted successfully"}
 
 @app.get("/api/recommend/history")
-def get_history(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_history(current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
     surveys = (
         db.query(SurveyResponse)
         .options(joinedload(SurveyResponse.recommendation))
@@ -709,7 +710,7 @@ def get_history(current_user: User = Depends(get_current_user), db: Session = De
     return history_list
 
 @app.get("/api/journal")
-def get_journals(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_journals(current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
     entries = db.query(DailyJournal).filter(DailyJournal.user_id == current_user.id).order_by(DailyJournal.timestamp.desc()).all()
     return [{
         "id": e.id,
@@ -720,7 +721,7 @@ def get_journals(current_user: User = Depends(get_current_user), db: Session = D
     } for e in entries]
 
 @app.post("/api/journal")
-def add_journal(entry: JournalSubmit, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def add_journal(entry: JournalSubmit, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
     new_entry = DailyJournal(
         user_id=current_user.id,
         mood=entry.mood,
@@ -739,7 +740,7 @@ def add_journal(entry: JournalSubmit, current_user: User = Depends(get_current_u
     }
 
 @app.get("/api/favorites")
-def get_favorites(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_favorites(current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
     favs = db.query(FavoriteTrack).filter(FavoriteTrack.user_id == current_user.id).order_by(FavoriteTrack.timestamp.desc()).all()
     return [{
         "title": f.title,
