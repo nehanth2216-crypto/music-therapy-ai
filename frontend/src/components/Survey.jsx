@@ -6,7 +6,7 @@ const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
 const ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"];
 const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
 const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
-const LANGUAGES = ["English", "Spanish", "Hindi", "Other"];
+const LANGUAGES = ["English", "Telugu", "Spanish", "Hindi", "Other"];
 
 export default function Survey({ token, apiBaseUrl, onViewChange }) {
   const [step, setStep] = useState(1);

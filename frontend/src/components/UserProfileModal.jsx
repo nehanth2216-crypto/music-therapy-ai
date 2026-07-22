@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Lock, Save, X, CheckCircle, AlertCircle, Sparkles, Music, Shield } from 'lucide-react';
 
-const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
-const LANGUAGES = ["English", "Spanish", "Hindi", "Other"];
-const ACTIVITIES = ["Relaxation", "Studying", "Sleeping", "Meditation", "Exercise"];
+const LANGUAGES = ["English", "Telugu", "Spanish", "Hindi", "Other"];
 
 export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, onProfileUpdated }) {
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'security'
@@ -316,36 +314,6 @@ export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, o
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
-              <div>
-                <label className="input-label">Preferred Music Genre</label>
-                <select
-                  className="input-field"
-                  value={favGenre}
-                  onChange={(e) => setFavGenre(e.target.value)}
-                  style={{ appearance: 'none' }}
-                >
-                  {GENRES.map(g => (
-                    <option key={g} value={g} style={{ background: '#1c1830' }}>{g}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="input-label">Default Activity</label>
-                <select
-                  className="input-field"
-                  value={defaultActivity}
-                  onChange={(e) => setDefaultActivity(e.target.value)}
-                  style={{ appearance: 'none' }}
-                >
-                  {ACTIVITIES.map(a => (
-                    <option key={a} value={a} style={{ background: '#1c1830' }}>{a}</option>
-                  ))}
-                </select>
-              </div>
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
