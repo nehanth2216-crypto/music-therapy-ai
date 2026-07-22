@@ -474,7 +474,7 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
     }
 
 @app.get("/api/auth/me", response_model=UserProfileResponse)
-def get_me(current_user: User = Depends(get_current_user)):
+def get_me(current_user: User = Depends(get_optional_current_user)):
     return {
         "id": current_user.id,
         "username": current_user.username,

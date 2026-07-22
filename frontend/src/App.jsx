@@ -61,14 +61,12 @@ export default function App() {
       if (response.ok) {
         const profileData = await response.json();
         setUserProfile(profileData);
-        setUsername(profileData.username);
-        localStorage.setItem('username', profileData.username);
-      } else if (response.status === 401 || response.status === 403) {
-        // Token is invalid or expired
-        handleLogout();
+        if (profileData && profileData.username) {
+          setUsername(profileData.username);
+          localStorage.setItem('username', profileData.username);
+        }
       }
     } catch (err) {
-      // Backend temporarily offline or network glitch; retain session
       console.warn("Could not verify session with backend:", err);
     }
   };
