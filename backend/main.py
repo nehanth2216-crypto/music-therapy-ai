@@ -17,7 +17,10 @@ from backend.database import (
     SurveyResponse,
     Recommendation,
     DailyJournal,
-    FavoriteTrack
+    FavoriteTrack,
+    ListeningHistory,
+    UserPlaylist,
+    PlaylistTrack
 )
 from datetime import datetime, timedelta
 from backend.auth import (
@@ -261,6 +264,26 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordSubmit(BaseModel):
     reset_token: str
     new_password: str
+
+class HistoryRecordItem(BaseModel):
+    title: str
+    artist: str
+    duration: str
+    album_image: Optional[str] = None
+    play_url: Optional[str] = None
+    preview_url: Optional[str] = None
+
+class PlaylistCreate(BaseModel):
+    name: str
+    description: Optional[str] = ""
+
+class PlaylistAddTrack(BaseModel):
+    title: str
+    artist: str
+    duration: str
+    album_image: Optional[str] = None
+    play_url: Optional[str] = None
+    preview_url: Optional[str] = None
 
 class SurveySubmit(BaseModel):
     age: int
@@ -712,6 +735,205 @@ def get_spotify_status():
         "connected": bool(client_id and client_secret),
         "client_id": client_id[:6] + "..." if client_id else None
     }
+
+# -------------------------------------------------------------------
+# Database Architecture API Endpoints
+# -------------------------------------------------------------------
+
+# 1. Listening History & Recently Played Songs
+@app.post("/api/music/history")
+def record_listening_history(
+    item: HistoryRecordItem,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    entry = ListeningHistory(
+        user_id=current_user.id,
+        title=item.title,
+        artist=item.artist,
+        duration=item.duration,
+        album_image=item.album_image,
+        play_url=item.play_url,
+        preview_url=item.preview_url
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return {"status": "success", "id": entry.id, "played_at": entry.played_at.isoformat()}
+
+@app.get("/api/music/history")
+def get_listening_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    records = db.query(ListeningHistory)\
+        .filter(ListeningHistory.user_id == current_user.id)\
+        .order_by(ListeningHistory.played_at.desc())\
+        .limit(25)\
+        .all()
+    
+    return [{
+        "id": r.id,
+        "title": r.title,
+        "artist": r.artist,
+        "duration": r.duration,
+        "album_image": r.album_image,
+        "play_url": r.play_url,
+        "preview_url": r.preview_url,
+        "played_at": r.played_at.strftime("%Y-%m-%d %H:%M")
+    } for r in records]
+
+# 2. User Playlists Management
+@app.post("/api/playlists")
+def create_playlist(
+    pdata: PlaylistCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    playlist = UserPlaylist(
+        user_id=current_user.id,
+        name=pdata.name,
+        description=pdata.description
+    )
+    db.add(playlist)
+    db.commit()
+    db.refresh(playlist)
+    return {"status": "success", "id": playlist.id, "name": playlist.name}
+
+@app.get("/api/playlists")
+def get_user_playlists(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    playlists = db.query(UserPlaylist)\
+        .options(joinedload(UserPlaylist.tracks))\
+        .filter(UserPlaylist.user_id == current_user.id)\
+        .order_by(UserPlaylist.updated_at.desc())\
+        .all()
+    
+    return [{
+        "id": p.id,
+        "name": p.name,
+        "description": p.description,
+        "track_count": len(p.tracks),
+        "created_at": p.created_at.strftime("%Y-%m-%d %H:%M")
+    } for p in playlists]
+
+@app.get("/api/playlists/{playlist_id}")
+def get_playlist_details(
+    playlist_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    playlist = db.query(UserPlaylist)\
+        .options(joinedload(UserPlaylist.tracks))\
+        .filter(UserPlaylist.id == playlist_id, UserPlaylist.user_id == current_user.id)\
+        .first()
+        
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+        
+    return {
+        "id": playlist.id,
+        "name": playlist.name,
+        "description": playlist.description,
+        "created_at": playlist.created_at.strftime("%Y-%m-%d %H:%M"),
+        "tracks": [{
+            "id": t.id,
+            "title": t.title,
+            "artist": t.artist,
+            "duration": t.duration,
+            "album_image": t.album_image,
+            "play_url": t.play_url,
+            "preview_url": t.preview_url,
+            "added_at": t.added_at.strftime("%Y-%m-%d %H:%M")
+        } for t in playlist.tracks]
+    }
+
+@app.post("/api/playlists/{playlist_id}/tracks")
+def add_track_to_playlist(
+    playlist_id: int,
+    track: PlaylistAddTrack,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    playlist = db.query(UserPlaylist)\
+        .filter(UserPlaylist.id == playlist_id, UserPlaylist.user_id == current_user.id)\
+        .first()
+        
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+        
+    ptrack = PlaylistTrack(
+        playlist_id=playlist.id,
+        title=track.title,
+        artist=track.artist,
+        duration=track.duration,
+        album_image=track.album_image,
+        play_url=track.play_url,
+        preview_url=track.preview_url
+    )
+    playlist.updated_at = datetime.utcnow()
+    db.add(ptrack)
+    db.commit()
+    return {"status": "success", "message": f"Added '{track.title}' to playlist '{playlist.name}'"}
+
+@app.delete("/api/playlists/{playlist_id}")
+def delete_playlist(
+    playlist_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    playlist = db.query(UserPlaylist)\
+        .filter(UserPlaylist.id == playlist_id, UserPlaylist.user_id == current_user.id)\
+        .first()
+        
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+        
+    db.delete(playlist)
+    db.commit()
+    return {"status": "success", "message": "Playlist deleted successfully"}
+
+# 3. Consolidated Mood History Timeline
+@app.get("/api/mood/history")
+def get_mood_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    surveys = db.query(SurveyResponse)\
+        .filter(SurveyResponse.user_id == current_user.id)\
+        .order_by(SurveyResponse.timestamp.asc())\
+        .all()
+        
+    journals = db.query(DailyJournal)\
+        .filter(DailyJournal.user_id == current_user.id)\
+        .order_by(DailyJournal.timestamp.asc())\
+        .all()
+        
+    events = []
+    for s in surveys:
+        events.append({
+            "type": "assessment",
+            "mood": s.mood,
+            "stress": s.stress,
+            "anxiety": s.anxiety,
+            "sleep_quality": s.sleep_quality,
+            "activity": s.activity,
+            "timestamp": s.timestamp.strftime("%Y-%m-%d %H:%M")
+        })
+        
+    for j in journals:
+        events.append({
+            "type": "journal",
+            "mood": j.mood,
+            "stress": j.stress,
+            "journal_text": j.journal_text,
+            "timestamp": j.timestamp.strftime("%Y-%m-%d %H:%M")
+        })
+        
+    events.sort(key=lambda x: x["timestamp"])
+    return {"user_id": current_user.id, "timeline": events}
 
 if __name__ == "__main__":
     import uvicorn

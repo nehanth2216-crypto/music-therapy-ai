@@ -227,6 +227,58 @@ class TestHarmonyRecBackend(unittest.TestCase):
         # Login with reset password
         login_resp = self.client.post("/api/auth/login", json={"username": "testuser", "password": "resetpassword789"})
         self.assertEqual(login_resp.status_code, 200)
+        type(self).auth_token = login_resp.json()["access_token"]
+
+    def test_11_listening_history_and_playlists(self):
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+
+        # 1. Test Listening History Record
+        history_item = {
+            "title": "Weightless Lofi",
+            "artist": "Lofi Dreamer",
+            "duration": "3:20",
+            "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=150&h=150&fit=crop",
+            "play_url": "https://open.spotify.com/track/6UaR2v567dGg36329",
+            "preview_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+        }
+        resp = self.client.post("/api/music/history", json=history_item, headers=headers)
+        self.assertEqual(resp.status_code, 200)
+
+        # 2. Get Listening History
+        resp = self.client.get("/api/music/history", headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        records = resp.json()
+        self.assertTrue(len(records) > 0)
+        self.assertEqual(records[0]["title"], "Weightless Lofi")
+
+        # 3. Create Custom Playlist
+        resp = self.client.post("/api/playlists", json={"name": "My Chill Vibes", "description": "Relaxing beats"}, headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        playlist_id = resp.json()["id"]
+
+        # 4. Add Track to Playlist
+        track_data = {
+            "title": "Raindrop Lounge",
+            "artist": "Cloudy Day",
+            "duration": "4:10"
+        }
+        resp = self.client.post(f"/api/playlists/{playlist_id}/tracks", json=track_data, headers=headers)
+        self.assertEqual(resp.status_code, 200)
+
+        # 5. Get Playlist Details
+        resp = self.client.get(f"/api/playlists/{playlist_id}", headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        details = resp.json()
+        self.assertEqual(details["name"], "My Chill Vibes")
+        self.assertEqual(len(details["tracks"]), 1)
+
+    def test_12_mood_timeline(self):
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+        resp = self.client.get("/api/mood/history", headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("timeline", data)
+        self.assertTrue(len(data["timeline"]) > 0)
 
 if __name__ == "__main__":
     unittest.main()

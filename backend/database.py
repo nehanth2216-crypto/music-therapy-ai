@@ -50,6 +50,8 @@ class User(Base):
     surveys = relationship("SurveyResponse", back_populates="user")
     journals = relationship("DailyJournal", back_populates="user")
     favorites = relationship("FavoriteTrack", back_populates="user")
+    listening_history = relationship("ListeningHistory", back_populates="user")
+    playlists = relationship("UserPlaylist", back_populates="user")
 
 class SurveyResponse(Base):
     __tablename__ = "survey_responses"
@@ -109,6 +111,49 @@ class FavoriteTrack(Base):
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
     
     user = relationship("User", back_populates="favorites")
+
+class ListeningHistory(Base):
+    __tablename__ = "listening_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    artist = Column(String, nullable=False)
+    duration = Column(String, nullable=False)
+    album_image = Column(String, nullable=True)
+    play_url = Column(String, nullable=True)
+    preview_url = Column(String, nullable=True)
+    played_at = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    
+    user = relationship("User", back_populates="listening_history")
+
+class UserPlaylist(Base):
+    __tablename__ = "user_playlists"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    
+    user = relationship("User", back_populates="playlists")
+    tracks = relationship("PlaylistTrack", back_populates="playlist", cascade="all, delete-orphan")
+
+class PlaylistTrack(Base):
+    __tablename__ = "playlist_tracks"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    playlist_id = Column(Integer, ForeignKey("user_playlists.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    artist = Column(String, nullable=False)
+    duration = Column(String, nullable=False)
+    album_image = Column(String, nullable=True)
+    play_url = Column(String, nullable=True)
+    preview_url = Column(String, nullable=True)
+    added_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    playlist = relationship("UserPlaylist", back_populates="tracks")
 
 def init_db():
     Base.metadata.create_all(bind=engine)

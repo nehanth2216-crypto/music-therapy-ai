@@ -195,24 +195,58 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     }
   };
 
+  const recordTrackPlay = (track) => {
+    if (!track || !token) return;
+    fetch(`${apiBaseUrl}/music/history`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        title: track.title,
+        artist: track.artist,
+        duration: track.duration,
+        album_image: track.album_image,
+        play_url: track.play_url,
+        preview_url: track.preview_url
+      })
+    }).catch(() => {});
+  };
+
   const handlePlayPause = (index) => {
     if (index !== undefined) {
       if (index === activeTrackIndex) {
-        setIsPlaying(!isPlaying);
+        const nextState = !isPlaying;
+        setIsPlaying(nextState);
+        if (nextState && currentTracks[index]) {
+          recordTrackPlay(currentTracks[index]);
+        }
       } else {
         setActiveTrackIndex(index);
         setIsPlaying(true);
+        if (currentTracks[index]) {
+          recordTrackPlay(currentTracks[index]);
+        }
       }
     } else {
-      setIsPlaying(!isPlaying);
+      const nextState = !isPlaying;
+      setIsPlaying(nextState);
+      if (nextState && currentTracks[activeTrackIndex]) {
+        recordTrackPlay(currentTracks[activeTrackIndex]);
+      }
     }
   };
 
   const handleNextTrack = () => {
     if (currentTracks.length === 0) return;
-    setActiveTrackIndex((prev) => (prev + 1) % currentTracks.length);
+    const nextIndex = (activeTrackIndex + 1) % currentTracks.length;
+    setActiveTrackIndex(nextIndex);
     setCurrentTime(0);
     setIsPlaying(true);
+    if (currentTracks[nextIndex]) {
+      recordTrackPlay(currentTracks[nextIndex]);
+    }
   };
 
   const handlePrevTrack = () => {
