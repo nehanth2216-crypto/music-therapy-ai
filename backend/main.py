@@ -98,7 +98,12 @@ SLEEP_QUALITIES = ["Good", "Fair", "Poor"]
 ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"]
 GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"]
 PLAYLISTS = ["playlist_1", "playlist_2", "playlist_3", "playlist_4", "playlist_5"]
-SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", "Bengali", "Marathi", "Korean", "Japanese", "Spanish"]
+SUPPORTED_LANGUAGES = [
+    "English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", 
+    "Bengali", "Marathi", "Gujarati", "Odia", "Assamese", "Urdu", "Sanskrit", 
+    "Korean", "Japanese", "Chinese", "Spanish", "French", "German", "Italian", 
+    "Arabic", "Turkish", "Portuguese", "Russian"
+]
 
 PLAYLIST_THEME_MAPPING = {
     "playlist_1": {"name": "Lofi & Calm Pop", "query": "lofi hip hop chill study beats"},
@@ -229,8 +234,8 @@ def get_cached_tracks(cache_key: str) -> Optional[List[dict]]:
 def set_cached_tracks(cache_key: str, tracks: List[dict]):
     TRACK_CACHE[cache_key] = (tracks, time.time())
 
-def fetch_itunes_tracks(query: str, limit: int = 8, language: str = "English") -> List[dict]:
-    cache_key = f"itunes_{language}_{query}_{limit}"
+def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", genre: str = "Pop") -> List[dict]:
+    cache_key = f"itunes_{language}_{genre}_{query}_{limit}"
     cached = get_cached_tracks(cache_key)
     if cached:
         return cached
@@ -244,7 +249,7 @@ def fetch_itunes_tracks(query: str, limit: int = 8, language: str = "English") -
             "entity": "song",
             "limit": limit
         }
-        resp = requests.get(url, params=params, timeout=5)
+        resp = requests.get(url, params=params, timeout=6)
         if resp.status_code == 200:
             results = resp.json().get("results", [])
             tracks = []
@@ -261,11 +266,31 @@ def fetch_itunes_tracks(query: str, limit: int = 8, language: str = "English") -
                 minutes = millis // 60000
                 seconds = (millis % 60000) // 1000
                 duration_str = f"{minutes}:{seconds:02d}" if millis > 0 else "3:30"
+
+                # Extract album or movie name
+                collection_name = item.get("collectionName", "")
+                track_name = item.get("trackName", "")
+                album_name = collection_name or "Original Soundtrack"
+                if "From \"" in track_name:
+                    try:
+                        extracted = track_name.split("From \"")[1].split("\"")[0]
+                        if extracted:
+                            album_name = f"Movie: {extracted}"
+                    except Exception:
+                        pass
+                
+                # Extract release year
+                release_date = item.get("releaseDate", "")
+                release_year = release_date[:4] if release_date else "2023"
                 
                 tracks.append({
-                    "title": item.get("trackName"),
-                    "artist": item.get("artistName"),
+                    "title": track_name,
+                    "artist": item.get("artistName", "Unknown Artist"),
+                    "album": album_name,
+                    "language": language,
+                    "genre": item.get("primaryGenreName", genre),
                     "duration": duration_str,
+                    "release_year": release_year,
                     "album_image": artwork,
                     "preview_url": preview_url,
                     "play_url": item.get("trackViewUrl")
@@ -276,6 +301,84 @@ def fetch_itunes_tracks(query: str, limit: int = 8, language: str = "English") -
     except Exception as e:
         print(f"Exception during iTunes track fetch: {e}")
     return []
+
+def fetch_hybrid_recommendations(
+    user_id: Optional[int] = None,
+    mood: str = "Calming",
+    language: str = "English",
+    genre: str = "Lo-fi",
+    activity: str = "Relaxation",
+    limit: int = 35,
+    db: Session = None
+) -> List[dict]:
+    cache_key = f"hybrid_{user_id}_{mood}_{language}_{genre}_{activity}_{limit}"
+    cached = get_cached_tracks(cache_key)
+    if cached:
+        return cached
+
+    # Query variations ensuring exact Language, Genre, and Mood alignment
+    search_queries = [
+        f"{genre} {mood}",
+        f"{mood} soundtrack",
+        f"{genre} hits",
+        f"top {genre} songs"
+    ]
+
+    all_tracks = []
+    seen_titles = set()
+
+    fav_artists = set()
+    if db and user_id:
+        try:
+            favs = db.query(FavoriteTrack).filter(FavoriteTrack.user_id == user_id).all()
+            for f in favs:
+                if f.artist:
+                    fav_artists.add(f.artist.lower())
+            hist = db.query(ListeningHistory).filter(ListeningHistory.user_id == user_id).limit(20).all()
+            for h in hist:
+                if h.artist:
+                    fav_artists.add(h.artist.lower())
+        except Exception:
+            pass
+
+    for q in search_queries:
+        if len(all_tracks) >= limit:
+            break
+        tracks = fetch_itunes_tracks(query=q, limit=25, language=language, genre=genre)
+        for t in tracks:
+            t_title = (t.get("title") or "").lower()
+            if t_title and t_title not in seen_titles:
+                seen_titles.add(t_title)
+                score = 0
+                artist = (t.get("artist") or "").lower()
+                if any(fa in artist for fa in fav_artists if fa):
+                    score += 5
+                t["hybrid_score"] = score
+                all_tracks.append(t)
+
+    all_tracks.sort(key=lambda x: x.get("hybrid_score", 0), reverse=True)
+
+    if len(all_tracks) < 5 and language in MULTI_LANG_LIBRARY:
+        for t in MULTI_LANG_LIBRARY[language]:
+            t_title = (t.get("title") or "").lower()
+            if t_title not in seen_titles:
+                seen_titles.add(t_title)
+                all_tracks.append({
+                    "title": t["title"],
+                    "artist": t["artist"],
+                    "album": "Movie Soundtrack",
+                    "language": language,
+                    "genre": genre,
+                    "duration": t.get("duration", "3:30"),
+                    "release_year": "2023",
+                    "album_image": t.get("album_image"),
+                    "preview_url": t.get("preview_url"),
+                    "play_url": t.get("play_url")
+                })
+
+    result_set = all_tracks[:limit]
+    set_cached_tracks(cache_key, result_set)
+    return result_set
 
 def fetch_spotify_tracks(query: str, limit: int = 8, language: str = "English") -> List[dict]:
     client_id = os.getenv("SPOTIFY_CLIENT_ID")
@@ -679,15 +782,18 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
     db.commit()
     db.refresh(response_record)
     
-    # Fetch tracks from Spotify or load mock library
-    theme_info = PLAYLIST_THEME_MAPPING[result_playlist]
+    theme_info = PLAYLIST_THEME_MAPPING.get(result_playlist, PLAYLIST_THEME_MAPPING["playlist_1"])
     playlist_name = theme_info["name"]
-    query = theme_info["query"]
-    
-    tracks = fetch_spotify_tracks(query, limit=8, language=survey.language_pref)
-    if not tracks:
-        print(f"Fetching from Spotify failed or credentials missing. Loading mock tracks for {result_playlist}.")
-        tracks = MOCK_LIBRARY.get(result_playlist, MOCK_LIBRARY["playlist_1"])
+
+    tracks = fetch_hybrid_recommendations(
+        user_id=current_user.id if current_user else None,
+        mood=survey.mood,
+        language=survey.language_pref,
+        genre=survey.fav_genre,
+        activity=survey.activity,
+        limit=35,
+        db=db
+    )
         
     # Store recommendation
     rec_record = Recommendation(
@@ -1155,18 +1261,29 @@ def get_mood_history(
 @app.get("/api/recommend/by-language")
 def get_recommendations_by_language(
     language: str = "English",
+    genre: Optional[str] = "Lo-fi",
+    mood: Optional[str] = "Calming",
+    activity: Optional[str] = "Relaxation",
     playlist_key: Optional[str] = "playlist_1",
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user),
+    db: Session = Depends(get_db)
 ):
     playlist_type = playlist_key if playlist_key in PLAYLIST_THEME_MAPPING else "playlist_1"
     theme_info = PLAYLIST_THEME_MAPPING[playlist_type]
-    query = theme_info["query"]
     
-    tracks = fetch_spotify_tracks(query, limit=8, language=language)
+    tracks = fetch_hybrid_recommendations(
+        user_id=current_user.id if current_user else None,
+        mood=mood,
+        language=language,
+        genre=genre,
+        activity=activity,
+        limit=35,
+        db=db
+    )
     return {
         "language": language,
         "playlist_key": playlist_type,
-        "playlist_name": theme_info["name"],
+        "playlist_name": f"{language} {theme_info['name']}",
         "tracks": tracks
     }
 

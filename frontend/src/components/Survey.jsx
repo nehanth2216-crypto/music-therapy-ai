@@ -5,8 +5,12 @@ const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
 const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
 const ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"];
 const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
-const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
-const LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", "Bengali", "Marathi", "Korean", "Japanese", "Spanish"];
+const LANGUAGES = [
+  "English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", 
+  "Bengali", "Marathi", "Gujarati", "Odia", "Assamese", "Urdu", "Sanskrit", 
+  "Korean", "Japanese", "Chinese", "Spanish", "French", "German", "Italian", 
+  "Arabic", "Turkish", "Portuguese", "Russian"
+];
 
 export default function Survey({ token, apiBaseUrl, onViewChange }) {
   const [step, setStep] = useState(1);

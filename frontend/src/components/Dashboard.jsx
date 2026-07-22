@@ -24,8 +24,12 @@ ChartJS.register(
   Filler
 );
 
-const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
-const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", "Bengali", "Marathi", "Korean", "Japanese", "Spanish"];
+const SUPPORTED_LANGUAGES = [
+  "English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Punjabi", 
+  "Bengali", "Marathi", "Gujarati", "Odia", "Assamese", "Urdu", "Sanskrit", 
+  "Korean", "Japanese", "Chinese", "Spanish", "French", "German", "Italian", 
+  "Arabic", "Turkish", "Portuguese", "Russian"
+];
 
 const LYRICS_DATABASE = {
   "Samayama": {
@@ -1185,11 +1189,18 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                         style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
                       />
                       <div>
-                        <div style={{ fontWeight: 600, color: idx === activeTrackIndex ? 'var(--primary)' : 'var(--text-primary)', fontSize: '0.95rem' }}>
+                        <div style={{ fontWeight: 600, color: idx === activeTrackIndex ? 'var(--primary)' : 'var(--text-primary)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                           {track.title}
+                          {track.language && (
+                            <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.2)', color: 'var(--primary)', fontWeight: 700 }}>
+                              {track.language}
+                            </span>
+                          )}
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          {track.artist}
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
+                          <span>{track.artist}</span>
+                          {track.album && <span style={{ color: 'var(--text-muted)' }}>• {track.album}</span>}
+                          {track.release_year && <span style={{ color: 'var(--text-muted)' }}>• {track.release_year}</span>}
                         </div>
                       </div>
                     </div>
