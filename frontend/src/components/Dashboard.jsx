@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Clock, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Clock, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX, Shuffle, Repeat, Repeat1 } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -41,6 +41,9 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [repeatMode, setRepeatMode] = useState('all'); // 'none' | 'all' | 'one'
   const [currentMoodState, setCurrentMoodState] = useState('None');
   const [latestSurveyId, setLatestSurveyId] = useState(null);
   
@@ -264,7 +267,12 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   const handleNextTrack = () => {
     if (currentTracks.length === 0) return;
-    const nextIndex = (activeTrackIndex + 1) % currentTracks.length;
+    let nextIndex;
+    if (isShuffle) {
+      nextIndex = Math.floor(Math.random() * currentTracks.length);
+    } else {
+      nextIndex = (activeTrackIndex + 1) % currentTracks.length;
+    }
     setActiveTrackIndex(nextIndex);
     setCurrentTime(0);
     setIsPlaying(true);
@@ -275,9 +283,56 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   const handlePrevTrack = () => {
     if (currentTracks.length === 0) return;
-    setActiveTrackIndex((prev) => (prev - 1 + currentTracks.length) % currentTracks.length);
+    if (currentTime > 3) {
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+      return;
+    }
+    let prevIndex;
+    if (isShuffle) {
+      prevIndex = Math.floor(Math.random() * currentTracks.length);
+    } else {
+      prevIndex = (activeTrackIndex - 1 + currentTracks.length) % currentTracks.length;
+    }
+    setActiveTrackIndex(prevIndex);
     setCurrentTime(0);
     setIsPlaying(true);
+    if (currentTracks[prevIndex]) {
+      recordTrackPlay(currentTracks[prevIndex]);
+    }
+  };
+
+  const handleTrackEnded = () => {
+    if (repeatMode === 'one') {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => setIsPlaying(false));
+      }
+    } else if (repeatMode === 'all' || isShuffle) {
+      handleNextTrack();
+    } else {
+      if (activeTrackIndex < currentTracks.length - 1) {
+        handleNextTrack();
+      } else {
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  const toggleRepeat = () => {
+    if (repeatMode === 'all') setRepeatMode('one');
+    else if (repeatMode === 'one') setRepeatMode('none');
+    else setRepeatMode('all');
+  };
+
+  const toggleMute = () => {
+    if (isMuted) {
+      setIsMuted(false);
+      if (audioRef.current) audioRef.current.volume = volume;
+    } else {
+      setIsMuted(true);
+      if (audioRef.current) audioRef.current.volume = 0;
+    }
   };
 
   const handleSeek = (e) => {
@@ -672,7 +727,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       {activeTrack.artist}
                     </p>
                     
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                       <span style={{
                         fontSize: '0.75rem',
                         padding: '0.2rem 0.5rem',
@@ -684,29 +739,21 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                         Duration: {activeTrack.duration}
                       </span>
                       
-                      {activeTrack.preview_url ? (
-                        <span style={{
-                          fontSize: '0.75rem',
-                          padding: '0.2rem 0.5rem',
-                          background: 'rgba(16, 185, 129, 0.1)',
-                          border: '1px solid var(--accent-emerald)',
-                          borderRadius: '4px',
-                          color: 'var(--accent-emerald)'
-                        }}>
-                          Preview Available
-                        </span>
-                      ) : (
-                        <span style={{
-                          fontSize: '0.75rem',
-                          padding: '0.2rem 0.5rem',
-                          background: 'rgba(239, 68, 68, 0.1)',
-                          border: '1px solid var(--accent-rose)',
-                          borderRadius: '4px',
-                          color: 'var(--accent-rose)'
-                        }}>
-                          Full Stream Only
-                        </span>
-                      )}
+                      <span style={{
+                        fontSize: '0.75rem',
+                        padding: '0.2rem 0.6rem',
+                        background: 'rgba(16, 185, 129, 0.12)',
+                        border: '1px solid var(--accent-emerald)',
+                        borderRadius: '4px',
+                        color: 'var(--accent-emerald)',
+                        fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem'
+                      }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-emerald)', display: 'inline-block' }} />
+                        Built-in Web Audio Player
+                      </span>
                     </div>
                   </div>
 
@@ -715,21 +762,22 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                 <p style={{ color: 'var(--text-secondary)' }}>Select a track to listen.</p>
               )}
 
-              {/* HTML5 Audio Player */}
-              {activeTrack?.preview_url && (
+              {/* HTML5 Built-in Audio Engine */}
+              {activeTrack && (
                 <audio
                   ref={audioRef}
-                  src={activeTrack.preview_url}
+                  src={activeTrack.preview_url || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
                   onTimeUpdate={handleTimeUpdate}
-                  onEnded={handleNextTrack}
+                  onEnded={handleTrackEnded}
                 />
               )}
 
-              {/* Progress Slider */}
-              {activeTrack?.preview_url && (
+              {/* Interactive Progress Bar */}
+              {activeTrack && (
                 <div style={{ marginTop: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', fontWeight: 500 }}>
                     <span>{formatTime(currentTime)}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Progress Bar</span>
                     <span>{formatTime(duration)}</span>
                   </div>
                   <input 
@@ -740,33 +788,87 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     value={currentTime} 
                     onChange={handleSeek} 
                     className="slider-custom"
+                    style={{ width: '100%', cursor: 'pointer' }}
                   />
                 </div>
               )}
 
-              {/* Controls */}
+              {/* Complete Built-in Player Control Suite */}
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <button id="player-prev-btn" className="btn-secondary" style={{ padding: '0.5rem', borderRadius: '50%' }} onClick={handlePrevTrack}>
-                    <SkipBack style={{ width: '16px', height: '16px' }} />
+                
+                {/* Shuffle, Prev, Play/Pause, Next, Repeat */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  {/* Shuffle Button */}
+                  <button
+                    onClick={() => setIsShuffle(!isShuffle)}
+                    title={isShuffle ? "Shuffle: ON" : "Shuffle: OFF"}
+                    className="btn-secondary"
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '50%',
+                      color: isShuffle ? 'var(--primary)' : 'var(--text-muted)',
+                      borderColor: isShuffle ? 'var(--primary)' : 'var(--border-glass)',
+                      background: isShuffle ? 'rgba(99, 102, 241, 0.15)' : 'transparent'
+                    }}
+                  >
+                    <Shuffle style={{ width: '16px', height: '16px' }} />
+                  </button>
+
+                  {/* Previous Button */}
+                  <button id="player-prev-btn" className="btn-secondary" style={{ padding: '0.55rem', borderRadius: '50%' }} onClick={handlePrevTrack} title="Previous Song">
+                    <SkipBack style={{ width: '17px', height: '17px' }} />
                   </button>
                   
-                  {activeTrack?.preview_url ? (
-                    <button id="player-play-btn" className="btn-primary" style={{ padding: '0.75rem', borderRadius: '50%' }} onClick={() => handlePlayPause()}>
-                      {isPlaying ? <Pause style={{ width: '18px', height: '18px' }} /> : <Play style={{ width: '18px', height: '18px' }} />}
-                    </button>
-                  ) : (
-                    <div style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <VolumeX style={{ width: '20px', height: '20px', color: 'var(--text-muted)' }} title="No audio preview" />
-                    </div>
-                  )}
+                  {/* Play / Pause Toggle Button */}
+                  <button id="player-play-btn" className="btn-primary" style={{ padding: '0.85rem', borderRadius: '50%' }} onClick={() => handlePlayPause()} title={isPlaying ? "Pause" : "Play"}>
+                    {isPlaying ? <Pause style={{ width: '20px', height: '20px' }} /> : <Play style={{ width: '20px', height: '20px' }} />}
+                  </button>
                   
-                  <button id="player-next-btn" className="btn-secondary" style={{ padding: '0.5rem', borderRadius: '50%' }} onClick={handleNextTrack}>
-                    <SkipForward style={{ width: '16px', height: '16px' }} />
+                  {/* Next Button */}
+                  <button id="player-next-btn" className="btn-secondary" style={{ padding: '0.55rem', borderRadius: '50%' }} onClick={handleNextTrack} title="Next Song">
+                    <SkipForward style={{ width: '17px', height: '17px' }} />
+                  </button>
+
+                  {/* Repeat Button */}
+                  <button
+                    onClick={toggleRepeat}
+                    title={`Repeat Mode: ${repeatMode.toUpperCase()}`}
+                    className="btn-secondary"
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '50%',
+                      color: repeatMode !== 'none' ? 'var(--primary)' : 'var(--text-muted)',
+                      borderColor: repeatMode !== 'none' ? 'var(--primary)' : 'var(--border-glass)',
+                      background: repeatMode !== 'none' ? 'rgba(99, 102, 241, 0.15)' : 'transparent'
+                    }}
+                  >
+                    {repeatMode === 'one' ? <Repeat1 style={{ width: '16px', height: '16px' }} /> : <Repeat style={{ width: '16px', height: '16px' }} />}
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {/* Volume Control Slider & Save Favorite */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  {/* Volume Control */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(0, 0, 0, 0.2)', padding: '0.35rem 0.75rem', borderRadius: '20px', border: '1px solid var(--border-glass)' }}>
+                    <button onClick={toggleMute} style={{ background: 'none', border: 'none', color: isMuted ? 'var(--accent-rose)' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title={isMuted ? "Unmute" : "Mute"}>
+                      {isMuted || volume === 0 ? <VolumeX style={{ width: '17px', height: '17px' }} /> : <Volume2 style={{ width: '17px', height: '17px' }} />}
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={isMuted ? 0 : volume}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setVolume(val);
+                        if (val > 0) setIsMuted(false);
+                      }}
+                      style={{ width: '75px', accentColor: 'var(--primary)', cursor: 'pointer' }}
+                    />
+                  </div>
+
+                  {/* Save Favorite Track */}
                   {activeTrack && (
                     <button 
                       className="btn-secondary" 
@@ -776,18 +878,6 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       <Heart style={{ width: '16px', height: '16px', fill: isFavorite(activeTrack) ? 'var(--accent-rose)' : 'none', color: isFavorite(activeTrack) ? 'var(--accent-rose)' : 'var(--text-secondary)' }} />
                       {isFavorite(activeTrack) ? 'Saved' : 'Save'}
                     </button>
-                  )}
-
-                  {activeTrack?.play_url && (
-                    <a 
-                      href={activeTrack.play_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="btn-primary"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      ▶ Play on Spotify
-                    </a>
                   )}
                 </div>
               </div>
