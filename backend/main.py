@@ -125,58 +125,46 @@ MOCK_LIBRARY = {
     ]
 }
 
-# Multi-Language Curated Track Libraries
+# Multi-Language Curated Track Libraries (Exact Official Movie Songs & Official Poster Artwork)
 MULTI_LANG_LIBRARY = {
     "Telugu": [
-        {"title": "Samayama (Peaceful Instrumental)", "artist": "Telugu Soundscapes", "duration": "4:12", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792e7.mp3"},
-        {"title": "Kanulanu Thaake (Lofi Chill)", "artist": "Tollywood Lofi Beats", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"},
-        {"title": "Pranam (Classical Flute)", "artist": "Carnatic Flute Ensemble", "duration": "5:10", "album_image": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792e7.mp3"},
-        {"title": "Oke Oka Lokam (Acoustic Guitar)", "artist": "Telugu Acoustic Sessions", "duration": "3:30", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"}
+        {"title": "Samayama (From \"Hi Nanna\")", "artist": "Hesham Abdul Wahab, Anurag Kulkarni & Sithara Krishnakumar", "duration": "4:12", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a"},
+        {"title": "Maate Vinadhuga (From \"Taxiwaala\")", "artist": "Sid Sriram & Jakes Bejoy", "duration": "4:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1d/a0/941da079-ee93-ce60-6340-3c7d0f7633a3/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/e5/59/89/e55989e2-d596-f94d-440a-5c1cf25ae90e/mzaf_6950280456108137397.plus.aac.p.m4a"},
+        {"title": "Fear Song (From \"Devara Part 1\")", "artist": "Anirudh Ravichander & Ramajogayya Sastry", "duration": "3:17", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/c6/af/1dc6af82-69e9-5341-5010-a9223fc25709/8903431001368_cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/9e/79/f1/9e79f18a-ea35-430c-43f1-d07eb021e176/mzaf_10335035548679698944.plus.aac.p.m4a"},
+        {"title": "Samajavaragamana (From \"Ala Vaikunthapurramuloo\")", "artist": "S.S. Thaman & Sid Sriram", "duration": "3:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/53/98/c1/5398c1cf-7c16-24a6-bfa3-391dc6015376/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/3a/4b/e7/3a4be72b-7724-7d3b-47bd-1f064246fe76/mzaf_3926624661015484703.plus.aac.p.m4a"}
     ],
     "Hindi": [
-        {"title": "Kesariya (Lofi Flip)", "artist": "Bollywood Lofi Club", "duration": "3:15", "album_image": "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/08/02/audio_884b9c48b7.mp3"},
-        {"title": "Raabta (Unplugged Acoustic)", "artist": "Arijit Singh Acoustic", "duration": "4:05", "album_image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"},
-        {"title": "Tum Hi Ho (Piano Relaxation)", "artist": "Hindi Classical Piano", "duration": "4:30", "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/11/11/audio_84e1b7f8c0.mp3"},
-        {"title": "Pee Loon (Ambient Chill)", "artist": "Sufi Ambient Beats", "duration": "3:50", "album_image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/11/06/audio_c2957b4478.mp3"}
+        {"title": "Kesariya (From \"Brahmastra\")", "artist": "Pritam, Arijit Singh & Amitabh Bhattacharya", "duration": "4:28", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/9f/13/ca/9f13ca3b-e533-03e0-f19a-f0aaa774581d/196589311191.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/38/4c/5c/384c5c8f-3ff8-e457-b2f7-3158ce108649/mzaf_12389299033886433185.plus.aac.p.m4a"},
+        {"title": "Tum Se Hi (From \"Jab We Met\")", "artist": "Pritam & Mohit Chauhan", "duration": "5:23", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/64/73/b3/6473b306-bf25-5460-6060-f561ee6dd7fa/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/71/ea/09/71ea0907-8898-1e42-7801-1b072d6ffbc2/mzaf_11306915159495861118.plus.aac.p.m4a"},
+        {"title": "Soniyo (From \"Raaz - The Mystery Continues\")", "artist": "Raju Singh, Sonu Nigam & Shreya Ghoshal", "duration": "5:29", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/77/4d/9f/774d9f5c-830a-c140-f1ae-6e637dc9af14/888880931542.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/19/51/ac/1951ac5b-81c8-72ea-ffe5-31e1a3369d9b/mzaf_17405745395809731793.plus.aac.p.m4a"}
     ],
     "Tamil": [
-        {"title": "Neeyum Naanum (Midnight Lofi)", "artist": "Kollywood Soundscape", "duration": "3:40", "album_image": "https://images.unsplash.com/photo-1486572788966-cfd3df1f5b42?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"},
-        {"title": "Moongil Thottam (Veena Ambient)", "artist": "A.R. Rahman Instrumental", "duration": "4:50", "album_image": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792e7.mp3"},
-        {"title": "Venmegam (Acoustic Soft)", "artist": "Tamil Acoustic Trio", "duration": "3:25", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"}
+        {"title": "Neeyum Naanum (From \"Naanum Rowdy Dhaan\")", "artist": "Anirudh Ravichander & Neeti Mohan", "duration": "5:02", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/bf/25/71/bf2571c4-9df2-aa00-8438-e6b7617c093a/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview128/v4/c3/ff/a6/c3ffa691-e407-3e0e-ce9c-c906666191ef/mzaf_7190040409395232971.plus.aac.p.m4a"}
     ],
     "Kannada": [
-        {"title": "Neenade Naa (Sandalwood Lofi)", "artist": "Sandalwood Beats", "duration": "3:35", "album_image": "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3"},
-        {"title": "Singara Siriye (Soft Instrumental)", "artist": "Kannada Instrumental Collective", "duration": "4:15", "album_image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_40409c2509.mp3"}
+        {"title": "Singara Siriye (From \"Kantara\")", "artist": "Vijay Prakash & Ananya Bhat", "duration": "4:42", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4a/1b/ee/4a1bee90-87ef-e5b0-df2b-18a7d32a9eb7/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/cb/21/57/cb215707-160a-0105-0e1b-8ca080352ef2/mzaf_14959085816912389650.plus.aac.p.m4a"},
+        {"title": "KGF Theme (From \"K.G.F: Chapter 1\")", "artist": "Ravi Basrur", "duration": "3:45", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/65/56/67/655667a4-e9fb-ee59-b1d5-bc4fb949d03d/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/bc/d0/0d/bcd00d41-477d-c200-a6ff-8451f28b4952/mzaf_10034444583151829676.plus.aac.p.m4a"}
     ],
     "Malayalam": [
-        {"title": "Darshana (Acoustic Unplugged)", "artist": "Malayalam Indie Sessions", "duration": "3:55", "album_image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"},
-        {"title": "Pavizha Mazha (Rain Meditation)", "artist": "Kerala Rain Ambient", "duration": "4:20", "album_image": "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3"}
+        {"title": "Darshana (From \"Hridayam\")", "artist": "Hesham Abdul Wahab & Darshana Rajendran", "duration": "3:45", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/47/f3/f1/47f3f1ec-6078-4355-08e0-16bb21558bf2/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/7e/17/2d/7e172dc7-28d5-1bdf-a720-357ea1ae74cb/mzaf_16238612140417721110.plus.aac.p.m4a"},
+        {"title": "Malare (From \"Premam\")", "artist": "Vijay Yesudas", "duration": "5:16", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music2/v4/6f/3c/cd/6f3ccd36-2a0f-0c4e-ce51-5aebcf9e9f84/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/41/59/b4/4159b41b-708b-8140-d758-e8da1ed7bedd/mzaf_7080443034849106781.plus.aac.p.m4a"},
+        {"title": "Illuminati (From \"Aavesham\")", "artist": "Sushin Shyam & Dabzee", "duration": "3:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/29/884e290c-29ed-25d5-7b25-243b89097220/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/aa/16/9c/aa169cff-649d-fb1f-468a-e8d9499f0221/mzaf_7041799171869820802.plus.aac.p.m4a"}
     ],
     "Punjabi": [
-        {"title": "Pasoori (Lofi Sunset)", "artist": "Punjabi Lofi Chill", "duration": "3:30", "album_image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3"},
-        {"title": "Soch (Acoustic Strings)", "artist": "Punjabi Acoustic Strings", "duration": "4:00", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"}
-    ],
-    "Bengali": [
-        {"title": "Mayabono Biharini (Rabindra Sangeet Ambient)", "artist": "Bengali Classical Chill", "duration": "4:45", "album_image": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792e7.mp3"},
-        {"title": "Tomake Chai (Acoustic Guitar)", "artist": "Kolkata Acoustic Sessions", "duration": "3:40", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"}
-    ],
-    "Marathi": [
-        {"title": "Radha Hi Bawari (Flute Soundscape)", "artist": "Marathi Bamboo Flute", "duration": "4:10", "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792e7.mp3"},
-        {"title": "Man Udhan Varyache (Acoustic)", "artist": "Marathi Folk Acoustic", "duration": "3:50", "album_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3"}
+        {"title": "Pasoori", "artist": "Ali Sethi & Shae Gill", "duration": "3:44", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/41/22/e1/4122e118-2e06-44ea-8a5e-2f54817a102a/886449911961.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/91/d5/43/91d543ee-1c39-38a4-0c58-bc4f7cbe5b92/mzaf_12984950669145610214.plus.aac.p.m4a"},
+        {"title": "Softly", "artist": "Karan Aujla & Ikky", "duration": "2:35", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/58/91/9f/58919f2c-e1bb-ec67-2483-3638d1796c99/197189182305.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/be/a7/9d/bea79d2b-65c7-9759-aa67-727eb184be53/mzaf_15077464010629731671.plus.aac.p.m4a"}
     ],
     "Korean": [
-        {"title": "Spring Day (K-Lofi Study)", "artist": "K-Pop Lofi Collective", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"},
-        {"title": "Through the Night (Piano Soft)", "artist": "Korean Chill Piano", "duration": "4:12", "album_image": "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/11/11/audio_84e1b7f8c0.mp3"},
-        {"title": "Breathe (Calm OST)", "artist": "K-Drama Soundscape", "duration": "4:30", "album_image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/03/24/audio_34b3f8dbec.mp3"}
+        {"title": "Spring Day", "artist": "BTS", "duration": "4:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/31/6d/8a/316d8a27-eb60-c3d3-7d52-6019550b7ec1/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/b8/0d/1a/b80d1a49-df63-39d3-5249-14022a106fdf/mzaf_12705139045763071850.plus.aac.p.m4a"},
+        {"title": "Through the Night", "artist": "IU", "duration": "4:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/b9/3e/6c/b93e6c0c-e2f6-cb01-1b91-4560d297a7e8/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview114/v4/f4/62/11/f4621183-1628-98e3-0d53-bc2a2f8b50f7/mzaf_17208151478523298710.plus.aac.p.m4a"}
     ],
     "Japanese": [
-        {"title": "Ghibli Lofi Piano (Totoro Theme)", "artist": "Tokyo Lofi Station", "duration": "3:55", "album_image": "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/11/11/audio_84e1b7f8c0.mp3"},
-        {"title": "First Love (Acoustic Cover)", "artist": "Japanese Acoustic Sessions", "duration": "4:20", "album_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6522c079.mp3"},
-        {"title": "Sparkle (Ambient Piano)", "artist": "Anime Chillout Orchestra", "duration": "5:00", "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/03/24/audio_34b3f8dbec.mp3"}
+        {"title": "First Love", "artist": "Hikaru Utada", "duration": "4:17", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/3e/2d/71/3e2d711b-7a54-df25-8339-e4d6537bfb1a/196589635037.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/71/bd/5e/71bd5ea0-520e-c1d0-1c0e-ee4bdf348e89/mzaf_162589635037.plus.aac.p.m4a"},
+        {"title": "Sparkle", "artist": "RADWIMPS", "duration": "6:48", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/0d/67/bf/0d67bf30-4e20-80d5-7119-eb652d5b6e2d/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/10/a5/d6/10a5d6c8-581d-e465-9831-29e2e2832961/mzaf_4734891040854378129.plus.aac.p.m4a"}
     ],
     "Spanish": [
-        {"title": "Despacito (Calm Spanish Guitar)", "artist": "Spanish Acoustic Guitar", "duration": "3:50", "album_image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/01/26/audio_d0a13f69d2.mp3"},
-        {"title": "Volver A Empezar (Lofi Latina)", "artist": "Latino Lofi Club", "duration": "3:20", "album_image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"}
+        {"title": "Despacito", "artist": "Luis Fonsi & Daddy Yankee", "duration": "3:48", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/e2/ef/f0/e2eff0bc-c51d-7de5-9280-6891ddcee71b/18UMGIM85289.rgb.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/40/5b/e7/405be722-3ec9-ba27-7469-002182d57b39/mzaf_14120258742032474456.plus.aac.p.m4a"},
+        {"title": "Vivir Mi Vida", "artist": "Marc Anthony", "duration": "4:12", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/f7/24/ce/f724ce48-4d0d-0cbc-3493-3d935142e5e6/886443947238.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/10/fd/bf/10fdbf20-d17d-a8a2-6058-c1ef9f221068/mzaf_9159790581568803090.plus.aac.p.m4a"}
     ]
 }
 
@@ -189,13 +177,10 @@ _spotify_token_cache = {
 def get_spotify_access_token(client_id: str, client_secret: str) -> Optional[str]:
     global _spotify_token_cache
     current_time = time.time()
-    
-    # Check if we have a valid cached token (with a 60-second buffer)
     if _spotify_token_cache["token"] and _spotify_token_cache["expires_at"] > current_time + 60:
         return _spotify_token_cache["token"]
         
     try:
-        # Get access token
         auth_url = "https://accounts.spotify.com/api/token"
         response = requests.post(
             auth_url,
@@ -211,8 +196,6 @@ def get_spotify_access_token(client_id: str, client_secret: str) -> Optional[str
         data = response.json()
         token = data.get("access_token")
         expires_in = data.get("expires_in", 3600)
-        
-        # Cache token with its expiration time
         _spotify_token_cache["token"] = token
         _spotify_token_cache["expires_at"] = current_time + expires_in
         return token
@@ -220,19 +203,57 @@ def get_spotify_access_token(client_id: str, client_secret: str) -> Optional[str
         print(f"Exception during Spotify token fetch: {e}")
         return None
 
+def fetch_itunes_tracks(query: str, limit: int = 8, language: str = "English") -> List[dict]:
+    try:
+        search_term = f"{language} {query}" if language and language != "English" else query
+        url = "https://itunes.apple.com/search"
+        params = {
+            "term": search_term,
+            "media": "music",
+            "entity": "song",
+            "limit": limit
+        }
+        resp = requests.get(url, params=params, timeout=5)
+        if resp.status_code == 200:
+            results = resp.json().get("results", [])
+            tracks = []
+            for item in results:
+                preview_url = item.get("previewUrl")
+                if not preview_url:
+                    continue
+                # Get high resolution official movie cover poster photo (500x500)
+                artwork = item.get("artworkUrl100", "").replace("100x100bb.jpg", "500x500bb.jpg")
+                if not artwork:
+                    artwork = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+                
+                millis = item.get("trackTimeMillis", 0)
+                minutes = millis // 60000
+                seconds = (millis % 60000) // 1000
+                duration_str = f"{minutes}:{seconds:02d}" if millis > 0 else "3:30"
+                
+                tracks.append({
+                    "title": item.get("trackName"),
+                    "artist": item.get("artistName"),
+                    "duration": duration_str,
+                    "album_image": artwork,
+                    "preview_url": preview_url,
+                    "play_url": item.get("trackViewUrl")
+                })
+            if tracks:
+                return tracks
+    except Exception as e:
+        print(f"Exception during iTunes track fetch: {e}")
+    return []
+
 def fetch_spotify_tracks(query: str, limit: int = 8, language: str = "English") -> List[dict]:
     client_id = os.getenv("SPOTIFY_CLIENT_ID")
     client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
-    
-    # Append language search term to query if language is specified and not default English
     search_query = f"{language} {query}" if language and language != "English" else query
 
     if client_id and client_secret:
         try:
-            # 1. Get access token (cached)
             token = get_spotify_access_token(client_id, client_secret)
             if token:
-                # 2. Search tracks
                 search_url = "https://api.spotify.com/v1/search"
                 headers = {"Authorization": f"Bearer {token}"}
                 params = {"q": search_query, "type": "track", "limit": limit}
@@ -242,30 +263,35 @@ def fetch_spotify_tracks(query: str, limit: int = 8, language: str = "English") 
                     items = search_resp.json().get("tracks", {}).get("items", [])
                     tracks = []
                     for item in items:
-                        # Format duration from ms to mm:ss
                         duration_ms = item.get("duration_ms", 0)
                         minutes = duration_ms // 60000
                         seconds = (duration_ms % 60000) // 1000
                         duration_str = f"{minutes}:{seconds:02d}"
-                        
-                        # Album image
                         images = item.get("album", {}).get("images", [])
                         album_img = images[0].get("url") if images else "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"
                         
+                        preview_url = item.get("preview_url")
                         tracks.append({
                             "title": item.get("name"),
                             "artist": ", ".join([a.get("name") for a in item.get("artists", [])]),
                             "duration": duration_str,
                             "album_image": album_img,
                             "play_url": item.get("external_urls", {}).get("spotify"),
-                            "preview_url": item.get("preview_url") or "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"
+                            "preview_url": preview_url
                         })
-                    if tracks:
-                        return tracks
+                    # Filter tracks to make sure they have a valid preview URL
+                    valid_tracks = [t for t in tracks if t.get("preview_url")]
+                    if valid_tracks:
+                        return valid_tracks
         except Exception as e:
             print(f"Exception during Spotify fetch: {e}")
 
-    # Fallback to curated multi-language mock library
+    # Primary High-Accuracy Music Provider: iTunes Official API
+    itunes_tracks = fetch_itunes_tracks(query, limit, language)
+    if itunes_tracks:
+        return itunes_tracks
+
+    # Fallback to curated multi-language mock library with official movie posters and audio
     if language in MULTI_LANG_LIBRARY:
         return MULTI_LANG_LIBRARY[language]
     return MOCK_LIBRARY.get(query, MOCK_LIBRARY["playlist_1"])
