@@ -98,7 +98,7 @@ SLEEP_QUALITIES = ["Good", "Fair", "Poor"]
 ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"]
 GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"]
 PLAYLISTS = ["playlist_1", "playlist_2", "playlist_3", "playlist_4", "playlist_5"]
-SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"]
+SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam", "Kannada", "Punjabi", "Bengali", "Marathi"]
 
 PLAYLIST_THEME_MAPPING = {
     "playlist_1": {"name": "Lofi & Calm Pop", "query": "lofi hip hop chill study beats"},
@@ -368,6 +368,23 @@ MOVIE_CATALOG = {
         "Varane Avashyamund", "Thanneer Mathan Dinangal", "Sudani from Nigeria", "Varathan", "Iyobinte Pusthakam",
         "Vineeth Sreenivasan songs", "Gopi Sundar melody", "Hesham Abdul Wahab hits", "Sushin Shyam OST", "Bijibal songs"
     ],
+    "Kannada": [
+        "KGF Chapter 2", "Kantara", "777 Charlie", "Kabzaa", "Vikrant Rona",
+        "James", "Roberrt", "Masterpiece", "KGF Chapter 1", "Kirik Party",
+        "Lucia", "Ugramm", "Googly", "Mungaru Male", "Tagaru"
+    ],
+    "Punjabi": [
+        "Carry On Jatta 3", "Jodi", "Maurh", "Warning 2", "Qismat",
+        "Sufna", "Shadaa", "Jatt & Juliet", "Chal Mera Putt", "Angrej"
+    ],
+    "Bengali": [
+        "Praktan", "Besh Korechi Prem Korechi", "Amazon Obhijaan", "Chotushkone", "Baishe Srabon",
+        "Autograph", "Belaseshe", "Gotro", "Kolkatar Harry", "Ballabhpurer Roopkotha"
+    ],
+    "Marathi": [
+        "Sairat", "Ved", "Baipan Bhaari Deva", "Subhedar", "Pawankhind",
+        "Timepass", "Natsamrat", "Mulshi Pattern", "Katyar Kaljat Ghusli", "Lai Bhaari"
+    ],
     "English": [
         "lofi hip hop study beats", "chill ambient relaxation", "piano sleep music",
         "indie pop 2024", "acoustic guitar chill", "nature sounds meditation",
@@ -406,6 +423,23 @@ ARTIST_CATALOG = {
         "Pradeep Kumar Malayalam", "Sooraj Santhosh", "Bijibal", "Ouseppachan",
         "Rathish Vega", "Sithara Krishnakumar", "Sujatha Mohan", "Unni Menon",
         "M.G. Sreekumar", "Haricharan Malayalam", "Zia Ul Haq", "Rahul Raj"
+    ],
+    "Kannada": [
+        "Sanjith Hegde", "Sonu Nigam Kannada", "Vijay Prakash", "Arjun Janya",
+        "Charan Raj", "B. Ajaneesh Loknath", "Raghu Dixit", "Armaan Malik Kannada",
+        "Shreya Ghoshal Kannada", "V. Harikrishna"
+    ],
+    "Punjabi": [
+        "Diljit Dosanjh", "AP Dhillon", "Gurinder Gill", "Sidhu Moose Wala",
+        "B Praak", "Jasleen Royal", "Shubh", "Karan Aujla", "Guru Randhawa", "Hardy Sandhu"
+    ],
+    "Bengali": [
+        "Arijit Singh Bengali", "Anupam Roy", "Shreya Ghoshal Bengali", "Jeet Gannguli",
+        "Anirban Bhattacharya", "Lopamudra Mitra", "Iman Chakraborty", "Rupam Islam"
+    ],
+    "Marathi": [
+        "Ajay-Atul", "Swapnil Bandodkar", "Avadhoot Gupte", "Shreya Ghoshal Marathi",
+        "Mahesh Kale", "Rahul Deshpande", "Arya Ambekar", "Adarsh Shinde"
     ],
     "English": [
         "Marconi Union", "Coldplay", "Ed Sheeran", "Taylor Swift", "Billie Eilish",
@@ -533,10 +567,32 @@ def fetch_hybrid_recommendations(
     set_cached_tracks(cache_key, result_set)
     return result_set
 
-def fetch_spotify_tracks(query: str, limit: int = 8, language: str = "English") -> List[dict]:
+LANGUAGE_KEYWORDS = {
+    "English": "english",
+    "Telugu": "telugu tollywood",
+    "Hindi": "hindi bollywood",
+    "Tamil": "tamil kollywood",
+    "Malayalam": "malayalam mollywood",
+    "Kannada": "kannada sandalwood",
+    "Punjabi": "punjabi",
+    "Bengali": "bengali",
+    "Marathi": "marathi"
+}
+
+def fetch_spotify_tracks(
+    query: str,
+    limit: int = 8,
+    language: str = "English",
+    mood: Optional[str] = None,
+    genre: Optional[str] = None,
+    fav_artists: Optional[List[str]] = None
+) -> List[dict]:
     client_id = os.getenv("SPOTIFY_CLIENT_ID")
     client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
-    search_query = f"{language} {query}" if language and language != "English" else query
+
+    # Normalize language string
+    lang_key = language.strip().title() if language else "English"
+    lang_search = LANGUAGE_KEYWORDS.get(lang_key, lang_key.lower())
 
     if client_id and client_secret:
         try:
@@ -544,45 +600,125 @@ def fetch_spotify_tracks(query: str, limit: int = 8, language: str = "English") 
             if token:
                 search_url = "https://api.spotify.com/v1/search"
                 headers = {"Authorization": f"Bearer {token}"}
-                params = {"q": search_query, "type": "track", "limit": limit}
-                
-                search_resp = requests.get(search_url, headers=headers, params=params, timeout=5)
-                if search_resp.status_code == 200:
-                    items = search_resp.json().get("tracks", {}).get("items", [])
-                    tracks = []
-                    for item in items:
-                        duration_ms = item.get("duration_ms", 0)
-                        minutes = duration_ms // 60000
-                        seconds = (duration_ms % 60000) // 1000
-                        duration_str = f"{minutes}:{seconds:02d}"
-                        images = item.get("album", {}).get("images", [])
-                        album_img = images[0].get("url") if images else "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"
-                        
-                        preview_url = item.get("preview_url")
-                        tracks.append({
-                            "title": item.get("name"),
-                            "artist": ", ".join([a.get("name") for a in item.get("artists", [])]),
-                            "duration": duration_str,
-                            "album_image": album_img,
-                            "play_url": item.get("external_urls", {}).get("spotify"),
-                            "preview_url": preview_url
-                        })
-                    # Filter tracks to make sure they have a valid preview URL
-                    valid_tracks = [t for t in tracks if t.get("preview_url")]
-                    if valid_tracks:
-                        return valid_tracks
+
+                # Build multiple Spotify search queries using:
+                # selected language, mood, genre, relaxation keywords, movie soundtrack keywords, artist keywords
+                relaxation_kw = "relaxing peaceful calming soothing acoustic"
+                soundtrack_kw = "soundtrack movie album hits"
+
+                queries = [
+                    f"{query} {lang_search}",
+                    f"{lang_search} {mood or 'chill'} {genre or 'music'}",
+                    f"{lang_search} {relaxation_kw}",
+                    f"{lang_search} {soundtrack_kw}"
+                ]
+
+                # Include movie soundtrack keywords if available
+                movies = MOVIE_CATALOG.get(lang_key, [])
+                if movies:
+                    queries.append(f"{lang_search} {movies[0]} soundtrack")
+                    if len(movies) > 1:
+                        queries.append(f"{lang_search} {movies[1]}")
+
+                # Include artist keywords if available
+                catalog_artists = ARTIST_CATALOG.get(lang_key, [])
+                if fav_artists:
+                    for fa in fav_artists[:2]:
+                        queries.append(f"{fa} {lang_search}")
+                elif catalog_artists:
+                    queries.append(f"{catalog_artists[0]} {lang_search}")
+                    if len(catalog_artists) > 1:
+                        queries.append(f"{catalog_artists[1]} {lang_search}")
+
+                seen_ids = set()
+                candidates = []
+
+                lang_terms = [t.lower() for t in lang_search.split()]
+                mood_terms = [mood.lower()] if mood else ["relax", "calm", "peace", "chill", "sooth", "meditation"]
+                genre_terms = [genre.lower()] if genre else ["lo-fi", "pop", "classical", "nature", "instrumental", "acoustic"]
+                target_artists = [a.lower() for a in (fav_artists or catalog_artists)]
+
+                for q_str in queries:
+                    params = {
+                        "q": q_str,
+                        "type": "track",
+                        "market": "IN",
+                        "limit": 50
+                    }
+                    search_resp = requests.get(search_url, headers=headers, params=params, timeout=5)
+                    if search_resp.status_code == 200:
+                        items = search_resp.json().get("tracks", {}).get("items", [])
+                        for item in items:
+                            track_id = item.get("id")
+                            if not track_id or track_id in seen_ids:
+                                continue
+                            seen_ids.add(track_id)
+
+                            duration_ms = item.get("duration_ms", 0)
+                            minutes = duration_ms // 60000
+                            seconds = (duration_ms % 60000) // 1000
+                            duration_str = f"{minutes}:{seconds:02d}"
+
+                            images = item.get("album", {}).get("images", [])
+                            album_img = images[0].get("url") if images else "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"
+
+                            artist_names = ", ".join([a.get("name", "") for a in item.get("artists", [])])
+                            album_name = item.get("album", {}).get("name", "Unknown Album")
+                            track_name = item.get("name", "")
+                            release_date = item.get("album", {}).get("release_date", "")
+                            release_year = release_date[:4] if release_date else "2024"
+
+                            # Rank songs using: language match, mood match, genre match, popularity, favorite artists
+                            popularity = item.get("popularity", 0)
+                            score = float(popularity)
+
+                            full_text = f"{track_name} {album_name} {artist_names}".lower()
+
+                            # 1. Language match
+                            if any(lt in full_text for lt in lang_terms):
+                                score += 30.0
+
+                            # 2. Mood match
+                            if any(mt in full_text for mt in mood_terms):
+                                score += 20.0
+
+                            # 3. Genre match
+                            if any(gt in full_text for gt in genre_terms):
+                                score += 20.0
+
+                            # 4. Favorite/Popular Artist match
+                            if any(ta in artist_names.lower() for ta in target_artists if ta):
+                                score += 25.0
+
+                            track_obj = {
+                                "title": track_name,
+                                "artist": artist_names,
+                                "album": album_name,
+                                "language": lang_key,
+                                "genre": genre or "Pop",
+                                "duration": duration_str,
+                                "release_year": release_year,
+                                "album_image": album_img,
+                                "play_url": item.get("external_urls", {}).get("spotify"),
+                                "preview_url": item.get("preview_url")  # Remove filtering based on preview_url
+                            }
+                            candidates.append((score, track_obj))
+
+                if candidates:
+                    candidates.sort(key=lambda x: x[0], reverse=True)
+                    return [c[1] for c in candidates[:limit]]
         except Exception as e:
             print(f"Exception during Spotify fetch: {e}")
 
-    # Primary High-Accuracy Music Provider: iTunes Official API
-    itunes_tracks = fetch_itunes_tracks(query, limit, language)
+    # Fallback to iTunes API if Spotify fails or yields no tracks
+    itunes_tracks = fetch_itunes_tracks(query, limit, lang_key)
     if itunes_tracks:
-        return itunes_tracks
+        return itunes_tracks[:limit]
 
-    # Fallback to curated multi-language mock library with official movie posters and audio
-    if language in MULTI_LANG_LIBRARY:
-        return MULTI_LANG_LIBRARY[language]
-    return MOCK_LIBRARY.get(query, MOCK_LIBRARY["playlist_1"])
+    # Fallback to curated multi-language mock library
+    if lang_key in MULTI_LANG_LIBRARY:
+        return MULTI_LANG_LIBRARY[lang_key][:limit]
+    return MOCK_LIBRARY.get(query, MOCK_LIBRARY["playlist_1"])[:limit]
 
 # Pydantic Schemas
 class UserSignup(BaseModel):
