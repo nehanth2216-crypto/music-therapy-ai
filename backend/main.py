@@ -217,8 +217,13 @@ def set_cached_tracks(cache_key: str, tracks: List[dict]):
 
 def make_yt_url(title: str, artist: str) -> str:
     """Generate a YouTube search URL for a given song title and artist."""
-    q = requests.utils.quote(f"{title} {artist}")
+    q = requests.utils.quote(f"{title} {artist}".strip())
     return f"https://www.youtube.com/results?search_query={q}"
+
+def make_yt_embed_url(title: str, artist: str) -> str:
+    """Generate a YouTube search embed URL for a given song title and artist."""
+    q = requests.utils.quote(f"{artist} {title}".strip())
+    return f"https://www.youtube.com/embed?listType=search&list={q}"
 
 def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", genre: str = "Pop") -> List[dict]:
     cache_key = f"itunes_{language}_{genre}_{query}_{limit}"
@@ -269,9 +274,11 @@ def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", 
                 release_date = item.get("releaseDate", "")
                 release_year = release_date[:4] if release_date else "2023"
                 
+                t_artist = item.get("artistName", "Unknown Artist")
                 tracks.append({
                     "title": track_name,
-                    "artist": item.get("artistName", "Unknown Artist"),
+                    "artist": t_artist,
+                    "mood": genre or "Calm",
                     "album": album_name,
                     "language": language,
                     "genre": item.get("primaryGenreName", genre),
@@ -279,7 +286,9 @@ def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", 
                     "release_year": release_year,
                     "album_image": artwork,
                     "preview_url": preview_url,
-                    "play_url": item.get("trackViewUrl")
+                    "play_url": item.get("trackViewUrl"),
+                    "youtube_search_url": make_yt_url(track_name, t_artist),
+                    "embed_url": make_yt_embed_url(track_name, t_artist)
                 })
             if tracks:
                 set_cached_tracks(cache_key, tracks)
@@ -314,9 +323,12 @@ def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", 
                 seconds = duration_s % 60
                 duration_str = f"{minutes}:{seconds:02d}" if duration_s > 0 else "3:30"
                 cover = album.get("cover_xl") or album.get("cover_big") or album.get("cover_medium") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+                t_artist = artist.get("name", "Unknown Artist")
+                t_title = item.get("title", "")
                 tracks.append({
-                    "title": item.get("title", ""),
-                    "artist": artist.get("name", "Unknown Artist"),
+                    "title": t_title,
+                    "artist": t_artist,
+                    "mood": genre or "Calm",
                     "album": album.get("title", "Unknown Album"),
                     "language": language,
                     "genre": genre,
@@ -324,7 +336,9 @@ def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", 
                     "release_year": "2024",
                     "album_image": cover,
                     "preview_url": preview_url,
-                    "play_url": item.get("link", "")
+                    "play_url": item.get("link", ""),
+                    "youtube_search_url": make_yt_url(t_title, t_artist),
+                    "embed_url": make_yt_embed_url(t_title, t_artist)
                 })
             if tracks:
                 set_cached_tracks(cache_key, tracks)
@@ -693,6 +707,7 @@ def fetch_spotify_tracks(
                             track_obj = {
                                 "title": track_name,
                                 "artist": artist_names,
+                                "mood": mood or "Calm",
                                 "album": album_name,
                                 "language": lang_key,
                                 "genre": genre or "Pop",
@@ -700,7 +715,9 @@ def fetch_spotify_tracks(
                                 "release_year": release_year,
                                 "album_image": album_img,
                                 "play_url": item.get("external_urls", {}).get("spotify"),
-                                "preview_url": item.get("preview_url")  # Remove filtering based on preview_url
+                                "preview_url": item.get("preview_url"),
+                                "youtube_search_url": make_yt_url(track_name, artist_names),
+                                "embed_url": make_yt_embed_url(track_name, artist_names)
                             }
                             candidates.append((score, track_obj))
 

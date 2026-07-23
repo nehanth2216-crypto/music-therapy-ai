@@ -1028,16 +1028,16 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     )}
                   </div>
 
-                  {/* Track Meta Details */}
-                  <div style={{ flex: 1, minWidth: '220px' }}>
+                  {/* Track Meta Details & Embedded YouTube Player */}
+                  <div style={{ flex: 1, minWidth: '280px' }}>
                     <h4 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.25rem' }}>
                       {activeTrack.title}
                     </h4>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem', fontWeight: 500 }}>
-                      {activeTrack.artist}
+                      {activeTrack.artist} {activeTrack.mood ? `• Mood: ${activeTrack.mood}` : ''}
                     </p>
                     
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.75rem' }}>
                       <span style={{
                         fontSize: '0.75rem',
                         padding: '0.2rem 0.5rem',
@@ -1052,19 +1052,31 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       <span style={{
                         fontSize: '0.75rem',
                         padding: '0.2rem 0.6rem',
-                        background: 'rgba(16, 185, 129, 0.12)',
-                        border: '1px solid var(--accent-emerald)',
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        border: '1px solid rgba(239, 68, 68, 0.4)',
                         borderRadius: '4px',
-                        color: 'var(--accent-emerald)',
+                        color: '#ff4444',
                         fontWeight: 600,
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '0.3rem'
                       }}>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-emerald)', display: 'inline-block' }} />
-                        Built-in Web Audio Player
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ff4444', display: 'inline-block' }} />
+                        YouTube Embedded Player
                       </span>
                     </div>
+
+                    {/* YouTube Embedded Search Player Iframe */}
+                    <iframe
+                      width="100%"
+                      height="180"
+                      src={activeTrack.embed_url || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent((activeTrack.artist || '') + ' ' + (activeTrack.title || ''))}`}
+                      title={activeTrack.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ borderRadius: '12px', border: '1px solid var(--border-neon)', background: '#000' }}
+                    />
                   </div>
 
                 </div>

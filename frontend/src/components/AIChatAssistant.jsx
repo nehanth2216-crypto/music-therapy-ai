@@ -248,63 +248,78 @@ export default function AIChatAssistant({ token, apiBaseUrl, onPlayTrack }) {
                   </div>
                 )}
 
-                {/* Suggested Song Cards */}
+                {/* Suggested Song Cards with Embedded YouTube Search Players */}
                 {msg.suggestedTracks && msg.suggestedTracks.length > 0 && (
-                  <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                     <div style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--accent-cyan)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      🎵 Recommended Tracks for You
+                      🎵 Recommended Embedded Song Players
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.65rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.85rem' }}>
                       {msg.suggestedTracks.map((track, tIdx) => (
                         <div
                           key={tIdx}
                           style={{
                             display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.75rem',
-                            background: 'rgba(0, 0, 0, 0.35)',
-                            padding: '0.6rem 0.85rem',
-                            borderRadius: '12px',
+                            flexDirection: 'column',
+                            gap: '0.6rem',
+                            background: 'rgba(0, 0, 0, 0.45)',
+                            padding: '0.85rem',
+                            borderRadius: '16px',
                             border: '1px solid var(--border-glass)'
                           }}
                         >
-                          <img
-                            loading="lazy"
-                            decoding="async"
-                            src={track.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop"}
-                            alt={track.title}
-                            style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover' }}
-                          />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {track.title}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <img
+                              loading="lazy"
+                              decoding="async"
+                              src={track.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop"}
+                              alt={track.title}
+                              style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover' }}
+                            />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '0.875rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {track.title}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {track.artist} {track.mood ? `• Mood: ${track.mood}` : ''}
+                              </div>
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {track.artist}
-                            </div>
+                            {onPlayTrack && (
+                              <button
+                                onClick={() => onPlayTrack(track)}
+                                style={{
+                                  background: 'var(--primary)',
+                                  border: 'none',
+                                  color: '#fff',
+                                  borderRadius: '50%',
+                                  width: '32px',
+                                  height: '32px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                  transition: 'transform 0.15s ease'
+                                }}
+                                title="Set active track"
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              >
+                                <Play style={{ width: '14px', height: '14px', marginLeft: '2px' }} />
+                              </button>
+                            )}
                           </div>
-                          {onPlayTrack && (
-                            <button
-                              onClick={() => onPlayTrack(track)}
-                              style={{
-                                background: 'var(--primary)',
-                                border: 'none',
-                                color: '#fff',
-                                borderRadius: '50%',
-                                width: '32px',
-                                height: '32px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                transition: 'transform 0.15s ease'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            >
-                              <Play style={{ width: '14px', height: '14px', marginLeft: '2px' }} />
-                            </button>
-                          )}
+
+                          {/* Dynamic YouTube Search Embed Iframe */}
+                          <iframe
+                            width="100%"
+                            height="160"
+                            src={track.embed_url || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent((track.artist || '') + ' ' + (track.title || ''))}`}
+                            title={track.title}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{ borderRadius: '12px', border: '1px solid var(--border-glass)', background: '#000' }}
+                          />
                         </div>
                       ))}
                     </div>
