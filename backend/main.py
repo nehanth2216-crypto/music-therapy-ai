@@ -108,6 +108,54 @@ PLAYLIST_THEME_MAPPING = {
     "playlist_5": {"name": "Energetic Pop & Dance", "query": "workout pop dance hits energy"},
 }
 
+# Clinical Therapy Profiles (Medical Assessment -> Mental State -> Therapy Profile -> Genre & Keywords)
+THERAPY_PROFILE = {
+    "stress": {
+        "tempo": "slow",
+        "genre": "lofi acoustic classical",
+        "keywords": [
+            "relax",
+            "calm",
+            "sleep",
+            "peaceful"
+        ]
+    },
+    "anxiety": {
+        "tempo": "slow",
+        "genre": "soft instrumental meditation",
+        "keywords": [
+            "meditation",
+            "soothing",
+            "healing",
+            "calming"
+        ]
+    },
+    "depression": {
+        "tempo": "moderate",
+        "genre": "hope uplifting motivational",
+        "keywords": [
+            "hope",
+            "uplifting",
+            "motivational",
+            "positive"
+        ]
+    }
+}
+
+def determine_mental_state(mood: str = "Tired", stress: int = 5, anxiety: int = 5) -> str:
+    """Evaluate medical assessment data to choose clinical mental state therapy profile."""
+    m_lower = (mood or "").lower()
+    if "sad" in m_lower or "depress" in m_lower:
+        return "depression"
+    elif anxiety >= 7 or "anxi" in m_lower or "panic" in m_lower:
+        return "anxiety"
+    elif stress >= 7 or "stres" in m_lower or "tired" in m_lower or "angry" in m_lower:
+        return "stress"
+    elif anxiety > stress:
+        return "anxiety"
+    else:
+        return "stress"
+
 MOCK_LIBRARY = {
     "playlist_1": [
         {"title": "Weightless Lofi", "artist": "Lofi Dreamer", "duration": "3:20", "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=150&h=150&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"},
@@ -615,14 +663,21 @@ def fetch_spotify_tracks(
                 search_url = "https://api.spotify.com/v1/search"
                 headers = {"Authorization": f"Bearer {token}"}
 
+                # Evaluate clinical therapy profile for query generation
+                mental_state = determine_mental_state(mood or query)
+                therapy_prof = THERAPY_PROFILE.get(mental_state, THERAPY_PROFILE["stress"])
+                therapy_genre = therapy_prof["genre"]
+                therapy_keywords = " ".join(therapy_prof["keywords"])
+
                 # Build multiple Spotify search queries using:
-                # selected language, mood, genre, relaxation keywords, movie soundtrack keywords, artist keywords
-                relaxation_kw = "relaxing peaceful calming soothing acoustic"
+                # selected language, mood, genre, therapy profile keywords, movie soundtrack keywords, artist keywords
+                relaxation_kw = f"{therapy_keywords} acoustic"
                 soundtrack_kw = "soundtrack movie album hits"
 
                 queries = [
                     f"{query} {lang_search}",
                     f"{lang_search} {mood or 'chill'} {genre or 'music'}",
+                    f"{lang_search} {therapy_genre}",
                     f"{lang_search} {relaxation_kw}",
                     f"{lang_search} {soundtrack_kw}"
                 ]
@@ -1100,11 +1155,16 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
     theme_info = PLAYLIST_THEME_MAPPING.get(result_playlist, PLAYLIST_THEME_MAPPING["playlist_1"])
     playlist_name = theme_info["name"]
 
+    # Clinical Pipeline: Medical Assessment -> Predict Mental State -> Choose Therapy Profile -> Choose Genre & Language
+    mental_state = determine_mental_state(survey.mood, survey.stress, survey.anxiety)
+    profile = THERAPY_PROFILE.get(mental_state, THERAPY_PROFILE["stress"])
+    target_genre = f"{survey.fav_genre} {profile['genre']}".strip()
+
     tracks = fetch_hybrid_recommendations(
         user_id=current_user.id if current_user else None,
-        mood=survey.mood,
+        mood=f"{survey.mood} {mental_state}",
         language=survey.language_pref,
-        genre=survey.fav_genre,
+        genre=target_genre,
         activity=survey.activity,
         limit=35,
         db=db
