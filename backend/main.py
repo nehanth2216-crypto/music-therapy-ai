@@ -73,8 +73,24 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return response
 
-# Load machine learning model, scaler, and performance metrics
+import joblib
+
+# Load machine learning models, scalers, and encoders
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Therapy AI Model & Encoders
+try:
+    therapy_model = joblib.load(os.path.join(BASE_DIR, "models", "therapy_model.pkl"))
+    language_encoder = joblib.load(os.path.join(BASE_DIR, "models", "language_encoder.pkl"))
+    genre_encoder = joblib.load(os.path.join(BASE_DIR, "models", "genre_encoder.pkl"))
+    therapy_encoder = joblib.load(os.path.join(BASE_DIR, "models", "therapy_encoder.pkl"))
+except Exception as e:
+    print(f"Notice: Therapy model or encoders loading info: {e}")
+    therapy_model = None
+    language_encoder = None
+    genre_encoder = None
+    therapy_encoder = None
+
 model_path = os.path.join(BASE_DIR, "models", "recommendation_model.pkl")
 scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
 metrics_path = os.path.join(BASE_DIR, "ml", "metrics.json")
@@ -87,7 +103,6 @@ try:
     with open(metrics_path, "r") as f:
         model_metrics = json.load(f)
 except Exception as e:
-    print(f"Warning: Failed to load ML model or scaler. Error: {e}")
     recommendation_model = None
     scaler = None
     model_metrics = {}

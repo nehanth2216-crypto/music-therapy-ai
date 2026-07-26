@@ -1,0 +1,11 @@
+stress,anxiety,depression,sleep,energy,language,genre,therapy
+9,8,2,3,2,Telugu,Melody,Relaxation
+8,9,3,2,3,Telugu,Classical,Relaxation
+7,8,2,4,4,Hindi,Lofi,Relaxation
+6,7,3,5,4,Tamil,Instrumental,Relaxation
+2,2,8,6,5,English,Pop,Motivation
+3,3,7,7,6,Hindi,Rock,Motivation
+4,5,4,8,8,English,Lofi,Focus
+5,6,3,7,7,Telugu,Classical,Focus
+9,9,1,2,2,Malayalam,Meditation,Calm
+8,7,2,3,3,Kannada,Melody,Calm
