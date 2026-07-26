@@ -1156,13 +1156,19 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
             sample = np.array([[survey.stress, survey.anxiety, depression_val, sleep_val, energy_val, lang_code, genre_code]])
             pred_label_code = therapy_model.predict(sample)[0]
             pred_therapy = therapy_encoder.inverse_transform([pred_label_code])[0]
-            t_map = {"Relaxation": "playlist_1", "Calm": "playlist_2", "Focus": "playlist_3", "Motivation": "playlist_5"}
-            result_playlist = t_map.get(pred_therapy, "playlist_1")
+
+            if survey.anxiety >= 8 or survey.activity == "Meditation":
+                result_playlist = "playlist_3"
+            else:
+                t_map = {"Relaxation": "playlist_1", "Calm": "playlist_2", "Focus": "playlist_3", "Motivation": "playlist_5"}
+                result_playlist = t_map.get(pred_therapy, "playlist_1")
         else:
             raise ValueError("No ML model loaded")
     except Exception as e:
         print(f"ML Model prediction fallback triggered: {e}")
-        if survey.stress >= 8 or survey.anxiety >= 8:
+        if survey.anxiety >= 8 or survey.activity == "Meditation":
+            result_playlist = "playlist_3"
+        elif survey.stress >= 8:
             result_playlist = "playlist_2"
         elif survey.mood == "Sad":
             result_playlist = "playlist_3"
