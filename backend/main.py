@@ -96,15 +96,27 @@ scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
 metrics_path = os.path.join(BASE_DIR, "ml", "metrics.json")
 
 try:
-    with open(model_path, "rb") as f:
-        recommendation_model = pickle.load(f)
-    with open(scaler_path, "rb") as f:
-        scaler = pickle.load(f)
+    if os.path.exists(model_path):
+        with open(model_path, "rb") as f:
+            recommendation_model = pickle.load(f)
+    else:
+        recommendation_model = None
+except Exception:
+    recommendation_model = None
+
+try:
+    if os.path.exists(scaler_path):
+        with open(scaler_path, "rb") as f:
+            scaler = pickle.load(f)
+    else:
+        scaler = None
+except Exception:
+    scaler = None
+
+try:
     with open(metrics_path, "r") as f:
         model_metrics = json.load(f)
-except Exception as e:
-    recommendation_model = None
-    scaler = None
+except Exception:
     model_metrics = {}
 
 # Mappings (must match ml_pipeline.py)
@@ -1095,12 +1107,6 @@ def reset_password(req: ResetPasswordSubmit, db: Session = Depends(get_db)):
 
 @app.post("/api/recommend/survey")
 def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
-    if recommendation_model is None or scaler is None:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Prediction model or scaler is not loaded on backend."
-        )
-        
     # Map categoricals to indexes
     try:
         mood_idx = MOODS.index(survey.mood)
@@ -1135,9 +1141,25 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
     
     # Scale features & Predict playlist safely
     try:
-        feature_scaled = scaler.transform(feature_arr)
-        pred_idx = recommendation_model.predict(feature_scaled)[0]
-        result_playlist = PLAYLISTS[int(pred_idx)]
+        if scaler and recommendation_model:
+            feature_scaled = scaler.transform(feature_arr)
+            pred_idx = recommendation_model.predict(feature_scaled)[0]
+            result_playlist = PLAYLISTS[int(pred_idx)]
+        elif therapy_model and therapy_encoder and language_encoder and genre_encoder:
+            lang_val = survey.language_pref if survey.language_pref in language_encoder.classes_ else language_encoder.classes_[0]
+            genre_val = survey.fav_genre if survey.fav_genre in genre_encoder.classes_ else genre_encoder.classes_[0]
+            lang_code = language_encoder.transform([lang_val])[0]
+            genre_code = genre_encoder.transform([genre_val])[0]
+            depression_val = 8 if survey.mood in ["Sad", "Depressed"] else 3
+            sleep_val = 3 if survey.sleep_quality == "Poor" else (5 if survey.sleep_quality == "Fair" else 8)
+            energy_val = 3 if survey.mood in ["Tired", "Sad"] else 7
+            sample = np.array([[survey.stress, survey.anxiety, depression_val, sleep_val, energy_val, lang_code, genre_code]])
+            pred_label_code = therapy_model.predict(sample)[0]
+            pred_therapy = therapy_encoder.inverse_transform([pred_label_code])[0]
+            t_map = {"Relaxation": "playlist_1", "Calm": "playlist_2", "Focus": "playlist_3", "Motivation": "playlist_5"}
+            result_playlist = t_map.get(pred_therapy, "playlist_1")
+        else:
+            raise ValueError("No ML model loaded")
     except Exception as e:
         print(f"ML Model prediction fallback triggered: {e}")
         if survey.stress >= 8 or survey.anxiety >= 8:
