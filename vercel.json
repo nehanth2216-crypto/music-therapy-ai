@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd frontend 2>/dev/null || true; npm run build",
+  "buildCommand": "cd frontend 2>/dev/null || true; npm install && npx vite build",
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
