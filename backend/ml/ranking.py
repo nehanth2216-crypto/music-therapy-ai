@@ -1,7 +1,8 @@
 from typing import List, Dict, Any, Set
+from backend.ml.language_verifier import LanguageVerifier
 
 class RecommendationRankingEngine:
-    """Recommendation Ranking Engine applying strict weightings."""
+    """Recommendation Ranking Engine enforcing mandatory Language Filtering."""
 
     def score_track(
         self,
@@ -16,42 +17,37 @@ class RecommendationRankingEngine:
         skipped_titles: Set[str]
     ) -> float:
         """
-        Calculate total recommendation score (0.0 to 100.0) based on weighted rules:
-        - 35% Mood Match
-        - 25% Therapy Match
-        - 15% Activity Match
-        - 10% Language Match
-        - 10% Listening History Similarity
-        - 5% Popularity
+        Calculate total recommendation score (0.0 to 100.0).
+        Strict mandatory rule: If track is NOT verified to belong to selected_language, return -1000.0 (discard).
         """
         track_title = (track.get("title") or "").strip().lower()
         track_artist = (track.get("artist") or "").strip().lower()
-        track_lang = (track.get("language") or "").strip().lower()
+        
+        # 1. MANDATORY LANGUAGE MATCH GATEKEEPER
+        if selected_language and not LanguageVerifier.verify_track_language(track, selected_language):
+            return -1000.0 # Strictly discard non-matching language tracks
 
-        # Strict Language Filtering: If languages do not match, heavily penalize or drop score
-        if selected_language and track_lang and selected_language.lower() != track_lang:
-            return -100.0 # Strict filter
-
-        # Penalty for skipped tracks
+        # 2. Penalty for skipped tracks
         if track_title in skipped_titles:
-            return -50.0
+            return -100.0
 
-        # 1. Mood Match Score (0 - 35 points)
+        # 3. Language Match Bonus (Mandatory base 20 points)
+        lang_score = 20.0
+
+        # 4. Mood Match Score (0 - 30 points)
         mood_score = 0.0
         audio_feat = track.get("audio_features", {})
         energy = audio_feat.get("energy", 0.5)
-        valence = audio_feat.get("valence", 0.5)
 
         m_lower = (user_mood or "").lower()
         if "anxi" in m_lower or "sad" in m_lower or "tired" in m_lower:
-            # Low energy, soothing valence is best
-            mood_score = 35.0 * (1.0 - abs(energy - 0.25))
+            mood_score = 30.0 * (1.0 - abs(energy - 0.25))
         elif "happy" in m_lower or "energetic" in m_lower:
-            mood_score = 35.0 * (1.0 - abs(energy - 0.75))
+            mood_score = 30.0 * (1.0 - abs(energy - 0.75))
         else:
-            mood_score = 25.0
+            mood_score = 20.0
 
-        # 2. Therapy Match Score (0 - 25 points)
+        # 5. Therapy Match Score (0 - 25 points)
         therapy_score = 0.0
         t_category = (track.get("therapy_category") or "").lower()
         pred_therapy = (predicted_therapy or "").lower()
@@ -60,7 +56,7 @@ class RecommendationRankingEngine:
         else:
             therapy_score = 15.0
 
-        # 3. Activity Match Score (0 - 15 points)
+        # 6. Activity Match Score (0 - 15 points)
         activity_score = 0.0
         act_lower = (target_activity or "").lower()
         if "sleep" in act_lower and energy <= 0.35:
@@ -69,29 +65,21 @@ class RecommendationRankingEngine:
             activity_score = 15.0 if energy >= 0.70 else 5.0
         elif "meditation" in act_lower:
             activity_score = 15.0 if audio_feat.get("acousticness", 0.5) >= 0.60 else 8.0
-        elif "study" in act_lower or "focus" in act_lower:
-            activity_score = 15.0 if audio_feat.get("instrumentalness", 0.5) >= 0.50 else 9.0
         else:
-            activity_score = 12.0
+            activity_score = 10.0
 
-        # 4. Language Match Score (0 - 10 points)
-        lang_score = 10.0 if track_lang == selected_language.lower() else 0.0
-
-        # 5. Listening History & Preference Similarity (0 - 10 points)
+        # 7. History & Popularity (0 - 10 points)
         history_score = 0.0
         if track_title in liked_titles:
-            history_score += 6.0
+            history_score += 5.0
         if any(fav_a in track_artist for fav_a in favorite_artists):
-            history_score += 4.0
-        elif any(rec_a in track_artist for rec_a in recent_artists):
-            history_score += 2.0
-        history_score = min(10.0, history_score)
+            history_score += 3.0
+        history_score = min(7.0, history_score)
 
-        # 6. Popularity Score (0 - 5 points)
         pop = float(track.get("popularity", 50))
-        pop_score = (pop / 100.0) * 5.0
+        pop_score = (pop / 100.0) * 3.0
 
-        total_score = mood_score + therapy_score + activity_score + lang_score + history_score + pop_score
+        total_score = lang_score + mood_score + therapy_score + activity_score + history_score + pop_score
         return round(total_score, 2)
 
     def rank_tracks(
@@ -107,7 +95,7 @@ class RecommendationRankingEngine:
         skipped_titles: Set[str] = None,
         top_n: int = 20
     ) -> List[Dict[str, Any]]:
-        """Rank candidates and return top_n highest scoring tracks."""
+        """Rank candidate tracks ensuring strict language filtering."""
         fav_art = favorite_artists or set()
         rec_art = recent_artists or set()
         liked_t = liked_titles or set()
@@ -133,7 +121,8 @@ class RecommendationRankingEngine:
                 skipped_titles=skip_t
             )
 
-            if score > 0.0: # Filter out strictly invalid language or heavily skipped tracks
+            # Strictly discard non-matching language tracks (score <= 0)
+            if score > 0.0:
                 track["match_score"] = score
                 scored_list.append((score, track))
                 seen_titles.add(t_key)

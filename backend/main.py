@@ -35,6 +35,7 @@ from backend.auth import (
     REMEMBER_ME_EXPIRE_DAYS
 )
 from backend.ml.recommender import HybridRecommender
+from backend.ml.language_verifier import LanguageVerifier
 
 # Initialize Database on Startup
 init_db()
@@ -357,7 +358,7 @@ def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", 
                 release_year = release_date[:4] if release_date else "2023"
                 
                 t_artist = item.get("artistName", "Unknown Artist")
-                tracks.append({
+                candidate = {
                     "title": track_name,
                     "artist": t_artist,
                     "mood": genre or "Calm",
@@ -371,7 +372,9 @@ def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", 
                     "play_url": item.get("trackViewUrl"),
                     "youtube_search_url": make_yt_url(track_name, t_artist),
                     "embed_url": make_yt_embed_url(track_name, t_artist)
-                })
+                }
+                if LanguageVerifier.verify_track_language(candidate, language):
+                    tracks.append(candidate)
             if tracks:
                 set_cached_tracks(cache_key, tracks)
                 return tracks
@@ -407,7 +410,7 @@ def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", 
                 cover = album.get("cover_xl") or album.get("cover_big") or album.get("cover_medium") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
                 t_artist = artist.get("name", "Unknown Artist")
                 t_title = item.get("title", "")
-                tracks.append({
+                candidate = {
                     "title": t_title,
                     "artist": t_artist,
                     "mood": genre or "Calm",
@@ -421,7 +424,9 @@ def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", 
                     "play_url": item.get("link", ""),
                     "youtube_search_url": make_yt_url(t_title, t_artist),
                     "embed_url": make_yt_embed_url(t_title, t_artist)
-                })
+                }
+                if LanguageVerifier.verify_track_language(candidate, language):
+                    tracks.append(candidate)
             if tracks:
                 set_cached_tracks(cache_key, tracks)
                 return tracks
