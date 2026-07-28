@@ -7,7 +7,20 @@ import ModelComparison from './components/ModelComparison';
 import UserProfileModal from './components/UserProfileModal';
 import AIChatAssistant from './components/AIChatAssistant';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8000/api`;
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return `http://${host}:8000/api`;
+    }
+  }
+  return 'https://harmonyrec-backend.onrender.com/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
 
 export default function App() {
@@ -113,8 +126,11 @@ export default function App() {
         setUsername(data.username);
         setAuthSuccess('Welcome back! Logged in successfully.');
       } catch (err) {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
-          ? 'Unable to connect to HarmonyRec backend server. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
+          ? (isLocal
+              ? 'Unable to connect to local HarmonyRec backend. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
+              : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat.')
           : err.message;
         setAuthError(msg);
       }
@@ -141,8 +157,11 @@ export default function App() {
         setUsername(data.username);
         setAuthSuccess('Account created successfully!');
       } catch (err) {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
-          ? 'Unable to connect to HarmonyRec backend server. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
+          ? (isLocal
+              ? 'Unable to connect to local HarmonyRec backend. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
+              : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat.')
           : err.message;
         setAuthError(msg);
       }
