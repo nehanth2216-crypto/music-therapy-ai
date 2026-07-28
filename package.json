@@ -1,0 +1,9 @@
+{
+  "name": "music-therapy-ai-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend 2>/dev/null || true; npm run build",
+    "dev": "cd frontend && npm run dev"
+  }
+}
