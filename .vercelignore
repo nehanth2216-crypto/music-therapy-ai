@@ -1,0 +1,11 @@
+# Vercel deployment ignore patterns
+# Ignore Python backend directory, databases, and heavy model files for Vercel Frontend build
+
+backend/
+harmonyrec.db
+test_harmonyrec.db
+*.db
+*.pkl
+update.md
+render.yaml
+run.bat
