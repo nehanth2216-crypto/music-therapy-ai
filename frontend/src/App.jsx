@@ -113,7 +113,10 @@ export default function App() {
         setUsername(data.username);
         setAuthSuccess('Welcome back! Logged in successfully.');
       } catch (err) {
-        setAuthError(err.message);
+        const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
+          ? 'Unable to connect to HarmonyRec backend server. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
+          : err.message;
+        setAuthError(msg);
       }
     } else if (authMode === 'signup') {
       try {
@@ -131,14 +134,17 @@ export default function App() {
         
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.detail || 'Registration failed');
+          throw new Error(data.detail || 'Signup failed');
         }
         
         setToken(data.access_token);
         setUsername(data.username);
-        setAuthSuccess('Account created successfully! Welcome to HarmonyRec.');
+        setAuthSuccess('Account created successfully!');
       } catch (err) {
-        setAuthError(err.message);
+        const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
+          ? 'Unable to connect to HarmonyRec backend server. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
+          : err.message;
+        setAuthError(msg);
       }
     }
   };

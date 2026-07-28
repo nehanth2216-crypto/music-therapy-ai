@@ -62,7 +62,10 @@ export default function Survey({ token, apiBaseUrl, onViewChange }) {
       setStep(3);
     } catch (err) {
       console.error("Survey submission error:", err);
-      setError(err.message || 'Failed to submit survey. Please try again.');
+      const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
+        ? 'Unable to connect to backend server. Please run run.bat to start the backend on http://127.0.0.1:8000.'
+        : (err.message || 'Failed to submit survey. Please try again.');
+      setError(msg);
     } finally {
       setLoading(false);
     }
