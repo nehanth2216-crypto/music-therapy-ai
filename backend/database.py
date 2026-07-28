@@ -52,6 +52,7 @@ class User(Base):
     favorites = relationship("FavoriteTrack", back_populates="user")
     listening_history = relationship("ListeningHistory", back_populates="user")
     playlists = relationship("UserPlaylist", back_populates="user")
+    track_feedbacks = relationship("TrackFeedback", back_populates="user")
 
 class SurveyResponse(Base):
     __tablename__ = "survey_responses"
@@ -154,6 +155,21 @@ class PlaylistTrack(Base):
     added_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     playlist = relationship("UserPlaylist", back_populates="tracks")
+
+class TrackFeedback(Base):
+    __tablename__ = "track_feedbacks"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    artist = Column(String, nullable=False)
+    action = Column(String, nullable=False) # 'like', 'skip', 'play'
+    therapy_category = Column(String, nullable=True)
+    language = Column(String, nullable=True)
+    genre = Column(String, nullable=True)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    
+    user = relationship("User", back_populates="track_feedbacks")
 
 def init_db():
     Base.metadata.create_all(bind=engine)

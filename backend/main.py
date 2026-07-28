@@ -21,7 +21,8 @@ from backend.database import (
     FavoriteTrack,
     ListeningHistory,
     UserPlaylist,
-    PlaylistTrack
+    PlaylistTrack,
+    TrackFeedback
 )
 from datetime import datetime, timedelta
 from backend.auth import (
@@ -33,6 +34,7 @@ from backend.auth import (
     generate_reset_token,
     REMEMBER_ME_EXPIRE_DAYS
 )
+from backend.ml.recommender import HybridRecommender
 
 # Initialize Database on Startup
 init_db()
@@ -53,10 +55,15 @@ load_env()
 
 app = FastAPI(title="HarmonyRec API", version="1.0.0")
 
+hybrid_recommender = HybridRecommender()
+
 # Setup CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In development, allow all origins
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -939,6 +946,14 @@ class ChatbotMessage(BaseModel):
     message: str
     current_mood: Optional[str] = "None"
 
+class TrackFeedbackSubmit(BaseModel):
+    title: str
+    artist: str
+    action: str # 'like', 'skip', 'play'
+    therapy_category: Optional[str] = None
+    language: Optional[str] = None
+    genre: Optional[str] = None
+
 
 @app.post("/api/auth/signup", response_model=TokenResponse)
 def signup(user_data: UserSignup, db: Session = Depends(get_db)):
@@ -1107,79 +1122,23 @@ def reset_password(req: ResetPasswordSubmit, db: Session = Depends(get_db)):
 
 @app.post("/api/recommend/survey")
 def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
-    # Map categoricals to indexes
-    try:
-        mood_idx = MOODS.index(survey.mood)
-    except ValueError:
-        mood_idx = 0
-        
-    try:
-        sleep_idx = SLEEP_QUALITIES.index(survey.sleep_quality)
-    except ValueError:
-        sleep_idx = 0
-        
-    try:
-        activity_idx = ACTIVITIES.index(survey.activity)
-    except ValueError:
-        activity_idx = 0
-        
-    try:
-        genre_idx = GENRES.index(survey.fav_genre)
-    except ValueError:
-        genre_idx = 0
-
-    # Features must match ML pipeline features: ["Age", "Mood", "Stress", "SleepQuality", "Anxiety", "Activity", "FavGenre"]
-    feature_arr = np.array([[
-        survey.age,
-        mood_idx,
-        survey.stress,
-        sleep_idx,
-        survey.anxiety,
-        activity_idx,
-        genre_idx
-    ]], dtype=float)
+    user_id = current_user.id if current_user else None
     
-    # Scale features & Predict playlist safely
-    try:
-        if scaler and recommendation_model:
-            feature_scaled = scaler.transform(feature_arr)
-            pred_idx = recommendation_model.predict(feature_scaled)[0]
-            result_playlist = PLAYLISTS[int(pred_idx)]
-        elif therapy_model and therapy_encoder and language_encoder and genre_encoder:
-            lang_val = survey.language_pref if survey.language_pref in language_encoder.classes_ else language_encoder.classes_[0]
-            genre_val = survey.fav_genre if survey.fav_genre in genre_encoder.classes_ else genre_encoder.classes_[0]
-            lang_code = language_encoder.transform([lang_val])[0]
-            genre_code = genre_encoder.transform([genre_val])[0]
-            depression_val = 8 if survey.mood in ["Sad", "Depressed"] else 3
-            sleep_val = 3 if survey.sleep_quality == "Poor" else (5 if survey.sleep_quality == "Fair" else 8)
-            energy_val = 3 if survey.mood in ["Tired", "Sad"] else 7
-            sample = np.array([[survey.stress, survey.anxiety, depression_val, sleep_val, energy_val, lang_code, genre_code]])
-            pred_label_code = therapy_model.predict(sample)[0]
-            pred_therapy = therapy_encoder.inverse_transform([pred_label_code])[0]
-
-            if survey.anxiety >= 8 or survey.activity == "Meditation":
-                result_playlist = "playlist_3"
-            else:
-                t_map = {"Relaxation": "playlist_1", "Calm": "playlist_2", "Focus": "playlist_3", "Motivation": "playlist_5"}
-                result_playlist = t_map.get(pred_therapy, "playlist_1")
-        else:
-            raise ValueError("No ML model loaded")
-    except Exception as e:
-        print(f"ML Model prediction fallback triggered: {e}")
-        if survey.anxiety >= 8 or survey.activity == "Meditation":
-            result_playlist = "playlist_3"
-        elif survey.stress >= 8:
-            result_playlist = "playlist_2"
-        elif survey.mood == "Sad":
-            result_playlist = "playlist_3"
-        elif survey.activity == "Studying":
-            result_playlist = "playlist_1"
-        else:
-            result_playlist = "playlist_1"
+    # 1. Execute Production Hybrid Recommendation Engine
+    survey_dict = survey.model_dump() if hasattr(survey, 'model_dump') else survey.dict()
+    rec_result = hybrid_recommender.get_recommendations(
+        survey_data=survey_dict,
+        user_id=user_id,
+        db=db,
+        limit=20
+    )
     
-    # Create DB entry
+    tracks = rec_result.get("tracks", [])
+    therapy_category = rec_result.get("predicted_therapy_category", "Relaxation")
+
+    # 2. Persist Survey Assessment Record
     response_record = SurveyResponse(
-        user_id=current_user.id,
+        user_id=user_id if user_id else 1,
         age=survey.age,
         gender=survey.gender,
         mood=survey.mood,
@@ -1189,34 +1148,16 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
         fav_genre=survey.fav_genre,
         language_pref=survey.language_pref,
         activity=survey.activity,
-        result_playlist=result_playlist
+        result_playlist=therapy_category
     )
     db.add(response_record)
     db.commit()
     db.refresh(response_record)
     
-    theme_info = PLAYLIST_THEME_MAPPING.get(result_playlist, PLAYLIST_THEME_MAPPING["playlist_1"])
-    playlist_name = theme_info["name"]
-
-    # Clinical Pipeline: Medical Assessment -> Predict Mental State -> Choose Therapy Profile -> Choose Genre & Language
-    mental_state = determine_mental_state(survey.mood, survey.stress, survey.anxiety)
-    profile = THERAPY_PROFILE.get(mental_state, THERAPY_PROFILE["stress"])
-    target_genre = f"{survey.fav_genre} {profile['genre']}".strip()
-
-    tracks = fetch_hybrid_recommendations(
-        user_id=current_user.id if current_user else None,
-        mood=f"{survey.mood} {mental_state}",
-        language=survey.language_pref,
-        genre=target_genre,
-        activity=survey.activity,
-        limit=35,
-        db=db
-    )
-        
-    # Store recommendation
+    # 3. Store Recommendation Details
     rec_record = Recommendation(
         survey_id=response_record.id,
-        genre=playlist_name,
+        genre=therapy_category,
         tracks=json.dumps(tracks)
     )
     db.add(rec_record)
@@ -1224,11 +1165,30 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
     
     return {
         "survey_id": response_record.id,
-        "result_state": playlist_name,
-        "playlist_key": result_playlist,
+        "result_state": therapy_category,
+        "playlist_key": "playlist_1",
+        "predicted_therapy_category": therapy_category,
+        "prediction_confidence": rec_result.get("prediction_confidence", 0.90),
         "tracks": tracks,
         "timestamp": response_record.timestamp.isoformat()
     }
+
+@app.post("/api/recommend/track-feedback")
+def submit_track_feedback(feedback: TrackFeedbackSubmit, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    success = hybrid_recommender.feedback_manager.record_feedback(
+        user_id=current_user.id,
+        title=feedback.title,
+        artist=feedback.artist,
+        action=feedback.action,
+        therapy_category=feedback.therapy_category,
+        language=feedback.language,
+        genre=feedback.genre,
+        db=db
+    )
+    if not success:
+        raise HTTPException(status_code=400, detail="Failed to record track feedback")
+    return {"status": "success", "message": f"Recorded action '{feedback.action}' for track '{feedback.title}'"}
+
 
 @app.post("/api/recommend/feedback")
 def submit_feedback(feedback: FeedbackSubmit, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
@@ -1710,19 +1670,23 @@ def get_recommendations_by_language(
                 "tracks": merged[:60]
             }
 
-    tracks = fetch_hybrid_recommendations(
+    rec_result = hybrid_recommender.get_recommendations(
+        survey_data={
+            "mood": mood or "Calming",
+            "language_pref": language,
+            "fav_genre": genre or "Lo-fi",
+            "activity": activity or "Relaxation"
+        },
         user_id=current_user.id if current_user else None,
-        mood=mood or "Calming",
-        language=language,
-        genre=genre or "Lo-fi",
-        activity=activity or "Relaxation",
-        limit=50,
-        db=db
+        db=db,
+        limit=50
     )
+    tracks = rec_result.get("tracks", [])
+    t_cat = rec_result.get("predicted_therapy_category", theme_info['name'])
     return {
         "language": language,
         "playlist_key": playlist_type,
-        "playlist_name": f"{language} {theme_info['name']}",
+        "playlist_name": f"{language} {t_cat}",
         "tracks": tracks
     }
 
