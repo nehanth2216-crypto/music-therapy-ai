@@ -24,7 +24,7 @@ from backend.database import (
     PlaylistTrack,
     TrackFeedback
 )
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from backend.auth import (
     get_password_hash,
     verify_password,
@@ -1093,7 +1093,7 @@ def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
     
     reset_tok = generate_reset_token()
     user.reset_token = reset_tok
-    user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    user.reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
     db.commit()
 
     return {
@@ -1584,7 +1584,7 @@ def add_track_to_playlist(
         play_url=track.play_url,
         preview_url=track.preview_url
     )
-    playlist.updated_at = datetime.utcnow()
+    playlist.updated_at = datetime.now(timezone.utc)
     db.add(ptrack)
     db.commit()
     return {"status": "success", "message": f"Added '{track.title}' to playlist '{playlist.name}'"}

@@ -45,7 +45,7 @@ class User(Base):
     default_activity = Column(String, default="Relaxation", nullable=True)
     reset_token = Column(String, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     surveys = relationship("SurveyResponse", back_populates="user")
     journals = relationship("DailyJournal", back_populates="user")
@@ -69,7 +69,7 @@ class SurveyResponse(Base):
     language_pref = Column(String, nullable=False) # Language preference
     activity = Column(String, nullable=False) # Studying, Sleeping, Meditation, Exercise, Relaxation
     result_playlist = Column(String, nullable=False) # Predicted playlist type (e.g. playlist_1, etc.)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     user = relationship("User", back_populates="surveys")
     recommendation = relationship("Recommendation", back_populates="survey", uselist=False)
@@ -94,7 +94,7 @@ class DailyJournal(Base):
     mood = Column(String, nullable=False)
     stress = Column(Integer, nullable=False)
     journal_text = Column(String, nullable=False)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     user = relationship("User", back_populates="journals")
 
@@ -109,7 +109,7 @@ class FavoriteTrack(Base):
     album_image = Column(String, nullable=True)
     play_url = Column(String, nullable=True)
     preview_url = Column(String, nullable=True)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     user = relationship("User", back_populates="favorites")
 
@@ -124,7 +124,7 @@ class ListeningHistory(Base):
     album_image = Column(String, nullable=True)
     play_url = Column(String, nullable=True)
     preview_url = Column(String, nullable=True)
-    played_at = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    played_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
     
     user = relationship("User", back_populates="listening_history")
 
@@ -135,8 +135,8 @@ class UserPlaylist(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     user = relationship("User", back_populates="playlists")
     tracks = relationship("PlaylistTrack", back_populates="playlist", cascade="all, delete-orphan")
@@ -152,7 +152,7 @@ class PlaylistTrack(Base):
     album_image = Column(String, nullable=True)
     play_url = Column(String, nullable=True)
     preview_url = Column(String, nullable=True)
-    added_at = Column(DateTime, default=datetime.datetime.utcnow)
+    added_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     playlist = relationship("UserPlaylist", back_populates="tracks")
 
@@ -167,7 +167,7 @@ class TrackFeedback(Base):
     therapy_category = Column(String, nullable=True)
     language = Column(String, nullable=True)
     genre = Column(String, nullable=True)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
     
     user = relationship("User", back_populates="track_feedbacks")
 
