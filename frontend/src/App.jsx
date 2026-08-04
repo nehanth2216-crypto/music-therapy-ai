@@ -40,6 +40,7 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState('');
   const [authFullName, setAuthFullName] = useState('');
   const [authPassword, setAuthPassword] = useState('');
+  const [authFavGenre, setAuthFavGenre] = useState('Lo-fi');
   const [rememberMe, setRememberMe] = useState(true);
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
@@ -458,6 +459,23 @@ export default function App() {
                       onChange={(e) => setAuthEmail(e.target.value)}
                       required
                     />
+                  </div>
+
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <label className="input-label" htmlFor="genre-select">Favorite Music Genre (Optional)</label>
+                    <select
+                      id="genre-select"
+                      className="input-field"
+                      value={authFavGenre}
+                      onChange={(e) => setAuthFavGenre(e.target.value)}
+                      style={{ background: 'rgba(0, 0, 0, 0.4)', color: 'var(--text-primary)' }}
+                    >
+                      <option value="Lo-fi">Lo-fi / Ambient</option>
+                      <option value="Classical">Classical / Instrumental</option>
+                      <option value="Nature Sounds">Nature Sounds</option>
+                      <option value="Instrumental">Instrumental / Acoustic</option>
+                      <option value="Pop">Melody / Pop</option>
+                    </select>
                   </div>
                 </>
               )}
