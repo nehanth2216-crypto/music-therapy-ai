@@ -1460,10 +1460,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                   </p>
                   <ul style={{ listStyle: 'none', paddingLeft: 0, fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     <li>🇮🇳 <strong>Emergency Contact (Nehanth):</strong> +91 9014069228 (Available 24/7)</li>
+                    <li>🇮🇳 <strong>Emergency Contact (Vamsi):</strong> +91 6309341025 (Available 24/7)</li>
+                    <li>🇮🇳 <strong>Emergency Contact (Ali Hussain):</strong> +91 9490668908 (Available 24/7)</li>
+                    <li>🇮🇳 <strong>Emergency Contact (Chashwith):</strong> +91 6303202532 (Available 24/7)</li>
                     <li>🇮🇳 <strong>KIRAN Helpline:</strong> 1800-599-0019 (Available 24/7)</li>
-                    <li>🇺🇸 <strong>National Crisis Lifeline:</strong> Call/Text 988 (Available 24/7)</li>
-                    <li>🇬🇧 <strong>Samaritans UK:</strong> Call 116 123 (Available 24/7)</li>
-                    <li>🌎 <strong>Crisis Text Line:</strong> Text HOME to 741741</li>
                   </ul>
                 </div>
               </div>
