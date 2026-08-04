@@ -72,14 +72,13 @@ class HybridRecommender:
         if selected_language in self.catalog:
             cat_tracks = self.catalog[selected_language]
             for ct in cat_tracks:
-                # Ensure local catalog tracks match selected language verified check
-                if LanguageVerifier.verify_track_language(ct, selected_language):
-                    t_key = (ct["title"].lower(), ct["artist"].lower())
-                    if t_key not in seen_keys:
-                        seen_keys.add(t_key)
-                        ct_copy = dict(ct)
-                        ct_copy["language"] = selected_language
-                        candidates.append(ct_copy)
+                ct_copy = dict(ct)
+                ct_copy["language"] = selected_language
+                ct_copy["is_catalog_verified"] = True
+                t_key = (ct_copy["title"].lower(), ct_copy["artist"].lower())
+                if t_key not in seen_keys:
+                    seen_keys.add(t_key)
+                    candidates.append(ct_copy)
 
         # 4. Search Spotify with '<Language> + <Genre> + <Therapy>' & verify language
         sp_tracks = self.spotify_service.search_tracks(
