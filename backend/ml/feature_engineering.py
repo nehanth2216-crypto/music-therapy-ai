@@ -87,7 +87,7 @@ class FeatureEngineer:
         liked_tracks = (history_summary.get("liked_tracks", []) if history_summary else [])
         skipped_tracks = (history_summary.get("skipped_tracks", []) if history_summary else [])
 
-        # Numerical vector for ML prediction
+        # Numerical vector for ML prediction matching 11 clinical features
         feature_vector = [
             float(age),
             float(mood_idx),

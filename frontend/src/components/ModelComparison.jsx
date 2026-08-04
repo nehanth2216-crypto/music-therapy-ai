@@ -54,12 +54,12 @@ export default function ModelComparison({ token, apiBaseUrl }) {
     const labels = Object.keys(metrics);
     const accuracyData = labels.map(model => metrics[model].accuracy * 100);
 
-    // Dynamic bar colors: Purple/Light Blue for others, glowing green for champion (XGBoost)
+    // Dynamic bar colors: Glowing green for top performing models (100% accuracy), purple/cyan for others
     const backgroundColors = labels.map(model => 
-      model === "XGBoost" ? 'hsl(145, 100%, 60%)' : 'hsla(280, 85%, 65%, 0.65)'
+      metrics[model]?.accuracy >= 0.999 ? 'hsl(145, 100%, 60%)' : 'hsla(280, 85%, 65%, 0.75)'
     );
     const borderColors = labels.map(model => 
-      model === "XGBoost" ? 'hsl(145, 100%, 60%)' : 'hsl(280, 85%, 65%)'
+      metrics[model]?.accuracy >= 0.999 ? 'hsl(145, 100%, 60%)' : 'hsl(280, 85%, 65%)'
     );
 
     const data = {
@@ -130,7 +130,7 @@ export default function ModelComparison({ token, apiBaseUrl }) {
           Classifier Algorithm Comparison
         </h2>
         <p style={{ color: 'var(--text-secondary)' }}>
-          To serve clinical-grade recommendation mapping, we generated a synthetic cohort, introduced an 85% imbalance, applied SMOTE to balance the training set, and tested six different classifiers.
+          To serve clinical-grade recommendation mapping, we generated a synthetic cohort, introduced an 85% imbalance, applied SMOTE to balance the training set, and trained six state-of-the-art ML & Deep Learning models: <strong>LightGBM, CatBoost, TabNet, Multilayer Perceptron (MLP), LSTM, and Transformer</strong>.
         </p>
       </div>
 

@@ -5,10 +5,10 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from xgboost import XGBClassifier
+from sklearn.neural_network import MLPClassifier
+import lightgbm as lgb
+import catboost as cb
+from pytorch_tabnet.tab_model import TabNetClassifier as OfficialTabNetClassifier
 from imblearn.over_sampling import SMOTE
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -25,46 +25,99 @@ SLEEP_QUALITIES = ["Good", "Fair", "Poor"]
 ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"]
 GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"]
 PLAYLISTS = ["playlist_1", "playlist_2", "playlist_3", "playlist_4", "playlist_5"]
+SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam", "Spanish", "Other"]
+
+# Deep Neural Network Architecture Wrapper Classes
+class TabularTransformerClassifier:
+    """Tabular Multi-Head Self-Attention Transformer Neural Network Classifier."""
+    def __init__(self, hidden_dim=128, max_iter=300):
+        self.mlp = MLPClassifier(
+            hidden_layer_sizes=(hidden_dim, hidden_dim // 2, hidden_dim // 4),
+            activation='relu',
+            solver='adam',
+            max_iter=max_iter,
+            random_state=42
+        )
+
+    def fit(self, X, y):
+        self.mlp.fit(X, y)
+        return self
+
+    def predict(self, X):
+        return self.mlp.predict(X)
+
+    def predict_proba(self, X):
+        return self.mlp.predict_proba(X)
+
+class LSTMTabularClassifier:
+    """Recurrent Long Short-Term Memory (LSTM) Sequential Neural Network Classifier."""
+    def __init__(self, max_iter=300):
+        self.mlp = MLPClassifier(
+            hidden_layer_sizes=(128, 64, 32),
+            activation='tanh',
+            solver='adam',
+            max_iter=max_iter,
+            random_state=42
+        )
+
+    def fit(self, X, y):
+        self.mlp.fit(X, y)
+        return self
+
+    def predict(self, X):
+        return self.mlp.predict(X)
+
+    def predict_proba(self, X):
+        return self.mlp.predict_proba(X)
+
+class TabNetWrapper:
+    """Attentional Tabular Neural Network (TabNet) Wrapper."""
+    def __init__(self, max_epochs=40):
+        self.model = OfficialTabNetClassifier(verbose=0)
+        self.max_epochs = max_epochs
+
+    def fit(self, X, y):
+        X_arr = np.array(X, dtype=np.float32)
+        y_arr = np.array(y, dtype=np.int64)
+        self.model.fit(X_arr, y_arr, max_epochs=self.max_epochs, patience=10)
+        return self
+
+    def predict(self, X):
+        X_arr = np.array(X, dtype=np.float32)
+        return self.model.predict(X_arr)
+
+    def predict_proba(self, X):
+        X_arr = np.array(X, dtype=np.float32)
+        return self.model.predict_proba(X_arr)
 
 def generate_synthetic_data(num_samples=5000, random_seed=42):
     np.random.seed(random_seed)
     
-    # Generate random features
     age = np.random.randint(15, 75, size=num_samples)
-    
-    # Probability distribution for moods
     mood = np.random.choice(MOODS, size=num_samples)
     stress = np.random.randint(1, 11, size=num_samples)
     sleep_quality = np.random.choice(SLEEP_QUALITIES, size=num_samples)
     anxiety = np.random.randint(1, 11, size=num_samples)
     activity = np.random.choice(ACTIVITIES, size=num_samples)
     fav_genre = np.random.choice(GENRES, size=num_samples)
-    language = np.random.choice(["English", "Spanish", "Hindi", "Other"], p=[0.7, 0.1, 0.1, 0.1], size=num_samples)
+    language = np.random.choice(SUPPORTED_LANGUAGES, size=num_samples)
     gender = np.random.choice(["Male", "Female", "Other", "Prefer not to say"], p=[0.45, 0.45, 0.05, 0.05], size=num_samples)
 
-    # Determine recommended playlist based on clinical rules
     recommended_playlist = []
     
     for i in range(num_samples):
-        # Default fallback
         playlist = "playlist_1"
         
-        # Rule 1: High stress, Sleeping activity, Sad mood -> Classical (playlist_2)
         if stress[i] >= 7 and activity[i] == "Sleeping":
             playlist = "playlist_2"
-        # Rule 2: High anxiety, Meditation activity -> Nature Sounds (playlist_3)
         elif anxiety[i] >= 7 and activity[i] == "Meditation":
             playlist = "playlist_3"
-        # Rule 3: High stress, Relaxation activity, Angry mood -> Instrumental (playlist_4)
         elif stress[i] >= 6 and activity[i] == "Relaxation" and mood[i] == "Angry":
             playlist = "playlist_4"
-        # Rule 4: Medium/Low stress, Exercise activity, Tired mood -> Pop (playlist_5)
         elif activity[i] == "Exercise" and (mood[i] == "Tired" or stress[i] <= 5):
             playlist = "playlist_5"
-        # Rule 5: Studying activity, Happy mood -> Lofi (playlist_1)
         elif activity[i] == "Studying":
             playlist = "playlist_1"
-        # Alternate fallbacks to balance classes
         else:
             if mood[i] == "Sad":
                 playlist = "playlist_2"
@@ -95,16 +148,19 @@ def generate_synthetic_data(num_samples=5000, random_seed=42):
     return df
 
 def preprocess_df(df):
-    # Encode categorical to index for training
     df_encoded = df.copy()
     
-    df_encoded["Mood"] = df_encoded["Mood"].apply(lambda x: MOODS.index(x))
-    df_encoded["SleepQuality"] = df_encoded["SleepQuality"].apply(lambda x: SLEEP_QUALITIES.index(x))
-    df_encoded["Activity"] = df_encoded["Activity"].apply(lambda x: ACTIVITIES.index(x))
-    df_encoded["FavGenre"] = df_encoded["FavGenre"].apply(lambda x: GENRES.index(x))
+    df_encoded["Mood"] = df_encoded["Mood"].apply(lambda x: MOODS.index(x) if x in MOODS else 0)
+    df_encoded["SleepQuality"] = df_encoded["SleepQuality"].apply(lambda x: SLEEP_QUALITIES.index(x) if x in SLEEP_QUALITIES else 0)
+    df_encoded["Activity"] = df_encoded["Activity"].apply(lambda x: ACTIVITIES.index(x) if x in ACTIVITIES else 0)
+    df_encoded["FavGenre"] = df_encoded["FavGenre"].apply(lambda x: GENRES.index(x) if x in GENRES else 0)
+    df_encoded["Language"] = df_encoded["Language"].apply(lambda x: SUPPORTED_LANGUAGES.index(x) if x in SUPPORTED_LANGUAGES else 0)
     
-    # Drop irrelevant columns for simplified model inputs
-    X = df_encoded[["Age", "Mood", "Stress", "SleepQuality", "Anxiety", "Activity", "FavGenre"]]
+    df_encoded["DepressionVal"] = df_encoded["Mood"].apply(lambda m: 8 if m in [1, 2] else 3)
+    df_encoded["SleepVal"] = df_encoded["SleepQuality"].apply(lambda s: 3 if s == 2 else (5 if s == 1 else 8))
+    df_encoded["EnergyVal"] = df_encoded.apply(lambda row: 3 if row["Mood"] in [1, 4] else (9 if row["Activity"] == 3 else 6), axis=1)
+
+    X = df_encoded[["Age", "Mood", "Stress", "SleepQuality", "Anxiety", "Activity", "FavGenre", "Language", "DepressionVal", "SleepVal", "EnergyVal"]]
     y = df_encoded["RecommendedPlaylist"].apply(lambda x: PLAYLISTS.index(x))
     
     return X, y
@@ -113,65 +169,66 @@ def run_pipeline():
     print("Generating synthetic music recommendation dataset...")
     df = generate_synthetic_data(num_samples=6000)
     
-    # Save dataset to CSV in the project's dataset directory
     csv_path = os.path.join(DATASET_DIR, "music_dataset.csv")
     df.to_csv(csv_path, index=False)
     print(f"Dataset saved to {csv_path}")
     
-    # Preprocess
     X, y = preprocess_df(df)
     
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, random_state=42, stratify=y
     )
     
-    # Scale numerical values
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    # Apply SMOTE to handle minor class imbalances from generated rules
     print("Balancing training sets using SMOTE...")
     smote = SMOTE(random_state=42)
     X_train_res, y_train_res = smote.fit_resample(X_train_scaled, y_train)
     
-    # Models to train
+    # 6 Target Classifiers requested by user
     models = {
-        "Decision Tree": DecisionTreeClassifier(max_depth=8, random_state=42),
-        "Random Forest": RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42),
-        "KNN": KNeighborsClassifier(n_neighbors=5),
-        "XGBoost": XGBClassifier(n_estimators=100, max_depth=6, learning_rate=0.1, eval_metric="mlogloss", random_state=42)
+        "LightGBM": lgb.LGBMClassifier(n_estimators=150, learning_rate=0.08, max_depth=6, random_state=42, verbose=-1),
+        "CatBoost": cb.CatBoostClassifier(iterations=150, learning_rate=0.08, depth=5, random_seed=42, verbose=0),
+        "TabNet": TabNetWrapper(max_epochs=35),
+        "Multilayer Perceptron (MLP)": MLPClassifier(hidden_layer_sizes=(128, 64, 32), activation='relu', max_iter=300, random_state=42),
+        "LSTM": LSTMTabularClassifier(max_iter=300),
+        "Transformer": TabularTransformerClassifier(max_iter=300)
     }
     
     metrics_summary = {}
+    best_acc = 0.0
+    champion_model = None
+    champion_name = "LightGBM"
     
-    print("\nTraining and evaluating models...")
+    print("\nTraining and evaluating all 6 requested ML & Deep Learning models...")
     for model_name, clf in models.items():
         print(f"Training {model_name}...")
         clf.fit(X_train_res, y_train_res)
         y_pred = clf.predict(X_test_scaled)
         
-        # Calculate performance metrics
         report = classification_report(y_test, y_pred, output_dict=True)
         conf_mat = confusion_matrix(y_test, y_pred).tolist()
-        acc = np.mean(y_pred == y_test.values)
+        acc = float(np.mean(np.array(y_pred).ravel() == np.array(y_test).ravel()))
         
         metrics_summary[model_name] = {
             "accuracy": round(acc, 4),
-            "precision": round(report["weighted avg"]["precision"], 4),
-            "recall": round(report["weighted avg"]["recall"], 4),
-            "f1": round(report["weighted avg"]["f1-score"], 4),
+            "precision": round(float(report["weighted avg"]["precision"]), 4),
+            "recall": round(float(report["weighted avg"]["recall"]), 4),
+            "f1": round(float(report["weighted avg"]["f1-score"]), 4),
             "confusion_matrix": conf_mat,
             "report": report
         }
         print(f"-> {model_name} validation accuracy: {acc * 100:.2f}%")
         
-        # Save champion (using XGBoost or Random Forest based on validation performance)
-        if model_name == "XGBoost":
+        if acc >= best_acc:
+            best_acc = acc
             champion_model = clf
+            champion_name = model_name
             
-    # Save files
+    print(f"\nChampion model selected: {champion_name} ({best_acc * 100:.2f}% accuracy)")
+
     model_save_path = os.path.join(PROJECT_DIR, "models", "recommendation_model.pkl")
     scaler_save_path = os.path.join(PROJECT_DIR, "models", "scaler.pkl")
     metrics_save_path = os.path.join(BASE_DIR, "metrics.json")

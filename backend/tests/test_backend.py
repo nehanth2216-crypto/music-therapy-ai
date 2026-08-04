@@ -126,9 +126,9 @@ class TestHarmonyRecBackend(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         
         data = response.json()
-        self.assertIn("XGBoost", data)
-        self.assertIn("Decision Tree", data)
-        self.assertIsInstance(data["XGBoost"]["accuracy"], float)
+        self.assertIn("LightGBM", data)
+        self.assertIn("CatBoost", data)
+        self.assertIsInstance(data["LightGBM"]["accuracy"], float)
 
     def test_06_feedback(self):
         # Submit ratings feedback
