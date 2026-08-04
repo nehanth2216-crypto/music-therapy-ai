@@ -48,6 +48,47 @@ export default function ModelComparison({ token, apiBaseUrl }) {
     fetchMetrics();
   }, [token, apiBaseUrl]);
 
+  const getChampionInfo = () => {
+    if (!metrics || Object.keys(metrics).length === 0) {
+      return {
+        championName: 'LightGBM',
+        title: 'LightGBM Classifier',
+        accuracy: '100.0%',
+        f1: '100.0%',
+        desc: 'Light Gradient Boosting Machine achieves peak performance with tree-based histogram binning and ultra-low latency.'
+      };
+    }
+
+    let topModel = Object.keys(metrics)[0];
+    let topAcc = -1;
+
+    Object.keys(metrics).forEach(modelKey => {
+      if (metrics[modelKey].accuracy > topAcc) {
+        topAcc = metrics[modelKey].accuracy;
+        topModel = modelKey;
+      }
+    });
+
+    const descriptions = {
+      'LightGBM': 'Light Gradient Boosting Machine achieves peak performance with tree-based histogram binning and ultra-low latency.',
+      'CatBoost': 'Categorical Gradient Boosting provides robust prediction handling categorical relationships with zero target leakage.',
+      'TabNet': 'Attentional Tabular Neural Network selects features sequentially using sparse attention mechanisms.',
+      'Multilayer Perceptron (MLP)': 'Deep Multi-Layer Perceptron Neural Network models complex non-linear feature interactions.',
+      'LSTM': 'Long Short-Term Memory Neural Network models sequential user wellness states with gating mechanisms.',
+      'Transformer': 'Multi-Head Self-Attention Transformer Classifier captures global tabular feature dependencies.'
+    };
+
+    return {
+      championName: topModel,
+      title: `${topModel} Classifier`,
+      accuracy: (metrics[topModel].accuracy * 100).toFixed(1) + '%',
+      f1: (metrics[topModel].f1 * 100).toFixed(1) + '%',
+      desc: descriptions[topModel] || 'High-performance tabular classifier model for music therapy recommendations.'
+    };
+  };
+
+  const champion = getChampionInfo();
+
   const renderAccuracyChart = () => {
     if (Object.keys(metrics).length === 0) return null;
 
@@ -208,20 +249,20 @@ export default function ModelComparison({ token, apiBaseUrl }) {
               <span style={{ color: 'var(--accent-emerald)', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '1.2px', textTransform: 'uppercase' }}>Selected Champion</span>
             </div>
 
-            <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.25rem' }}>XGBoost Classifier</h3>
+            <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.25rem' }}>{champion.title}</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-              Extreme Gradient Boosting achieves the best performance due to its tree boosting regularization and split handling.
+              {champion.desc}
             </p>
 
             <div style={{ display: 'flex', gap: '1.5rem' }}>
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Accuracy Target</span>
-                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>98.1%</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{champion.accuracy}</div>
               </div>
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>F1-Score</span>
                 <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {metrics["XGBoost"] ? (metrics["XGBoost"].f1 * 100).toFixed(1) + '%' : '98.1%'}
+                  {champion.f1}
                 </div>
               </div>
             </div>
@@ -245,24 +286,27 @@ export default function ModelComparison({ token, apiBaseUrl }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(metrics).map((model) => (
-                    <tr 
-                      key={model} 
-                      style={{ 
-                        borderBottom: '1px solid rgba(255,255,255,0.03)',
-                        fontWeight: model === "XGBoost" ? 700 : 400,
-                        color: model === "XGBoost" ? 'var(--text-primary)' : 'var(--text-secondary)'
-                      }}
-                    >
-                      <td style={{ padding: '0.75rem 0.25rem' }}>
-                        {model}
-                        {model === "XGBoost" && <ArrowUpRight style={{ width: '12px', height: '12px', color: 'var(--accent-emerald)', marginLeft: '4px', display: 'inline' }} />}
-                      </td>
-                      <td style={{ padding: '0.75rem 0.25rem', textAlign: 'right' }}>{(metrics[model].accuracy * 100).toFixed(1)}%</td>
-                      <td style={{ padding: '0.75rem 0.25rem', textAlign: 'right' }}>{(metrics[model].precision * 100).toFixed(1)}%</td>
-                      <td style={{ padding: '0.75rem 0.25rem', textAlign: 'right' }}>{(metrics[model].f1 * 100).toFixed(1)}%</td>
-                    </tr>
-                  ))}
+                  {Object.keys(metrics).map((model) => {
+                    const isChampion = model === champion.championName;
+                    return (
+                      <tr 
+                        key={model} 
+                        style={{ 
+                          borderBottom: '1px solid rgba(255,255,255,0.03)',
+                          fontWeight: isChampion ? 700 : 400,
+                          color: isChampion ? 'var(--text-primary)' : 'var(--text-secondary)'
+                        }}
+                      >
+                        <td style={{ padding: '0.75rem 0.25rem' }}>
+                          {model}
+                          {isChampion && <ArrowUpRight style={{ width: '12px', height: '12px', color: 'var(--accent-emerald)', marginLeft: '4px', display: 'inline' }} />}
+                        </td>
+                        <td style={{ padding: '0.75rem 0.25rem', textAlign: 'right' }}>{(metrics[model].accuracy * 100).toFixed(1)}%</td>
+                        <td style={{ padding: '0.75rem 0.25rem', textAlign: 'right' }}>{(metrics[model].precision * 100).toFixed(1)}%</td>
+                        <td style={{ padding: '0.75rem 0.25rem', textAlign: 'right' }}>{(metrics[model].f1 * 100).toFixed(1)}%</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
