@@ -1327,7 +1327,11 @@ MOTIVATIONAL_QUOTES = [
     {"quote": "Almost everything will work again if you unplug it for a few minutes, including you.", "author": "Anne Lamott"},
     {"quote": "You are braver than you believe, stronger than you seem, and smarter than you think.", "author": "A.A. Milne"},
     {"quote": "Healing takes time, and asking for help is a courageous step, not a weakness.", "author": "Therapeutic Insight"},
-    {"quote": "Breathe. It's just a bad day, not a bad life.", "author": "Mindfulness Reflection"}
+    {"quote": "Breathe. It's just a bad day, not a bad life.", "author": "Mindfulness Reflection"},
+    {"quote": "When everything seems to be going against you, remember that the airplane takes off against the wind, not with it.", "author": "Henry Ford"},
+    {"quote": "Out of your vulnerabilities will come your strength.", "author": "Sigmund Freud"},
+    {"quote": "Self-care is how you take your power back.", "author": "Lalah Delia"},
+    {"quote": "The greatest weapon against stress is our ability to choose one thought over another.", "author": "William James"}
 ]
 
 MEDITATION_TRACKS = [
@@ -1339,7 +1343,7 @@ MEDITATION_TRACKS = [
 
 @app.post("/api/chatbot")
 def chat_bot(message_data: ChatbotMessage):
-    msg = message_data.message.lower()
+    msg = message_data.message.lower().strip()
     mood = message_data.current_mood
     
     category = "wellness"
@@ -1347,8 +1351,8 @@ def chat_bot(message_data: ChatbotMessage):
     suggested_tracks = []
     selected_quote = None
 
-    # 1. SUGGEST SONGS
-    if "song" in msg or "suggest" in msg or "music" in msg or "track" in msg or "telugu" in msg or "hindi" in msg or "tamil" in msg:
+    # 1. SUGGEST MUSIC
+    if any(k in msg for k in ["song", "music", "suggest", "track", "playlist", "telugu", "hindi", "tamil", "korean", "spanish"]):
         category = "songs"
         lang = "English"
         if "telugu" in msg:
@@ -1363,69 +1367,86 @@ def chat_bot(message_data: ChatbotMessage):
             lang = "Spanish"
             
         suggested_tracks = fetch_spotify_tracks(query="relaxing acoustic chill", limit=4, language=lang)
-        reply = f"Here are 4 hand-picked {lang} therapeutic songs carefully chosen for relaxation and mood enhancement! Click ▶️ to play any track instantly."
+        if not suggested_tracks and lang in MULTI_LANG_LIBRARY:
+            suggested_tracks = MULTI_LANG_LIBRARY[lang][:4]
+            
+        reply = f"🎵 **Therapeutic Song Suggestions ({lang})**\nHere are 4 hand-picked {lang} tracks tailored to soothe your nervous system and elevate your mood. Click ▶ to play any track instantly!"
 
-    # 2. RECOMMEND RELAXATION TECHNIQUES
-    elif "technique" in msg or "breath" in msg or "relax" in msg or "exercise" in msg or "grounding" in msg:
+    # 2. GIVES BREATHING EXERCISES
+    elif any(k in msg for k in ["breath", "breathing", "exercise", "technique", "4-7-8", "box breathing", "grounding", "relax"]):
         category = "technique"
-        reply = (
-            "🧘 **Recommended Relaxation Technique: The 4-7-8 Breathing Method**\n\n"
-            "1. **Inhale quietly** through your nose for **4 seconds**.\n"
-            "2. **Hold your breath** gently for **7 seconds**.\n"
-            "3. **Exhale completely** through your mouth making a soft 'whoosh' sound for **8 seconds**.\n"
-            "4. **Repeat for 4 cycles**.\n\n"
-            "💡 *Clinical Impact*: This pattern activates the parasympathetic nervous system, slowing heart rate and lowering cortisol levels."
-        )
+        if "box" in msg:
+            reply = (
+                "🧘 **Box Breathing Exercise (Navy SEAL 4x4 Method)**\n\n"
+                "1. **Inhale slowly** through your nose for **4 seconds**.\n"
+                "2. **Hold your breath** for **4 seconds**.\n"
+                "3. **Exhale steadily** through your mouth for **4 seconds**.\n"
+                "4. **Hold empty** for **4 seconds**.\n"
+                "5. **Repeat for 4 rounds**.\n\n"
+                "💡 *Clinical Benefit*: Resets the vagus nerve and restores cognitive focus during high anxiety."
+            )
+        else:
+            reply = (
+                "🧘 **Clinical 4-7-8 Breathing Technique**\n\n"
+                "1. **Inhale quietly** through your nose for **4 seconds**.\n"
+                "2. **Hold your breath** gently for **7 seconds**.\n"
+                "3. **Exhale completely** through your mouth making a soft 'whoosh' sound for **8 seconds**.\n"
+                "4. **Repeat for 4 full cycles**.\n\n"
+                "💡 *Clinical Impact*: Lowers heart rate, reduces blood pressure, and activates parasympathetic relaxation."
+            )
         suggested_tracks = MEDITATION_TRACKS[:2]
 
-    # 3. GIVE MOTIVATIONAL QUOTES
-    elif "quote" in msg or "motivat" in msg or "inspire" in msg or "inspiration" in msg or "encourage" in msg:
+    # 3. SUGGESTS MEDITATION
+    elif any(k in msg for k in ["meditat", "ambient", "rain", "flute", "bowls", "mindful"]):
+        category = "meditation"
+        reply = (
+            "🧘‍♀️ **Guided Meditation & Soundscape Recommendation**\n"
+            "Deep acoustic frequencies (432Hz / 528Hz) and nature soundscapes entrain brainwaves into Alpha and Theta states, helping lower anxiety and promote deep inner calm."
+        )
+        suggested_tracks = MEDITATION_TRACKS
+
+    # 4. GIVES MOTIVATIONAL QUOTES
+    elif any(k in msg for k in ["quote", "motivat", "inspire", "inspiration", "encourage"]):
         category = "quote"
         import random
         selected_quote = random.choice(MOTIVATIONAL_QUOTES)
-        reply = f"Here is a reflection for your heart today:\n\n*\"{selected_quote['quote']}\"*\n— **{selected_quote['author']}**"
+        reply = f"💡 **Daily Motivational Reflection**:\n\n*\"{selected_quote['quote']}\"*\n— **{selected_quote['author']}**"
 
-    # 4. RECOMMEND MEDITATION MUSIC
-    elif "meditation" in msg or "ambient" in msg or "rain" in msg or "flute" in msg or "bowls" in msg:
-        category = "meditation"
-        reply = "🧘‍♀️ **Meditation Music Recommendations**\nDeep acoustic frequencies and nature soundscapes help slow brainwaves down to Alpha and Theta states, ideal for deep focus and restorative meditation."
-        suggested_tracks = MEDITATION_TRACKS
-
-    # 5. ANSWER QUESTIONS ABOUT MENTAL WELLNESS & STRESS/ANXIETY/SLEEP
-    elif "stress" in msg or "anxi" in msg or "burnout" in msg or "worry" in msg or "sleep" in msg or "depress" in msg or "sad" in msg:
+    # 5. ANSWERS MENTAL HEALTH QUESTIONS
+    elif any(k in msg for k in ["stress", "anxi", "burnout", "worry", "sleep", "insomnia", "depress", "sad", "mental health", "panic", "lonely", "help"]):
         category = "wellness"
         if "sleep" in msg or "insomnia" in msg:
             reply = (
-                "🌙 **Sleep Hygiene & Mental Recovery Tips**:\n"
-                "• Avoid screen exposure 30 minutes before sleeping.\n"
-                "• Keep room temperature around 18–20°C (65–68°F).\n"
-                "• Listen to rhythmic classical or ambient nature soundscapes to entrain your brain for deep sleep."
+                "🌙 **Clinical Sleep Hygiene Protocol**:\n"
+                "• **30-Min Wind-down**: Avoid screens 30 minutes before bed.\n"
+                "• **Environment**: Keep bedroom cool (18-20°C / 65-68°F).\n"
+                "• **Soundscape**: Listen to rhythmic ambient rainfall or Carnatic flute streams to transition into deep REM sleep."
             )
-            suggested_tracks = MOCK_LIBRARY.get("playlist_2", [])[:2]
-        elif "stress" in msg or "burnout" in msg:
+            suggested_tracks = MEDITATION_TRACKS[:2]
+        elif "stress" in msg or "burnout" in msg or "overwhelm" in msg:
             reply = (
-                "⚡ **Managing Stress & Preventing Burnout**:\n"
-                "• Take structured 5-minute micro-breaks every 50 minutes.\n"
-                "• Practice sensory grounding: Focus on 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste.\n"
-                "• Listen to instrumental acoustic streams to reduce cognitive strain."
+                "⚡ **Burnout & Stress Recovery Protocol**:\n"
+                "• **Micro-breaks**: Take a 5-minute break every 50 minutes of work.\n"
+                "• **5-4-3-2-1 Grounding**: Identify 5 things you see, 4 you feel, 3 you hear, 2 you smell, and 1 you taste.\n"
+                "• **Auditory Relief**: Listen to acoustic ambient melodies to reduce cognitive workload."
             )
             suggested_tracks = MOCK_LIBRARY.get("playlist_4", [])[:2]
         else:
             reply = (
-                "💚 **Mental Wellness Guidance**:\n"
-                "Mental health is a journey, not a destination. Remember to treat yourself with self-compassion. "
-                "Pairing gentle movement or nature walks with calming music helps regulate your autonomic nervous system."
+                "💚 **Mental Health & Emotional Wellness**:\n"
+                "Your feelings are valid. Healing is an iterative journey. "
+                "Pairing gentle physical movement, mindful breathing, and therapeutic music helps regulate your nervous system."
             )
             suggested_tracks = MOCK_LIBRARY.get("playlist_1", [])[:2]
 
     else:
         reply = (
-            "Hi! I'm your AI Wellness Assistant. I can help you with:\n\n"
-            "• 🎵 **Suggest Songs** (e.g. 'Suggest Telugu/Hindi/English songs')\n"
-            "• 🧘 **Relaxation Techniques** (e.g. 'Show 4-7-8 breathing exercise')\n"
-            "• 💡 **Motivational Quotes** (e.g. 'Give me an inspiring quote')\n"
-            "• 🧘‍♀️ **Meditation Music** (e.g. 'Recommend meditation soundscapes')\n"
-            "• 🧠 **Mental Wellness Questions** (e.g. 'How to handle stress and sleep better')"
+            "Hi! I am your AI Wellness Assistant. Here is how I can support you:\n\n"
+            "• 🎵 **Suggest Music**: 'Suggest Telugu / Hindi / English songs'\n"
+            "• 🧘 **Breathing Exercises**: 'Give me a 4-7-8 breathing exercise'\n"
+            "• 🧘‍♀️ **Suggest Meditation**: 'Recommend meditation music soundscapes'\n"
+            "• 💡 **Motivational Quotes**: 'Give me an inspiring motivational quote'\n"
+            "• 🧠 **Mental Health Questions**: 'How to reduce stress and improve sleep?'"
         )
         suggested_tracks = MEDITATION_TRACKS[:2]
 
