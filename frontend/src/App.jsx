@@ -619,7 +619,7 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Navbar Header */}
-      <header className="glass-panel" style={{
+      <header className="app-header glass-panel" style={{
         position: 'sticky',
         top: 0,
         zIndex: 100,
@@ -641,7 +641,7 @@ export default function App() {
         </div>
 
         {/* Navigation Tabs */}
-        <nav style={{ display: 'flex', gap: '0.5rem' }}>
+        <nav className="app-nav" style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
             id="nav-dashboard-btn"
             onClick={() => changeView('dashboard')}
@@ -684,7 +684,7 @@ export default function App() {
         </nav>
 
         {/* User Badge & Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+        <div className="app-user-controls" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           <button 
             id="nav-user-profile-btn"
             onClick={() => setIsProfileOpen(true)}
@@ -737,7 +737,7 @@ export default function App() {
       </header>
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, padding: '2rem', maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
+      <main className="main-content-container" style={{ flex: 1, padding: '2rem', maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
         <ErrorBoundary>
           {renderActiveView()}
         </ErrorBoundary>
