@@ -100,6 +100,18 @@ export default function App() {
     localStorage.removeItem('harmonyrec_current_view');
   };
 
+  const formatApiError = (detail, fallbackMsg = 'Request failed') => {
+    if (!detail) return fallbackMsg;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) {
+      return detail.map(item => item.msg || item.message || JSON.stringify(item)).join('; ');
+    }
+    if (typeof detail === 'object') {
+      return detail.msg || detail.message || JSON.stringify(detail);
+    }
+    return String(detail);
+  };
+
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
@@ -119,7 +131,7 @@ export default function App() {
         
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.detail || 'Authentication failed');
+          throw new Error(formatApiError(data.detail, 'Authentication failed'));
         }
         
         setToken(data.access_token);
@@ -149,7 +161,7 @@ export default function App() {
         
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.detail || 'Signup failed');
+          throw new Error(formatApiError(data.detail, 'Signup failed'));
         }
         
         setToken(data.access_token);

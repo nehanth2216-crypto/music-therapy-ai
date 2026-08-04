@@ -852,8 +852,8 @@ class UserSignup(BaseModel):
         v = v.strip()
         if len(v) < 3:
             raise ValueError('Username must be at least 3 characters long')
-        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
-            raise ValueError('Username can only contain letters, numbers, underscores, and hyphens')
+        if not re.match(r'^[a-zA-Z0-9_@.-]+$', v):
+            raise ValueError('Username can only contain letters, numbers, @, ., underscores, and hyphens')
         return v
 
     @field_validator('password')
