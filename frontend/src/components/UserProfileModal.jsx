@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, Lock, Save, X, CheckCircle, AlertCircle, Sparkles, Music, Shield } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { User, Lock, Save, X, CheckCircle, AlertCircle, Sparkles, Shield } from 'lucide-react';
 
 const LANGUAGES = ["English", "Telugu", "Spanish", "Hindi", "Other"];
 
@@ -24,13 +24,7 @@ export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, o
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  useEffect(() => {
-    if (isOpen && token) {
-      fetchUserProfile();
-    }
-  }, [isOpen, token]);
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
     try {
@@ -39,21 +33,32 @@ export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, o
           'Authorization': `Bearer ${token}`
         }
       });
-      if (!res.ok) throw new Error("Failed to load user profile");
-      const data = await res.json();
-      setUsername(data.username || '');
-      setEmail(data.email || '');
-      setFullName(data.full_name || '');
-      setFavGenre(data.fav_genre || 'Lo-fi');
-      setLanguagePref(data.language_pref || 'English');
-      setDefaultActivity(data.default_activity || 'Relaxation');
-      setCreatedAt(data.created_at || '');
+      if (res.ok) {
+        const data = await res.json();
+        setUsername(data.username || '');
+        setEmail(data.email || '');
+        setFullName(data.full_name || '');
+        setFavGenre(data.fav_genre || 'Lo-fi');
+        setLanguagePref(data.language_pref || 'English');
+        setDefaultActivity(data.default_activity || 'Relaxation');
+        if (data.created_at) {
+          setCreatedAt(new Date(data.created_at).toLocaleDateString());
+        }
+      }
     } catch (err) {
-      setMessage({ type: 'error', text: err.message });
+      console.error("Error fetching user profile:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiBaseUrl, token]);
+
+  useEffect(() => {
+    if (isOpen && token) {
+      fetchUserProfile();
+    }
+  }, [isOpen, token, fetchUserProfile]);
+
+
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();

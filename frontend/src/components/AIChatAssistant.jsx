@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Sparkles, Music, Heart, Moon, Wind, Smile, Play, Volume2, Lightbulb, Compass, RefreshCw } from 'lucide-react';
+import { Bot, Send, Sparkles, Music, Heart, Moon, Wind, Smile, Play, Lightbulb, RefreshCw } from 'lucide-react';
 
 export default function AIChatAssistant({ token, apiBaseUrl, onPlayTrack }) {
   const [messages, setMessages] = useState([

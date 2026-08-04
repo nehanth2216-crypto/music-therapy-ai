@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ShieldCheck, LogOut, Disc, ClipboardList, BarChart3, User, Sparkles, Key, CheckCircle, ArrowLeft, Settings, Shield, Bot } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ShieldCheck, LogOut, Disc, ClipboardList, BarChart3, User, Sparkles, Key, CheckCircle, ArrowLeft, Settings, Bot } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 import Dashboard from './components/Dashboard';
 import Survey from './components/Survey';
@@ -21,7 +21,6 @@ const getApiBaseUrl = () => {
 };
 
 const API_BASE_URL = getApiBaseUrl();
-const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token') || '');
@@ -40,7 +39,6 @@ export default function App() {
   const [authUsername, setAuthUsername] = useState('');
   const [authEmail, setAuthEmail] = useState('');
   const [authFullName, setAuthFullName] = useState('');
-  const [authFavGenre, setAuthFavGenre] = useState('Lo-fi');
   const [authPassword, setAuthPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [authError, setAuthError] = useState('');
@@ -52,20 +50,7 @@ export default function App() {
   const [resetTokenInput, setResetTokenInput] = useState('');
   const [newPasswordInput, setNewPasswordInput] = useState('');
 
-  // Verify session on mount and restore user details
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-      if (username) localStorage.setItem('username', username);
-      verifySession(token);
-    } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      setUserProfile(null);
-    }
-  }, [token]);
-
-  const verifySession = async (authToken) => {
+  const verifySession = useCallback(async (authToken) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
@@ -81,7 +66,22 @@ export default function App() {
     } catch (err) {
       console.warn("Could not verify session with backend:", err);
     }
-  };
+  }, []);
+
+  // Verify session on mount and restore user details
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token);
+      if (username) localStorage.setItem('username', username);
+      verifySession(token);
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      setUserProfile(null);
+    }
+  }, [token, username, verifySession]);
+
+
 
   const handleLogout = () => {
     setToken('');

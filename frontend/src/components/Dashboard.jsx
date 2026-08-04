@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Clock, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX, Shuffle, Repeat, Repeat1, X } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX, Shuffle, Repeat, Repeat1, X } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -290,7 +290,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     return [];
   };
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
 
@@ -334,7 +334,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiBaseUrl, token]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -354,7 +354,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     };
     window.addEventListener('harmonyrec_play_track', handleCustomPlay);
     return () => window.removeEventListener('harmonyrec_play_track', handleCustomPlay);
-  }, []);
+  }, [fetchDashboardData]);
 
   const handleMultiFilterSearch = async (lang = selectedLanguage, genre = selectedGenre, mood = selectedMood, query = filterQuery) => {
     setSelectedLanguage(lang);

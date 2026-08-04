@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
-    "dev": "npm --prefix frontend run dev"
+    "dev": "npm --prefix frontend run dev",
+    "start": "python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000"
   }
 }

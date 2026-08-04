@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, BarChart3, Database, Percent, Award, ArrowUpRight, HelpCircle } from 'lucide-react';
+import { ShieldCheck, BarChart3, Database, Percent, Award, ArrowUpRight } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -46,7 +46,7 @@ export default function ModelComparison({ token, apiBaseUrl }) {
       }
     };
     fetchMetrics();
-  }, []);
+  }, [token, apiBaseUrl]);
 
   const renderAccuracyChart = () => {
     if (Object.keys(metrics).length === 0) return null;
