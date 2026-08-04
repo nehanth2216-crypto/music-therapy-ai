@@ -1463,7 +1463,6 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     <li>🇮🇳 <strong>Emergency Contact (Vamsi):</strong> +91 6309341025 (Available 24/7)</li>
                     <li>🇮🇳 <strong>Emergency Contact (Ali Hussain):</strong> +91 9490668908 (Available 24/7)</li>
                     <li>🇮🇳 <strong>Emergency Contact (Chashwith):</strong> +91 6303202532 (Available 24/7)</li>
-                    <li>🇮🇳 <strong>KIRAN Helpline:</strong> 1800-599-0019 (Available 24/7)</li>
                   </ul>
                 </div>
               </div>
