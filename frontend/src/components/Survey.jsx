@@ -8,7 +8,7 @@ const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
 const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
 const LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"];
 
-export default function Survey({ token, apiBaseUrl, onViewChange }) {
+export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComplete }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -60,6 +60,11 @@ export default function Survey({ token, apiBaseUrl, onViewChange }) {
       
       setResult(data);
       setStep(3);
+
+      // Instantly trigger playback of recommended music!
+      if (onSurveyComplete && data.tracks && data.tracks.length > 0) {
+        onSurveyComplete(data.tracks);
+      }
     } catch (err) {
       console.error("Survey submission error:", err);
       const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')

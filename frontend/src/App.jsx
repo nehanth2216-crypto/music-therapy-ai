@@ -576,7 +576,20 @@ export default function App() {
           window.dispatchEvent(new CustomEvent('harmonyrec_play_track', { detail: track }));
         }} />;
       case 'survey':
-        return <Survey token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} />;
+        return <Survey token={token} apiBaseUrl={API_BASE_URL} onViewChange={changeView} onSurveyComplete={(tracks) => {
+          changeView('dashboard');
+          setTimeout(() => {
+            if (tracks && tracks.length > 0) {
+              window.dispatchEvent(new CustomEvent('harmonyrec_play_track', {
+                detail: {
+                  ...tracks[0],
+                  allTracks: tracks,
+                  index: 0
+                }
+              }));
+            }
+          }, 150);
+        }} />;
       case 'analytics':
         return <ModelComparison token={token} apiBaseUrl={API_BASE_URL} />;
       default:

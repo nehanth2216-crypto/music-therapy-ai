@@ -342,14 +342,20 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     const handleCustomPlay = (e) => {
       if (e.detail) {
         const customTrack = e.detail;
-        setCurrentTracks([customTrack]);
-        setActiveTrackIndex(0);
+        if (customTrack.allTracks && Array.isArray(customTrack.allTracks) && customTrack.allTracks.length > 0) {
+          setCurrentTracks(customTrack.allTracks);
+        } else {
+          setCurrentTracks([customTrack]);
+        }
+        setActiveTrackIndex(customTrack.index || 0);
         setIsPlaying(true);
         setTimeout(() => {
           if (audioRef.current) {
-            audioRef.current.play().catch(() => {});
+            audioRef.current.play().catch((err) => {
+              console.warn("Audio play error/policy check:", err);
+            });
           }
-        }, 100);
+        }, 150);
       }
     };
     window.addEventListener('harmonyrec_play_track', handleCustomPlay);
@@ -1060,9 +1066,17 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
               {activeTrack && (
                 <audio
                   ref={audioRef}
-                  src={activeTrack.preview_url || "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"}
+                  src={activeTrack.preview_url || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={handleTrackEnded}
+                  onError={() => {
+                    if (audioRef.current && audioRef.current.src !== "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") {
+                      audioRef.current.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+                      if (isPlaying) {
+                        audioRef.current.play().catch(() => {});
+                      }
+                    }
+                  }}
                 />
               )}
 
