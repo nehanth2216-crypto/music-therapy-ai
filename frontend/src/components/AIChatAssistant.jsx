@@ -308,18 +308,6 @@ export default function AIChatAssistant({ token, apiBaseUrl, onPlayTrack }) {
                               </button>
                             )}
                           </div>
-
-                          {/* Dynamic YouTube Search Embed Iframe */}
-                          <iframe
-                            width="100%"
-                            height="160"
-                            src={track.embed_url || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent((track.artist || '') + ' ' + (track.title || ''))}`}
-                            title={track.title}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            style={{ borderRadius: '12px', border: '1px solid var(--border-glass)', background: '#000' }}
-                          />
                         </div>
                       ))}
                     </div>

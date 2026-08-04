@@ -1048,35 +1048,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       }}>
                         Duration: {activeTrack.duration}
                       </span>
-                      
-                      <span style={{
-                        fontSize: '0.75rem',
-                        padding: '0.2rem 0.6rem',
-                        background: 'rgba(239, 68, 68, 0.12)',
-                        border: '1px solid rgba(239, 68, 68, 0.4)',
-                        borderRadius: '4px',
-                        color: '#ff4444',
-                        fontWeight: 600,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem'
-                      }}>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ff4444', display: 'inline-block' }} />
-                        YouTube Embedded Player
-                      </span>
                     </div>
-
-                    {/* YouTube Embedded Search Player Iframe */}
-                    <iframe
-                      width="100%"
-                      height="180"
-                      src={activeTrack.embed_url || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent((activeTrack.artist || '') + ' ' + (activeTrack.title || ''))}`}
-                      title={activeTrack.title}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      style={{ borderRadius: '12px', border: '1px solid var(--border-neon)', background: '#000' }}
-                    />
                   </div>
 
                 </div>
@@ -1320,29 +1292,6 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{track.duration}</span>
-                      <a
-                        href={track.youtube_search_url || `https://www.youtube.com/results?search_query=${encodeURIComponent((track.title || '') + ' ' + (track.artist || ''))}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        title="Play full song on YouTube"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.3rem',
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '6px',
-                          background: 'rgba(255, 0, 0, 0.12)',
-                          border: '1px solid rgba(255, 0, 0, 0.25)',
-                          color: '#ff4444',
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          textDecoration: 'none',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        ▶ YouTube
-                      </a>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
