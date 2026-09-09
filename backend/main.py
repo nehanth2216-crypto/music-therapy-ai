@@ -229,31 +229,31 @@ MOCK_LIBRARY = {
 # Multi-Language Curated Track Libraries (Exact Official Movie Songs & Crystal-Clear Full Length Audio Streams)
 MULTI_LANG_LIBRARY = {
     "Telugu": [
-        {"title": "Samayama (From \"Hi Nanna\")", "artist": "Hesham Abdul Wahab, Anurag Kulkarni", "duration": "4:12", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3", "is_catalog_verified": True},
-        {"title": "Maate Vinadhuga (From \"Taxiwaala\")", "artist": "Sid Sriram & Jakes Bejoy", "duration": "4:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1d/a0/941da079-ee93-ce60-6340-3c7d0f7633a3/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_40409c2509.mp3", "is_catalog_verified": True},
-        {"title": "Fear Song (From \"Devara Part 1\")", "artist": "Anirudh Ravichander", "duration": "3:17", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/c6/af/1dc6af82-69e9-5341-5010-a9223fc25709/8903431001368_cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3", "is_catalog_verified": True},
-        {"title": "Samajavaragamana (From \"Ala Vaikunthapurramuloo\")", "artist": "S.S. Thaman & Sid Sriram", "duration": "3:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/53/98/c1/5398c1cf-7c16-24a6-bfa3-391dc6015376/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/06/07/audio_b2875e6a98.mp3", "is_catalog_verified": True},
-        {"title": "Inkem Inkem Inkem Kaavaale (From \"Geetha Govindam\")", "artist": "Sid Sriram & Gopi Sundar", "duration": "4:28", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/31/89/3e/31893e4d-7b2e-07a8-6b83-b78f8c7e0998/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3", "is_catalog_verified": True},
-        {"title": "O Ranga Ranga (From \"Rangasthalam\")", "artist": "M.M. Keeravani & Rahul Sipligunj", "duration": "4:00", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/b8/01/7a/b8017a42-7a2e-4b68-80df-90a16f912c9b/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3", "is_catalog_verified": True}
+        {"title": "Samayama (From \"Hi Nanna\")", "artist": "Hesham Abdul Wahab, Anurag Kulkarni", "duration": "4:12", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Maate Vinadhuga (From \"Taxiwaala\")", "artist": "Sid Sriram & Jakes Bejoy", "duration": "4:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1d/a0/941da079-ee93-ce60-6340-3c7d0f7633a3/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/07/27/4c/07274cc8-f662-8747-e425-1108ba2a2390/mzaf_12339835384962827073.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Fear Song (From \"Devara Part 1\")", "artist": "Anirudh Ravichander", "duration": "3:17", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/c6/af/1dc6af82-69e9-5341-5010-a9223fc25709/8903431001368_cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/8d/b1/16/8db11650-580e-ab11-9747-b7bb8544ce55/mzaf_14247929829726939234.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Samajavaragamana (From \"Ala Vaikunthapurramuloo\")", "artist": "S.S. Thaman & Sid Sriram", "duration": "3:34", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/53/98/c1/5398c1cf-7c16-24a6-bfa3-391dc6015376/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/29/a7/55/29a75528-3808-d849-ad00-9e714bf12621/mzaf_2813549342968292058.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Inkem Inkem Inkem Kaavaale (From \"Geetha Govindam\")", "artist": "Sid Sriram & Gopi Sundar", "duration": "4:28", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/31/89/3e/31893e4d-7b2e-07a8-6b83-b78f8c7e0998/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6d/5a/f1/6d5af141-475c-7404-495c-0ef55283457c/mzaf_3028662401385709025.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "O Ranga Ranga (From \"Rangasthalam\")", "artist": "M.M. Keeravani & Rahul Sipligunj", "duration": "4:00", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/b8/01/7a/b8017a42-7a2e-4b68-80df-90a16f912c9b/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/64/0c/30/640c3082-d257-d55d-5be7-8289c1484cb1/mzaf_9955003886284627240.plus.aac.p.m4a", "is_catalog_verified": True}
     ],
     "Hindi": [
-        {"title": "Kesariya (From \"Brahmastra\")", "artist": "Pritam, Arijit Singh & Amitabh Bhattacharya", "duration": "4:28", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/9f/13/ca/9f13ca3b-e533-03e0-f19a-f0aaa774581d/196589311191.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3", "is_catalog_verified": True},
-        {"title": "Tum Se Hi (From \"Jab We Met\")", "artist": "Pritam & Mohit Chauhan", "duration": "5:23", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/64/73/b3/6473b306-bf25-5460-6060-f561ee6dd7fa/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3", "is_catalog_verified": True},
-        {"title": "Soniyo (From \"Raaz - The Mystery Continues\")", "artist": "Raju Singh, Sonu Nigam & Shreya Ghoshal", "duration": "5:29", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/77/4d/9f/774d9f5c-830a-c140-f1ae-6e637dc9af14/888880931542.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/06/07/audio_b2875e6a98.mp3", "is_catalog_verified": True}
+        {"title": "Kesariya (From \"Brahmastra\")", "artist": "Pritam, Arijit Singh & Amitabh Bhattacharya", "duration": "4:28", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/9f/13/ca/9f13ca3b-e533-03e0-f19a-f0aaa774581d/196589311191.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/38/4c/5c/384c5c8f-3ff8-e457-b2f7-3158ce108649/mzaf_12389299033886433185.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Tum Se Hi (From \"Jab We Met\")", "artist": "Pritam & Mohit Chauhan", "duration": "5:23", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/64/73/b3/6473b306-bf25-5460-6060-f561ee6dd7fa/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/e7/39/b8/e739b870-54a1-8f33-57d5-3817108b8bd9/mzaf_16925921654959290990.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Soniyo (From \"Raaz - The Mystery Continues\")", "artist": "Raju Singh, Sonu Nigam & Shreya Ghoshal", "duration": "5:29", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/77/4d/9f/774d9f5c-830a-c140-f1ae-6e637dc9af14/888880931542.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/19/51/ac/1951ac5b-81c8-72ea-ffe5-31e1a3369d9b/mzaf_17405745395809731793.plus.aac.p.m4a", "is_catalog_verified": True}
     ],
     "Tamil": [
-        {"title": "Neeyum Naanum (From \"Naanum Rowdy Dhaan\")", "artist": "Anirudh Ravichander & Neeti Mohan", "duration": "5:02", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/bf/25/71/bf2571c4-9df2-aa00-8438-e6b7617c093a/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_40409c2509.mp3", "is_catalog_verified": True},
-        {"title": "Rowdy Baby (From \"Maari 2\")", "artist": "Dhanush & Dhee", "duration": "4:43", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/a1/b2/c3/a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3", "is_catalog_verified": True}
+        {"title": "Neeyum Naanum (From \"Naanum Rowdy Dhaan\")", "artist": "Anirudh Ravichander & Neeti Mohan", "duration": "5:02", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/bf/25/71/bf2571c4-9df2-aa00-8438-e6b7617c093a/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/6c/46/bb/6c46bb00-98fe-abe5-a191-05a30e4ce11e/mzaf_17637533678834679920.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Rowdy Baby (From \"Maari 2\")", "artist": "Dhanush & Dhee", "duration": "4:43", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/a1/b2/c3/a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/91/17/90/911790e5-27e3-6021-da30-bddf59576e3d/mzaf_3831305118076812899.plus.aac.p.m4a", "is_catalog_verified": True}
     ],
     "Malayalam": [
-        {"title": "Darshana (From \"Hridayam\")", "artist": "Hesham Abdul Wahab & Darshana Rajendran", "duration": "3:45", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/47/f3/f1/47f3f1ec-6078-4355-08e0-16bb21558bf2/source/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3", "is_catalog_verified": True},
-        {"title": "Malare (From \"Premam\")", "artist": "Vijay Yesudas", "duration": "5:16", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music2/v4/6f/3c/cd/6f3ccd36-2a0f-0c4e-ce51-5aebcf9e9f84/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3", "is_catalog_verified": True},
-        {"title": "Illuminati (From \"Aavesham\")", "artist": "Sushin Shyam & Dabzee", "duration": "3:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/29/884e290c-29ed-25d5-7b25-243b89097220/cover.jpg/500x500bb.jpg", "preview_url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3", "is_catalog_verified": True}
+        {"title": "Darshana (From \"Hridayam\")", "artist": "Hesham Abdul Wahab & Darshana Rajendran", "duration": "3:45", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/47/f3/f1/47f3f1ec-6078-4355-08e0-16bb21558bf2/source/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/2b/71/38/2b71380d-0114-3845-c3a8-5d2cfb9abfae/mzaf_14430613370529957448.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Malare (From \"Premam\")", "artist": "Vijay Yesudas", "duration": "5:16", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music2/v4/6f/3c/cd/6f3ccd36-2a0f-0c4e-ce51-5aebcf9e9f84/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/41/59/b4/4159b41b-708b-8140-d758-e8da1ed7bedd/mzaf_7080443034849106781.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Illuminati (From \"Aavesham\")", "artist": "Sushin Shyam & Dabzee", "duration": "3:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/29/884e290c-29ed-25d5-7b25-243b89097220/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/43/a0/da/43a0daa2-504d-6b7c-c63a-0c8864608a6d/mzaf_7754996064757215177.plus.aac.p.m4a", "is_catalog_verified": True}
     ],
     "English": [
-        {"title": "Weightless (Deep Relaxation)", "artist": "Marconi Union", "duration": "8:08", "album_image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&h=500&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2021/08/09/audio_884489a24d.mp3", "is_catalog_verified": True},
-        {"title": "Closer (Acoustic Chill)", "artist": "The Chainsmokers", "duration": "4:05", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc86214151.mp3", "is_catalog_verified": True},
-        {"title": "Sunset Serenade", "artist": "Lofi Chill Beats", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&h=500&fit=crop", "preview_url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_40409c2509.mp3", "is_catalog_verified": True}
+        {"title": "Weightless (Deep Relaxation)", "artist": "Marconi Union", "duration": "8:08", "album_image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&h=500&fit=crop", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/65/69/07/656907c9-eb54-c59c-72b9-dad8489a0165/mzaf_3316991574698499044.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Closer (Acoustic Chill)", "artist": "The Chainsmokers", "duration": "4:05", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/bd/f9/b9/bdf9b9b2-eaa4-4461-6079-aaacc6df7316/mzaf_17327312786932455493.plus.aac.p.m4a", "is_catalog_verified": True},
+        {"title": "Sunset Serenade", "artist": "Lofi Chill Beats", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&h=500&fit=crop", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/65/69/07/656907c9-eb54-c59c-72b9-dad8489a0165/mzaf_3316991574698499044.plus.aac.p.m4a", "is_catalog_verified": True}
     ]
 }
 
@@ -331,60 +331,64 @@ def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", 
             "limit": limit
         }
         resp = requests.get(url, params=params, timeout=6)
-        if resp.status_code == 200:
-            results = resp.json().get("results", [])
-            tracks = []
-            for item in results:
-                preview_url = item.get("previewUrl")
-                if not preview_url:
-                    continue
-                # Get high resolution official movie cover poster photo (500x500)
-                artwork = item.get("artworkUrl100", "").replace("100x100bb.jpg", "500x500bb.jpg")
-                if not artwork:
-                    artwork = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
-                
-                millis = item.get("trackTimeMillis", 0)
-                minutes = millis // 60000
-                seconds = (millis % 60000) // 1000
-                duration_str = f"{minutes}:{seconds:02d}" if millis > 0 else "3:30"
+        results = resp.json().get("results", []) if resp.status_code == 200 else []
+        
+        # If language prefix search returned no tracks, retry with raw query
+        if not results and language and language != "English":
+            params["term"] = query
+            resp = requests.get(url, params=params, timeout=6)
+            results = resp.json().get("results", []) if resp.status_code == 200 else []
 
-                # Extract album or movie name
-                collection_name = item.get("collectionName", "")
-                track_name = item.get("trackName", "")
-                album_name = collection_name or "Original Soundtrack"
-                if "From \"" in track_name:
-                    try:
-                        extracted = track_name.split("From \"")[1].split("\"")[0]
-                        if extracted:
-                            album_name = f"Movie: {extracted}"
-                    except Exception:
-                        pass
-                
-                # Extract release year
-                release_date = item.get("releaseDate", "")
-                release_year = release_date[:4] if release_date else "2023"
-                
-                t_artist = item.get("artistName", "Unknown Artist")
-                candidate = {
-                    "title": track_name,
-                    "artist": t_artist,
-                    "mood": genre or "Calm",
-                    "album": album_name,
-                    "language": language,
-                    "genre": item.get("primaryGenreName", genre),
-                    "duration": duration_str,
-                    "release_year": release_year,
-                    "album_image": artwork,
-                    "preview_url": preview_url,
-                    "play_url": item.get("trackViewUrl"),
-                    "youtube_search_url": make_yt_url(track_name, t_artist),
-                    "embed_url": make_yt_embed_url(track_name, t_artist)
-                }
-                if LanguageVerifier.verify_track_language(candidate, language):
-                    tracks.append(candidate)
-            if tracks:
-                set_cached_tracks(cache_key, tracks)
-                return tracks
+        tracks = []
+        for item in results:
+            preview_url = item.get("previewUrl")
+            if not preview_url:
+                continue
+            artwork = item.get("artworkUrl100", "").replace("100x100bb.jpg", "500x500bb.jpg")
+            if not artwork:
+                artwork = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+            
+            millis = item.get("trackTimeMillis", 0)
+            minutes = millis // 60000
+            seconds = (millis % 60000) // 1000
+            duration_str = f"{minutes}:{seconds:02d}" if millis > 0 else "3:30"
+
+            collection_name = item.get("collectionName", "")
+            track_name = item.get("trackName", "")
+            album_name = collection_name or "Original Soundtrack"
+            if "From \"" in track_name:
+                try:
+                    extracted = track_name.split("From \"")[1].split("\"")[0]
+                    if extracted:
+                        album_name = f"Movie: {extracted}"
+                except Exception:
+                    pass
+            
+            release_date = item.get("releaseDate", "")
+            release_year = release_date[:4] if release_date else "2023"
+            
+            t_artist = item.get("artistName", "Unknown Artist")
+            candidate = {
+                "title": track_name,
+                "artist": t_artist,
+                "mood": genre or "Calm",
+                "album": album_name,
+                "language": language,
+                "genre": item.get("primaryGenreName", genre),
+                "duration": duration_str,
+                "release_year": release_year,
+                "album_image": artwork,
+                "preview_url": preview_url,
+                "play_url": item.get("trackViewUrl"),
+                "youtube_search_url": make_yt_url(track_name, t_artist),
+                "embed_url": make_yt_embed_url(track_name, t_artist),
+                "is_search_result": True
+            }
+            if LanguageVerifier.verify_track_language(candidate, language):
+                tracks.append(candidate)
+        if tracks:
+            set_cached_tracks(cache_key, tracks)
+            return tracks
     except Exception as e:
         print(f"Exception during iTunes track fetch: {e}")
     return []
@@ -430,7 +434,8 @@ def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", 
                     "preview_url": preview_url,
                     "play_url": item.get("link", ""),
                     "youtube_search_url": make_yt_url(t_title, t_artist),
-                    "embed_url": make_yt_embed_url(t_title, t_artist)
+                    "embed_url": make_yt_embed_url(t_title, t_artist),
+                    "is_search_result": True
                 }
                 if LanguageVerifier.verify_track_language(candidate, language):
                     tracks.append(candidate)
