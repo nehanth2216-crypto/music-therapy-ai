@@ -170,7 +170,11 @@ class HybridRecommender:
                     candidates.append(st)
 
         # 5. Live iTunes Fallback to guarantee rich live catalog depth
-        itunes_live = fetch_live_itunes_tracks(f"{fav_genre} {user_mood}", language=selected_language, limit=30)
+        genre_search_term = f"{fav_genre} {user_mood}"
+        if any(g in fav_genre.lower() for g in ["instrumental", "nature", "classical", "lo-fi", "meditation"]):
+            genre_search_term = f"{fav_genre} flute sitar veena piano ambient relaxation"
+            
+        itunes_live = fetch_live_itunes_tracks(genre_search_term, language=selected_language, limit=30)
         for it in itunes_live:
             t_key = (it["title"].lower(), it["artist"].lower())
             if t_key not in seen_keys:
@@ -201,6 +205,7 @@ class HybridRecommender:
             predicted_therapy=therapy_category,
             target_activity=user_activity,
             selected_language=selected_language,
+            selected_genre=fav_genre,
             favorite_artists=favorite_artists,
             recent_artists=recent_artists,
             liked_titles=liked_titles,
