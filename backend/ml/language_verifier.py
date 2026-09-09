@@ -33,7 +33,10 @@ LANGUAGE_ARTIST_CATALOG = {
         "rangasthalam", "jersey", "uppena", "kushi", "samajavaragamana", "maate vinadhuga",
         "samayama", "inkem inkem", "o ranga ranga", "nee pathali", "fear song", "sitaramam",
         "sita ramam", "hanuman", "salaar", "saripodhaa sanivaaram", "thandel", "game changer",
-        "pawan kalyan", "mahesh babu", "ntr", "jr ntr", "ram charan", "prabhas", "allu arjun",
+        "chuttamalle", "kadalalle", "priyathama", "undiporaadhey", "ay pilla", "saranga dariya",
+        "sirivennela", "manasa manasa", "naa kanulu yepudu", "priya mithunam", "love story",
+        "majili", "hushaaru", "varudu kavalenu", "most eligible bachelor", "shyam singha roy", "rang de",
+        "ram miriyala", "shilpa rao", "chinmayi", "pawan kalyan", "mahesh babu", "ntr", "jr ntr", "ram charan", "prabhas", "allu arjun",
         "nani", "balakrishna", "venkatesh", "nagarjuna", "chiranjeevi"
     ],
     "Hindi": [

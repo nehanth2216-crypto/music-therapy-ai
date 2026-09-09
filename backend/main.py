@@ -452,9 +452,10 @@ MOVIE_CATALOG = {
         "RRR", "Pushpa", "Hi Nanna", "Devara", "Kalki 2898 AD", "Tillu Square",
         "Guntur Kaaram", "Ala Vaikunthapurramuloo", "Samajavaragamana", "Taxiwaala",
         "Dear Comrade", "Fidaa", "Arjun Reddy", "Geetha Govindam", "Bharat Ane Nenu",
-        "Baahubali", "Eega", "Magadheera", "Rangasthalam", "Jersey",
+        "Baahubali", "Eega", "Magadheera", "Rangasthalam", "Jersey", "Love Story", "Majili",
+        "Hushaaru", "Varudu Kavalenu", "Most Eligible Bachelor", "Shyam Singha Roy", "Rang De",
         "Uppena", "DJ Tillu", "Sye Raa Narasimha Reddy", "V", "Vakeel Saab",
-        "Maguva Maguva", "Ramuloo Ramulaa", "Naatu Naatu", "Srivalli", "Oo Antava"
+        "Maguva Maguva", "Ramuloo Ramulaa", "Naatu Naatu", "Srivalli", "Oo Antava", "Chuttamalle", "Kadalalle", "Priyathama"
     ],
     "Hindi": [
         "Brahmastra", "Animal", "Jawan", "Dunki", "Fighter", "Stree 2",
@@ -503,7 +504,8 @@ MOVIE_CATALOG = {
         "indie pop 2024", "acoustic guitar chill", "nature sounds meditation",
         "jazz coffee morning", "classical healing piano", "Ed Sheeran", "Coldplay",
         "Taylor Swift", "Billie Eilish", "Harry Styles", "Olivia Rodrigo", "The Weeknd",
-        "Post Malone", "Dua Lipa", "Adele", "Sam Smith", "Lewis Capaldi",
+        "Post Malone", "Dua Lipa", "Adele", "Sam Smith", "Lewis Capaldi", "Stephen Sanchez",
+        "JVKE", "Bruno Mars", "James Arthur", "The Kid LAROI", "Justin Bieber", "Lady Gaga", "Miley Cyrus", "One Direction",
         "ambient electronic", "lo-fi beats focus", "deep focus work music", "Hans Zimmer", "Max Richter",
         "Yiruma piano", "Brian Eno ambient", "Marconi Union weightless", "binaural beats relaxation", "healing frequencies 432hz"
     ]
@@ -514,7 +516,7 @@ ARTIST_CATALOG = {
         "Sid Sriram", "Anirudh Ravichander", "Hesham Abdul Wahab", "A.R. Rahman",
         "S.S. Thaman", "Devi Sri Prasad", "Anurag Kulkarni", "M.M. Keeravani",
         "Shreya Ghoshal Telugu", "Armaan Malik Telugu", "Haricharan", "Jonita Gandhi Telugu",
-        "Karthik Telugu", "Yazin Nizar", "Ramya Behara", "Madhu Priya",
+        "Karthik Telugu", "Yazin Nizar", "Ramya Behara", "Madhu Priya", "Ram Miriyala", "Chinmayi Telugu", "Mangli",
         "Kaala Bhairava", "Naresh Iyer", "Geetha Madhuri", "Mohana Bhogaraju"
     ],
     "Hindi": [
@@ -557,6 +559,7 @@ ARTIST_CATALOG = {
     "English": [
         "Marconi Union", "Coldplay", "Ed Sheeran", "Taylor Swift", "Billie Eilish",
         "The Weeknd", "Harry Styles", "Olivia Rodrigo", "Post Malone", "Dua Lipa",
+        "Stephen Sanchez", "JVKE", "Bruno Mars", "James Arthur", "The Kid LAROI", "Justin Bieber", "Lady Gaga", "Miley Cyrus", "One Direction",
         "Ludovico Einaudi", "Yiruma", "Hans Zimmer", "Max Richter", "Brian Eno",
         "Adele", "Sam Smith", "Lewis Capaldi", "Shawn Mendes", "Charlie Puth"
     ]
