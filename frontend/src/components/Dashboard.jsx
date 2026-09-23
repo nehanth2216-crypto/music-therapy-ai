@@ -423,14 +423,28 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     }
   };
 
-  // HTML5 Audio playback logic
+  // HTML5 Audio playback logic with resilient error recovery
   useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying && currentTracks.length > 0 && currentTracks[activeTrackIndex]?.preview_url) {
-        audioRef.current.play().catch(() => setIsPlaying(false));
-      } else {
-        audioRef.current.pause();
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const track = currentTracks[activeTrackIndex];
+    if (isPlaying && track && track.preview_url) {
+      if (audio.src !== track.preview_url) {
+        audio.src = track.preview_url;
+        audio.load();
       }
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Audio playback issue:", err);
+          if (err.name !== 'AbortError') {
+            setIsPlaying(false);
+          }
+        });
+      }
+    } else {
+      audio.pause();
     }
   }, [isPlaying, activeTrackIndex, currentTracks]);
 
@@ -1036,7 +1050,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       onChange={(e) => handleMultiFilterSearch(selectedLanguage, e.target.value, selectedMood, filterQuery)}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
                     >
-                      {["Melody", "Pop", "Dance", "Acoustic", "Ballad", "Folk", "Rock", "Lo-fi", "Classical", "Instrumental", "Nature Sounds", "Soundtrack"].map(g => (
+                      {["Melody", "Pop", "Dance", "Acoustic", "Ballad", "Rock", "Lo-fi", "Classical", "Instrumental", "Nature Sounds", "Soundtrack"].map(g => (
                         <option key={g} value={g}>{g}</option>
                       ))}
                     </select>
@@ -1135,12 +1149,16 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
               {activeTrack && (
                 <audio
                   ref={audioRef}
+                  preload="auto"
+                  crossOrigin="anonymous"
                   src={activeTrack.preview_url || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={handleTrackEnded}
                   onError={() => {
+                    console.warn("Audio element error on src:", activeTrack?.preview_url);
                     if (audioRef.current && audioRef.current.src !== "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") {
                       audioRef.current.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+                      audioRef.current.load();
                       if (isPlaying) {
                         audioRef.current.play().catch(() => {});
                       }

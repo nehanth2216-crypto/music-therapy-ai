@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, Loader2, Music, CheckCircle2, Activity, Heart, Moon } from 'lucide-react';
 
-const GENRES = ["Melody", "Dance", "Pop", "Folk", "Rock", "Acoustic", "Ballad", "Classical", "Instrumental", "Lo-fi", "Nature Sounds"];
+const GENRES = ["Melody", "Dance", "Pop", "Rock", "Acoustic", "Ballad", "Classical", "Instrumental", "Lo-fi", "Nature Sounds"];
 const MOODS = ["Happy", "Sad", "Calm", "Stressed", "Anxious", "Angry", "Energetic", "Romantic", "Bored", "Focused", "Relaxed", "Tired"];
 const ACTIVITIES = ["Studying", "Working", "Workout", "Running", "Walking", "Driving", "Relaxing", "Meditation", "Sleeping", "Party", "Gaming", "Cooking"];
 const ENERGIES = ["Low", "Medium", "High"];
@@ -329,39 +329,6 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
               </div>
             </div>
 
-            <div style={{ marginBottom: '2rem' }}>
-              <label className="input-label" htmlFor="model-select">AI Prediction Model</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }} id="model-select">
-                {[
-                  { id: 'LightGBM', name: 'LightGBM', badge: 'Champion (Fastest)' },
-                  { id: 'CatBoost', name: 'CatBoost', badge: 'Categorical Pro' },
-                  { id: 'Ensemble', name: 'Ensemble', badge: 'LightGBM + CatBoost' }
-                ].map(m => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setModelName(m.id)}
-                    style={{
-                      padding: '0.65rem 0.75rem',
-                      borderRadius: '10px',
-                      border: modelName === m.id ? '2px solid var(--primary)' : '1px solid var(--border-glass)',
-                      background: modelName === m.id ? 'rgba(99, 102, 241, 0.18)' : 'rgba(0, 0, 0, 0.25)',
-                      color: modelName === m.id ? 'var(--text-primary)' : 'var(--text-secondary)',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '0.2rem',
-                      transition: 'var(--transition-fast)'
-                    }}
-                  >
-                    <span style={{ fontSize: '0.9rem' }}>{m.name}</span>
-                    <span style={{ fontSize: '0.68rem', color: modelName === m.id ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>{m.badge}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {error && (
               <div style={{
@@ -409,7 +376,7 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
             
             <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>AI recommendation generated!</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-              Our trained {result.model_used || modelName} model has mapped your parameters to the best target soundscape.
+              Our AI music therapy engine has mapped your parameters to the best target soundscape.
             </p>
 
             <div className="glass-card" style={{
@@ -447,18 +414,6 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
                   border: '1px solid var(--border-glass)'
                 }}>
                   {getSymptomTag(result.result_state).label}
-                </span>
-
-                <span style={{
-                  background: 'rgba(99, 102, 241, 0.15)',
-                  color: 'var(--primary)',
-                  padding: '0.4rem 0.8rem',
-                  borderRadius: '20px',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  border: '1px solid rgba(99, 102, 241, 0.3)'
-                }}>
-                  ⚡ Model: {result.model_used || modelName}
                 </span>
 
                 <span style={{
