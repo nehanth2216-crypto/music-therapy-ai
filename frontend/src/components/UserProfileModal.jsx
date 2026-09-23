@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Lock, Save, X, CheckCircle, AlertCircle, Sparkles, Shield } from 'lucide-react';
 
-const LANGUAGES = ["English", "Telugu", "Spanish", "Hindi", "Other"];
+const LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam", "Spanish", "Other"];
 
 export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, onProfileUpdated }) {
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'security'

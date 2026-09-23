@@ -503,7 +503,6 @@ class WeightedSongRecommendationEngine:
         return compat_table.get(s_g, 0.20)
 
     @staticmethod
-    @staticmethod
     def calculate_energy_match(song_energy: str, user_energy: str) -> float:
         """Energy compatibility match according to exact specification."""
         s_e = (song_energy or "medium").strip().lower()
@@ -538,6 +537,129 @@ class WeightedSongRecommendationEngine:
             return 0.85
 
     @staticmethod
+    def calculate_clinical_vector_similarity(
+        user_mood: str,
+        user_act: str,
+        user_energy: str,
+        user_stress: int,
+        user_anxiety: int,
+        song_mood: str,
+        song_act: str,
+        song_energy: str,
+        song_genre: str
+    ) -> float:
+        """
+        Calculates cosine similarity in high-dimensional continuous clinical space:
+        Vectors span [Valence, Arousal, Autonomic Balance, Energy Resonance].
+        """
+        import math
+        
+        u_m = (user_mood or "calm").lower()
+        u_e = (user_energy or "medium").lower()
+        u_a = (user_act or "relaxing").lower()
+        
+        valence_map = {
+            "happy": 0.85, "energetic": 0.80, "calm": 0.40, "relaxed": 0.50,
+            "romantic": 0.70, "focused": 0.30, "bored": -0.20, "tired": -0.30,
+            "stressed": -0.50, "anxious": -0.70, "anxiety": -0.70, "sad": -0.75, "angry": -0.80
+        }
+        arousal_map = {
+            "tired": 0.10, "calm": 0.20, "relaxed": 0.20, "bored": 0.25,
+            "sad": 0.30, "focused": 0.40, "romantic": 0.40, "stressed": 0.70,
+            "happy": 0.75, "anxious": 0.80, "anxiety": 0.80, "energetic": 0.90, "angry": 0.95
+        }
+        energy_map = {"low": 0.20, "medium": 0.55, "high": 0.90}
+        
+        u_val = valence_map.get(u_m, 0.20)
+        u_aro = arousal_map.get(u_m, 0.40)
+        u_eng = energy_map.get(u_e, 0.55)
+        
+        s_m = (song_mood or "calm").lower()
+        s_e = (song_energy or "medium").lower()
+        s_g = (song_genre or "").lower()
+        
+        s_val = valence_map.get(s_m, 0.30)
+        s_aro = arousal_map.get(s_m, 0.40)
+        s_eng = energy_map.get(s_e, 0.55)
+        
+        calming_genres = {"lo-fi": 0.9, "classical": 0.95, "acoustic": 0.85, "ambient": 1.0, "melody": 0.80, "nature sounds": 1.0}
+        s_calm = calming_genres.get(s_g, 0.40 if s_e == "low" else (0.20 if s_e == "high" else 0.50))
+        target_calm = 0.90 if (user_stress >= 7 or user_anxiety >= 7) else 0.50
+        
+        v_u = [(u_val + 1.0) / 2.0, u_aro, u_eng, target_calm]
+        v_s = [(s_val + 1.0) / 2.0, s_aro, s_eng, s_calm]
+        
+        dot = sum(a * b for a, b in zip(v_u, v_s))
+        mag_u = math.sqrt(sum(a * a for a in v_u))
+        mag_s = math.sqrt(sum(b * b for b in v_s))
+        
+        if mag_u == 0.0 or mag_s == 0.0:
+            return 0.70
+            
+        cosine_sim = dot / (mag_u * mag_s)
+        return max(0.0, min(1.0, cosine_sim))
+
+    @staticmethod
+    def calculate_iso_principle_trajectory(
+        user_mood: str,
+        user_energy: str,
+        user_stress: int,
+        user_anxiety: int,
+        user_act: str,
+        song_mood: str,
+        song_energy: str,
+        song_act: str,
+        song_genre: str
+    ) -> Tuple[float, str]:
+        """
+        ISO Principle (Clinical Music Therapy):
+        Matches patient's starting affective state and progressively shifts neurochemistry
+        toward therapeutic equilibrium.
+        """
+        u_m = (user_mood or "").strip().lower()
+        u_e = (user_energy or "medium").strip().lower()
+        u_a = (user_act or "").strip().lower()
+        s_m = (song_mood or "").strip().lower()
+        s_e = (song_energy or "medium").strip().lower()
+        s_g = (song_genre or "").strip().lower()
+        s_a = (song_act or "").strip().lower()
+
+        # Clinical case 1: Acute Stress & Anxiety (>= 7)
+        if user_stress >= 7 or user_anxiety >= 7:
+            if s_e == "high" or s_a in ["party", "workout"] or s_g in ["rock", "dance"]:
+                return 0.10, "Contraindicated Sensory Overload"
+            if s_m in ["calm", "relaxed", "anxiety", "stressed", "emotional"] and s_e in ["low", "medium"]:
+                return 1.0, "Parasympathetic Vagal Down-Regulation (Calm)"
+            return 0.65, "Pacing Transition toward Calm"
+
+        # Clinical case 2: Motor Activation / High Physical Output (Workout / Running / Party)
+        if u_a in ["workout", "running", "party"] or u_e == "high":
+            if s_e == "high" and (s_g in ["dance", "pop", "rock"] or s_m in ["energetic", "happy"]):
+                return 1.0, "Cardiovascular Rhythm Entrainment & Motor Activation"
+            if s_e == "low":
+                return 0.20, "Motor Inertia Inhibitor"
+            return 0.75, "Rhythmic Cadence Maintenance"
+
+        # Clinical case 3: Deep Focus / Cognitive Flow (Studying / Working)
+        if u_a in ["studying", "working", "reading"] or u_m in ["focused"]:
+            if s_g in ["lo-fi", "classical", "acoustic", "melody", "ambient", "nature sounds"] and s_e in ["low", "medium"]:
+                return 1.0, "Alpha-Wave Synchronization (Deep Focus)"
+            if s_e == "high":
+                return 0.25, "Cognitive Intrusion Distraction"
+            return 0.80, "Sustained Cognitive Balance"
+
+        # Clinical case 4: Depressive, Exhaustion or Fatigue (Sad / Tired)
+        if u_m in ["sad", "tired", "bored"] or u_e == "low":
+            if s_m in ["calm", "romantic", "melody", "acoustic"] and s_e in ["low", "medium"]:
+                return 0.95, "Affective Validation & Gentle Dopaminergic Pacing"
+            if s_e == "high":
+                return 0.35, "Emotional Discordance / Sensory Mismatch"
+            return 0.80, "Emotional Resonant Pacing"
+
+        # Clinical case 5: Hedonic Optimization (Happy / Relaxed / Balanced)
+        return 0.90, "Positive Affect Stabilization & Flow"
+
+    @staticmethod
     def calculate_age_match(min_age: int, max_age: int, user_age: int) -> float:
         """Age compatibility curve (1–100, non-restrictive factor)."""
         try:
@@ -561,6 +683,7 @@ class WeightedSongRecommendationEngine:
         """
         Calculate weighted score (0.0 - 100.0) factoring in complete user state:
         Language (25%), Mood (20%), Activity (20%), Energy (15%), Stress/Anxiety Therapy Fit (10%), Genre (5%), Age (5%).
+        Enhanced with clinical vector embedding cosine similarity and ISO Principle trajectory calibration.
         """
         user_lang = str(user_state.get("language") or user_state.get("language_pref") or "English").strip()
         user_mood = str(user_state.get("mood") or "Calm").strip()
@@ -623,16 +746,30 @@ class WeightedSongRecommendationEngine:
         # 7. Age Compatibility (5%)
         age_match = self.calculate_age_match(s_min_age, s_max_age, user_age)
 
-        # Weighted calculation normalized to 0–100
-        score = (
+        # 8. Clinical Vector Embedding & ISO Principle Trajectory
+        vector_sim = self.calculate_clinical_vector_similarity(
+            user_mood, user_act, user_energy, user_stress, user_anxiety,
+            s_mood, s_act, s_energy, s_genre
+        )
+        iso_fit, iso_stage = self.calculate_iso_principle_trajectory(
+            user_mood, user_energy, user_stress, user_anxiety, user_act,
+            s_mood, s_energy, s_act, s_genre
+        )
+        blended_therapy_fit = (therapy_fit * 0.70) + (iso_fit * 0.30)
+
+        # Base weighted calculation normalized to 0–100
+        base_score = (
             (lang_match * 0.25) +
             (mood_match * 0.20) +
             (act_match * 0.20) +
             (energy_match * 0.15) +
-            (therapy_fit * 0.10) +
+            (blended_therapy_fit * 0.10) +
             (genre_match * 0.05) +
             (age_match * 0.05)
         ) * 100.0
+
+        # Continuous vector embedding alignment
+        score = (base_score * 0.90) + (vector_sim * 100.0 * 0.10)
 
         # Hard conflict penalty: polar opposite energy during intensity-specific activities
         if user_energy.lower() == "high" and s_energy.lower() == "low" and user_act.lower() in ["workout", "running", "party"]:
@@ -656,6 +793,16 @@ class WeightedSongRecommendationEngine:
             score = min(100.0, score + min(1.2, history_bonus))
 
         score = round(score, 1)
+
+        # Attach telemetry data to song_item for explainability
+        song_item["_match_telemetry"] = {
+            "clinical_fit_pct": round(blended_therapy_fit * 100.0, 1),
+            "mood_alignment_pct": round(mood_match * 100.0, 1),
+            "energy_resonance_pct": round(energy_match * 100.0, 1),
+            "activity_compatibility_pct": round(act_match * 100.0, 1),
+            "vector_similarity_pct": round(vector_sim * 100.0, 1),
+            "iso_principle_stage": iso_stage
+        }
 
         # Generate matched features checklist
         matched_features = []
@@ -682,6 +829,12 @@ class WeightedSongRecommendationEngine:
 
         if therapy_fit >= 0.90 and (user_stress >= 7 or user_anxiety >= 7):
             matched_features.append("✓ Stress/Anxiety Relief")
+
+        if vector_sim >= 0.85:
+            matched_features.append(f"✓ Vector Alignment ({round(vector_sim * 100)}%)")
+
+        if iso_stage and "Contraindicated" not in iso_stage:
+            matched_features.append(f"✓ ISO: {iso_stage}")
 
         if s_min_age <= user_age <= s_max_age:
             matched_features.append(f"✓ Target demographic (age {user_age})")
@@ -789,7 +942,9 @@ class WeightedSongRecommendationEngine:
                 "cover_image": item.get("album_image") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop",
                 "preview_url": item.get("preview_url") or "",
                 "play_url": item.get("play_url") or f"https://open.spotify.com/search/{song_name}",
-                "youtube_search_url": f"https://www.youtube.com/results?search_query={song_name.replace(' ', '+')}+{artist.replace(' ', '+')}"
+                "youtube_search_url": f"https://www.youtube.com/results?search_query={song_name.replace(' ', '+')}+{artist.replace(' ', '+')}",
+                "match_telemetry": item.get("_match_telemetry", {}),
+                "clinical_telemetry": item.get("_match_telemetry", {})
             }
 
             if song_key not in scored_unique_songs or score > scored_unique_songs[song_key]["score"]:

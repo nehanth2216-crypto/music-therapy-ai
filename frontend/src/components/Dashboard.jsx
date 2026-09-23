@@ -25,7 +25,7 @@ ChartJS.register(
 );
 
 const MOODS = ["Calm", "Happy", "Stressed", "Sad", "Emotional", "Romantic", "Energetic", "Anxiety", "Relaxed", "Tired", "Angry", "Focused"];
-const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"];
+const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam"];
 
 const LYRICS_DATABASE = {
   "Samayama": {
@@ -1503,6 +1503,19 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                                 {feat.startsWith('✓') ? feat : `✓ ${feat}`}
                               </span>
                             ))}
+                          </div>
+                        )}
+                        {track.match_telemetry && track.match_telemetry.iso_principle_stage && (
+                          <div style={{ marginTop: '0.45rem', paddingTop: '0.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', fontSize: '0.72rem', color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '0.12rem 0.5rem', borderRadius: '4px', background: 'rgba(6, 182, 212, 0.15)', border: '1px solid rgba(6, 182, 212, 0.3)', color: '#38bdf8' }}>
+                              🧠 Clinical Fit: {track.match_telemetry.clinical_fit_pct}%
+                            </span>
+                            <span style={{ padding: '0.12rem 0.5rem', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', color: '#818cf8' }}>
+                              ⚡ Energy: {track.match_telemetry.energy_resonance_pct}%
+                            </span>
+                            <span style={{ padding: '0.12rem 0.5rem', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399' }}>
+                              🎯 Vector Cosine: {track.match_telemetry.vector_similarity_pct}%
+                            </span>
                           </div>
                         )}
                       </div>

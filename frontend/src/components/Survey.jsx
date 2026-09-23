@@ -7,7 +7,7 @@ const ACTIVITIES = ["Studying", "Working", "Workout", "Running", "Walking", "Dri
 const ENERGIES = ["Low", "Medium", "High"];
 const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
 const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
-const LANGUAGES = ["Telugu", "Tamil", "Hindi", "Malayalam", "English"];
+const LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam"];
 
 export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComplete }) {
   const [step, setStep] = useState(1);
@@ -22,7 +22,7 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
   const [sleepQuality, setSleepQuality] = useState('Good');
   const [anxiety, setAnxiety] = useState(5);
   const [favGenre, setFavGenre] = useState('Melody');
-  const [languagePref, setLanguagePref] = useState('Telugu');
+  const [languagePref, setLanguagePref] = useState('English');
   const [activity, setActivity] = useState('Studying');
   const [energy, setEnergy] = useState('Low');
   const [modelName, setModelName] = useState('LightGBM');
