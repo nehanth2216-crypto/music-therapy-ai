@@ -2,7 +2,7 @@ import os
 import json
 from typing import Dict, Any, List, Optional, Tuple
 
-CATALOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "song_catalog.json")
+CATALOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dataset", "multilingual_music_catalog.json")
 
 # Mood compatibility matrix
 # Mood compatibility matrix
@@ -379,11 +379,58 @@ class WeightedSongRecommendationEngine:
         self.load_catalog()
 
     def load_catalog(self):
-        """Load 500-song catalog from persistent JSON."""
+        """Load authentic music catalog from previous dataset (multilingual_music_catalog.json)."""
         if os.path.exists(self.catalog_path):
             try:
                 with open(self.catalog_path, "r", encoding="utf-8") as f:
-                    self.catalog = json.load(f)
+                    data = json.load(f)
+                if isinstance(data, list):
+                    self.catalog = data
+                elif isinstance(data, dict):
+                    # Flatten previous multilingual music catalog dictionary
+                    flattened = []
+                    for lang, songs in data.items():
+                        for s in songs:
+                            s_copy = dict(s)
+                            if "language" not in s_copy:
+                                s_copy["language"] = lang
+                            if "song" not in s_copy:
+                                s_copy["song"] = s_copy.get("title", "")
+                            if "title" not in s_copy:
+                                s_copy["title"] = s_copy.get("song", "")
+                            if "artist" not in s_copy:
+                                s_copy["artist"] = s_copy.get("artist_or_source", "")
+                            if "artist_or_source" not in s_copy:
+                                s_copy["artist_or_source"] = s_copy.get("artist", "")
+
+                            # Map / infer clinical features from mood and genre if not explicitly present
+                            m_lower = str(s_copy.get("mood", "")).lower()
+                            g_lower = str(s_copy.get("genre", "")).lower()
+                            if "energy" not in s_copy or not s_copy["energy"]:
+                                if m_lower in ["energetic", "happy"] or g_lower in ["dance", "pop", "rock"]:
+                                    s_copy["energy"] = "High"
+                                elif m_lower in ["calm", "calming", "relaxed", "tired", "anxiety", "lo-fi"] or g_lower in ["lo-fi", "acoustic", "classical", "melody"]:
+                                    s_copy["energy"] = "Low"
+                                else:
+                                    s_copy["energy"] = "Medium"
+
+                            if "activity" not in s_copy or not s_copy["activity"]:
+                                if m_lower in ["energetic"] or g_lower in ["dance", "party"]:
+                                    s_copy["activity"] = "Party"
+                                elif g_lower in ["rock", "workout"]:
+                                    s_copy["activity"] = "Workout"
+                                elif g_lower in ["lo-fi", "acoustic"] or m_lower in ["studying", "focused"]:
+                                    s_copy["activity"] = "Studying"
+                                else:
+                                    s_copy["activity"] = "Relaxing"
+
+                            if "min_age" not in s_copy:
+                                s_copy["min_age"] = 10
+                            if "max_age" not in s_copy:
+                                s_copy["max_age"] = 80
+
+                            flattened.append(s_copy)
+                    self.catalog = flattened
             except Exception as e:
                 print(f"Error loading song catalog: {e}")
                 self.catalog = []
@@ -404,13 +451,28 @@ class WeightedSongRecommendationEngine:
         s_m = (song_mood or "").strip().lower()
         u_m = (user_mood or "calm").strip().lower()
 
+        # Mood normalizations
+        mood_synonyms = {
+            "calming": "calm",
+            "relaxed": "calm",
+            "relaxing": "calm",
+            "anxious": "anxiety",
+            "stressed": "anxiety",
+            "energetic": "happy",
+            "joyful": "happy",
+            "exhausted": "tired",
+            "fatigued": "tired"
+        }
+        s_norm = mood_synonyms.get(s_m, s_m)
+        u_norm = mood_synonyms.get(u_m, u_m)
+
         if not s_m:
             return 0.30
-        if s_m == u_m:
+        if s_m == u_m or s_norm == u_norm:
             return 1.0
 
-        compat_table = MOOD_COMPATIBILITY.get(u_m, {})
-        return compat_table.get(s_m, 0.10)
+        compat_table = MOOD_COMPATIBILITY.get(u_norm, MOOD_COMPATIBILITY.get(u_m, {}))
+        return compat_table.get(s_norm, compat_table.get(s_m, 0.10))
 
     @staticmethod
     def calculate_activity_match(song_act: str, user_act: str) -> float:
@@ -514,9 +576,29 @@ class WeightedSongRecommendationEngine:
         s_act = str(song_item.get("activity") or "").strip()
         s_genre = str(song_item.get("genre") or "").strip()
         s_energy = str(song_item.get("energy") or "").strip()
-        s_artist = str(song_item.get("artist_or_source") or "").strip()
+        s_artist = str(song_item.get("artist") or song_item.get("artist_or_source") or "").strip()
         s_min_age = int(song_item.get("min_age") or 1)
         s_max_age = int(song_item.get("max_age") or 100)
+
+        # Fallback infer energy if empty
+        if not s_energy:
+            if s_mood.lower() in ["energetic", "happy"] or s_genre.lower() in ["dance", "pop", "rock"]:
+                s_energy = "High"
+            elif s_mood.lower() in ["calm", "calming", "relaxed", "tired", "anxiety", "lo-fi"] or s_genre.lower() in ["lo-fi", "acoustic", "classical", "melody"]:
+                s_energy = "Low"
+            else:
+                s_energy = "Medium"
+
+        # Fallback infer activity if empty
+        if not s_act:
+            if s_mood.lower() in ["energetic"] or s_genre.lower() in ["dance", "party"]:
+                s_act = "Party"
+            elif s_genre.lower() in ["rock", "workout"]:
+                s_act = "Workout"
+            elif s_genre.lower() in ["lo-fi", "acoustic"] or s_mood.lower() in ["studying", "focused"]:
+                s_act = "Studying"
+            else:
+                s_act = "Relaxing"
 
         # 1. Language Match (25% - Hard Gate)
         lang_match = self.calculate_language_match(s_lang, user_lang)
@@ -647,6 +729,33 @@ class WeightedSongRecommendationEngine:
             if it.get("language", "").strip().lower() == user_lang.lower()
         ]
 
+        if len(candidate_items) < 10:
+            try:
+                from backend.ml.recommender import fetch_live_itunes_tracks
+                genre_term = str(user_state.get("genre") or user_state.get("fav_genre") or "").strip()
+                mood_term = str(user_state.get("mood") or "").strip()
+                queries_to_try = [genre_term, mood_term, "hits", "popular"]
+                for q in queries_to_try:
+                    if len(candidate_items) >= 15:
+                        break
+                    if not q:
+                        continue
+                    live_tracks = fetch_live_itunes_tracks(
+                        q,
+                        language=user_lang,
+                        limit=15
+                    )
+                    for lt in live_tracks:
+                        lt_copy = dict(lt)
+                        lt_copy["language"] = user_lang
+                        if not lt_copy.get("genre"):
+                            lt_copy["genre"] = genre_term or "Pop"
+                        if not lt_copy.get("mood"):
+                            lt_copy["mood"] = mood_term or "Calm"
+                        candidate_items.append(lt_copy)
+            except Exception:
+                pass
+
         if not candidate_items:
             return []
 
@@ -654,8 +763,8 @@ class WeightedSongRecommendationEngine:
         scored_unique_songs: Dict[str, Dict[str, Any]] = {}
 
         for item in candidate_items:
-            song_name = item.get("song", "").strip()
-            artist = item.get("artist_or_source", "").strip()
+            song_name = (item.get("song") or item.get("title") or "").strip()
+            artist = (item.get("artist") or item.get("artist_or_source") or "").strip()
             song_key = f"{song_name.lower()}___{artist.lower()}"
 
             score, matched_features, reason = self.score_song(item, user_state)

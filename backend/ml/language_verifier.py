@@ -121,7 +121,15 @@ class LanguageVerifier:
                 return True
 
         # 4. Catalog or Search Result matching target language
-        if track.get("is_catalog_verified") or track.get("is_search_result"):
+        if track.get("is_catalog_verified"):
+            return True
+
+        if track.get("is_search_result"):
+            if t_lang.lower() != "english":
+                keywords = LANGUAGE_ARTIST_CATALOG.get(t_lang, [])
+                has_keyword = any(kw in full_text for kw in keywords) or t_lang.lower() in full_text
+                if not has_keyword:
+                    return False
             for lang, pattern in UNICODE_RANGES.items():
                 if lang != t_lang and lang != "English":
                     if re.search(pattern, full_text):

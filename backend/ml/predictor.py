@@ -9,7 +9,14 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 
-from backend.ml.feature_engineering import THERAPY_CATEGORIES
+from backend.ml.feature_engineering import (
+    THERAPY_CATEGORIES,
+    MOODS,
+    SLEEP_QUALITIES,
+    ACTIVITIES,
+    GENRES,
+    SUPPORTED_LANGUAGES
+)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
@@ -41,103 +48,64 @@ class TherapyPredictor:
         X_real = []
         y_real = []
 
-        dataset_path = os.path.join(BASE_DIR, "dataset", "therapy_dataset_500.json")
+        dataset_path = os.path.join(BASE_DIR, "dataset", "music_dataset.csv")
         if os.path.exists(dataset_path):
             try:
-                import json
+                import csv
                 with open(dataset_path, "r", encoding="utf-8") as f:
-                    items = json.load(f)
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        age = float(row.get("Age") or 25)
+                        mood_str = (row.get("Mood") or "Tired").strip()
+                        stress = float(row.get("Stress") or 5)
+                        sleep_str = (row.get("SleepQuality") or "Fair").strip()
+                        anxiety = float(row.get("Anxiety") or 5)
+                        genre_str = (row.get("FavGenre") or "Lo-fi").strip()
+                        lang_str = (row.get("Language") or "English").strip()
+                        act_str = (row.get("Activity") or "Relaxation").strip()
+                        rec_pl = (row.get("RecommendedPlaylist") or "playlist_1").strip()
 
-                supported_langs = [
-                    "English", "Telugu", "Hindi", "Tamil", "Kannada", "Malayalam",
-                    "Punjabi", "Marathi", "Gujarati", "Bengali", "Urdu", "Japanese",
-                    "Korean", "Chinese", "Spanish", "French", "German", "Italian"
-                ]
+                        # Categorical Encodings matching FeatureEngineer
+                        mood_idx = MOODS.index(mood_str) if mood_str in MOODS else 4
+                        sleep_idx = SLEEP_QUALITIES.index(sleep_str) if sleep_str in SLEEP_QUALITIES else 1
+                        act_idx = ACTIVITIES.index(act_str) if act_str in ACTIVITIES else 4
+                        genre_idx = GENRES.index(genre_str) if genre_str in GENRES else 0
+                        lang_idx = SUPPORTED_LANGUAGES.index(lang_str) if lang_str in SUPPORTED_LANGUAGES else 0
 
-                for item in items:
-                    min_a = item.get("min_age", 20)
-                    max_a = item.get("max_age", 30)
-                    age = (min_a + max_a) / 2.0
+                        depression_val = 8.0 if mood_str in ["Sad", "Anxiety"] else 3.0
+                        sleep_val = 3.0 if sleep_str == "Poor" else (5.0 if sleep_str == "Fair" else 8.0)
+                        energy_val = 9.0 if act_str == "Exercise" else (3.0 if mood_str in ["Tired", "Sad"] else 6.0)
 
-                    mood_str = item.get("mood", "Calm")
-                    act_str = item.get("activity", "Relaxing")
-                    genre_str = item.get("genre", "Melody")
-                    lang_str = item.get("language", "English")
-                    energy_str = item.get("energy", "Medium")
+                        if rec_pl == "playlist_2" or act_str == "Sleeping":
+                            label = 0  # Sleep Therapy
+                        elif rec_pl == "playlist_3" and anxiety >= 7:
+                            label = 1  # Anxiety Relief
+                        elif rec_pl == "playlist_5" or stress >= 7:
+                            label = 2  # Stress Relief
+                        elif act_str == "Meditation":
+                            label = 3  # Meditation
+                        elif act_str == "Studying":
+                            label = 5  # Focus
+                        elif rec_pl == "playlist_4" or act_str == "Exercise":
+                            label = 7  # Workout
+                        elif mood_str == "Sad":
+                            label = 8  # Emotional Healing
+                        elif mood_str == "Happy":
+                            label = 9  # Happiness
+                        elif act_str in ["Walking", "Driving"]:
+                            label = 6  # Motivation
+                        else:
+                            label = 4  # Relaxation
 
-                    if mood_str in ["Happy", "Romantic"]:
-                        mood_idx = 0
-                    elif mood_str in ["Emotional", "Sad"]:
-                        mood_idx = 1
-                    elif mood_str in ["Stressed"]:
-                        mood_idx = 2
-                    elif mood_str in ["Angry"]:
-                        mood_idx = 3
-                    else:
-                        mood_idx = 4
-
-                    if act_str in ["Studying"]:
-                        act_idx = 0
-                    elif act_str in ["Sleeping"]:
-                        act_idx = 1
-                    elif act_str in ["Meditation"]:
-                        act_idx = 2
-                    elif act_str in ["Workout", "Party"]:
-                        act_idx = 3
-                    else:
-                        act_idx = 4
-
-                    if genre_str in ["Lo-fi", "Acoustic"]:
-                        genre_idx = 0
-                    elif genre_str in ["Classical", "Melody"]:
-                        genre_idx = 1
-                    elif genre_str in ["Nature Sounds"]:
-                        genre_idx = 2
-                    elif genre_str in ["Instrumental"]:
-                        genre_idx = 3
-                    else:
-                        genre_idx = 4
-
-                    lang_idx = supported_langs.index(lang_str) if lang_str in supported_langs else 0
-
-                    stress = 8 if mood_str == "Stressed" else (2 if mood_str == "Calm" else 5)
-                    anxiety = 8 if mood_str == "Stressed" else (2 if mood_str == "Calm" else 4)
-                    sleep_idx = 0 if energy_str == "High" else (2 if energy_str == "Low" else 1)
-
-                    depression_val = 8 if mood_str in ["Emotional", "Sad"] else 3
-                    sleep_val = 3 if sleep_idx == 2 else 7
-                    energy_val = 9 if energy_str == "High" else (3 if energy_str == "Low" else 6)
-
-                    if act_str == "Sleeping" or (energy_str == "Low" and act_str == "Relaxing" and mood_str == "Calm"):
-                        label = 0 # Sleep Therapy
-                    elif mood_str == "Stressed" and anxiety >= 7:
-                        label = 1 # Anxiety Relief
-                    elif mood_str == "Stressed":
-                        label = 2 # Stress Relief
-                    elif act_str == "Meditation" or item.get("context_activity") == "Meditation":
-                        label = 3 # Meditation
-                    elif act_str == "Studying":
-                        label = 5 # Focus
-                    elif act_str in ["Workout", "Party"] or energy_str == "High":
-                        label = 7 # Workout
-                    elif mood_str in ["Emotional", "Sad"]:
-                        label = 8 # Emotional Healing
-                    elif mood_str == "Happy":
-                        label = 9 # Happiness
-                    elif act_str in ["Driving", "Walking"]:
-                        label = 6 # Motivation
-                    else:
-                        label = 4 # Relaxation
-
-                    vec = [
-                        float(age), float(mood_idx), float(stress), float(sleep_idx),
-                        float(anxiety), float(act_idx), float(genre_idx), float(lang_idx),
-                        float(depression_val), float(sleep_val), float(energy_val)
-                    ]
-                    X_real.append(vec)
-                    y_real.append(label)
+                        vec = [
+                            age, float(mood_idx), stress, float(sleep_idx),
+                            anxiety, float(act_idx), float(genre_idx), float(lang_idx),
+                            depression_val, sleep_val, energy_val
+                        ]
+                        X_real.append(vec)
+                        y_real.append(label)
             except Exception as e:
-                print(f"Error loading therapy_dataset_500.json: {e}")
+                print(f"Error loading music_dataset.csv: {e}")
 
         # Augmentation cohort to balance all 10 therapy categories
         num_aug = 2000

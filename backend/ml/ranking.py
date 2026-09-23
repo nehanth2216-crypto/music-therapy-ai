@@ -190,8 +190,47 @@ class RecommendationRankingEngine:
             if score > -500.0:
                 seen_titles.add(t_key)
                 scored_track = dict(track)
-                scored_track["recommendation_score"] = score
-                scored_list.append((score, scored_track))
+                title = scored_track.get("title") or scored_track.get("song") or "Therapeutic Track"
+                artist = scored_track.get("artist") or scored_track.get("artist_or_source") or "HarmonyRec"
+                norm_score = max(0.0, min(100.0, round(score, 1)))
+
+                scored_track["song"] = title
+                scored_track["title"] = title
+                scored_track["artist"] = artist
+                scored_track["artist_or_source"] = artist
+                scored_track["recommendation_score"] = norm_score
+                scored_track["score"] = norm_score
+                scored_track["match_score"] = norm_score
+
+                # Image formatting
+                if not scored_track.get("album_image"):
+                    scored_track["album_image"] = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+                scored_track["cover_image"] = scored_track.get("album_image")
+
+                # Playback & Streaming URLs
+                from urllib.parse import quote_plus
+                if not scored_track.get("play_url"):
+                    scored_track["play_url"] = f"https://open.spotify.com/search/{quote_plus(f'{title} {artist}')}"
+                if not scored_track.get("spotify_url"):
+                    scored_track["spotify_url"] = scored_track["play_url"]
+                if not scored_track.get("youtube_search_url"):
+                    scored_track["youtube_search_url"] = f"https://www.youtube.com/results?search_query={quote_plus(f'{title} {artist}')}"
+
+                # Feature tags and explanations
+                feats = [f"✓ {selected_language}"]
+                t_mood = scored_track.get("mood") or user_mood
+                feats.append(f"✓ {t_mood} mood")
+                if selected_genre:
+                    feats.append(f"✓ {selected_genre} style")
+                if target_activity:
+                    feats.append(f"✓ {target_activity}")
+                scored_track["matched_features"] = feats
+                scored_track["reason"] = f"Strong therapeutic match for your {selected_language} music preference, {user_mood.lower()} mood, and {target_activity.lower()} session."
+
+                scored_list.append((norm_score, scored_track))
 
         scored_list.sort(key=lambda x: x[0], reverse=True)
-        return [t[1] for t in scored_list[:top_n]]
+        final_tracks = [t[1] for t in scored_list[:top_n]]
+        for idx, tr in enumerate(final_tracks, start=1):
+            tr["rank"] = idx
+        return final_tracks
