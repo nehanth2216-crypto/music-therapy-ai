@@ -18,7 +18,6 @@ TEST_DATABASE_URL = "sqlite:///./test_harmonyrec.db"
 engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Override database dependency in FastAPI
 def override_get_db():
     db = TestingSessionLocal()
     try:
@@ -26,14 +25,13 @@ def override_get_db():
     finally:
         db.close()
 
-app.dependency_overrides[get_db] = override_get_db
-
 class TestHarmonyRecBackend(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
         # Create test database tables
         Base.metadata.create_all(bind=engine)
+        app.dependency_overrides[get_db] = override_get_db
         cls.client = TestClient(app)
         
         # Test accounts data
@@ -61,6 +59,7 @@ class TestHarmonyRecBackend(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        app.dependency_overrides.pop(get_db, None)
         # Drop test tables and clean up database file
         Base.metadata.drop_all(bind=engine)
         if os.path.exists("./test_harmonyrec.db"):

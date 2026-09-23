@@ -24,7 +24,7 @@ ChartJS.register(
   Filler
 );
 
-const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
+const MOODS = ["Calm", "Happy", "Stressed", "Sad", "Emotional", "Romantic", "Energetic", "Anxiety", "Relaxed", "Tired", "Angry", "Focused"];
 const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"];
 
 const LYRICS_DATABASE = {
@@ -220,8 +220,8 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   
   // Audio Player, Lyrics, and Multi-Filter Search Engine State
   const [selectedLanguage, setSelectedLanguage] = useState('English');
-  const [selectedGenre, setSelectedGenre] = useState('Lo-fi');
-  const [selectedMood, setSelectedMood] = useState('Calming');
+  const [selectedGenre, setSelectedGenre] = useState('Melody');
+  const [selectedMood, setSelectedMood] = useState('Calm');
   const [filterQuery, setFilterQuery] = useState('');
   const [filterLoading, setFilterLoading] = useState(false);
   const [currentTracks, setCurrentTracks] = useState([]);
@@ -320,6 +320,9 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
           // Set feedback default if already submitted
           setRating(latest.rating || 0);
           setHelped(latest.helped);
+          if (latest.language_pref) setSelectedLanguage(latest.language_pref);
+          if (latest.mood) setSelectedMood(latest.mood);
+          if (latest.fav_genre) setSelectedGenre(latest.fav_genre);
         }
       }
 
@@ -372,7 +375,13 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     setCatalogPage(1);
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      const url = `${apiBaseUrl}/recommend/by-language?language=${encodeURIComponent(lang)}&genre=${encodeURIComponent(genre)}&mood=${encodeURIComponent(mood)}&query=${encodeURIComponent(query)}`;
+      const latest = history && history.length > 0 ? history[history.length - 1] : null;
+      const act = latest?.activity || 'Relaxing';
+      const nrg = latest?.energy || 'Medium';
+      const str = latest?.stress ?? 5;
+      const anx = latest?.anxiety ?? 5;
+      const ageVal = latest?.age ?? 25;
+      const url = `${apiBaseUrl}/recommend/by-language?language=${encodeURIComponent(lang)}&genre=${encodeURIComponent(genre)}&mood=${encodeURIComponent(mood)}&activity=${encodeURIComponent(act)}&energy=${encodeURIComponent(nrg)}&stress=${str}&anxiety=${anx}&age=${ageVal}&query=${encodeURIComponent(query)}`;
       const res = await fetch(url, { headers });
       if (res.ok) {
         const data = await res.json();
@@ -1027,7 +1036,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       onChange={(e) => handleMultiFilterSearch(selectedLanguage, e.target.value, selectedMood, filterQuery)}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
                     >
-                      {["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop", "Melody", "Soundtrack", "Acoustic"].map(g => (
+                      {["Melody", "Pop", "Dance", "Acoustic", "Ballad", "Folk", "Rock", "Lo-fi", "Classical", "Instrumental", "Nature Sounds", "Soundtrack"].map(g => (
                         <option key={g} value={g}>{g}</option>
                       ))}
                     </select>

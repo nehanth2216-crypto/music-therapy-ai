@@ -234,8 +234,8 @@ ACTIVITY_COMPATIBILITY = {
 ENERGY_COMPATIBILITY = {
     "low": {
         "low": 1.0,
-        "medium": 0.60,
-        "high": 0.10
+        "medium": 0.50,
+        "high": 0.0
     },
     "medium": {
         "medium": 1.0,
@@ -244,8 +244,8 @@ ENERGY_COMPATIBILITY = {
     },
     "high": {
         "high": 1.0,
-        "medium": 0.60,
-        "low": 0.10
+        "medium": 0.50,
+        "low": 0.0
     }
 }
 
@@ -253,7 +253,7 @@ ENERGY_COMPATIBILITY = {
 GENRE_COMPATIBILITY = {
     "melody": {
         "melody": 1.0,
-        "classical": 0.85,
+        "classical": 0.90,
         "acoustic": 0.85,
         "ballad": 0.85,
         "lo-fi": 0.80,
@@ -316,19 +316,54 @@ GENRE_COMPATIBILITY = {
     },
     "lo-fi": {
         "lo-fi": 1.0,
-        "acoustic": 0.85,
-        "melody": 0.80,
-        "ballad": 0.70,
+        "acoustic": 0.90,
+        "melody": 0.85,
+        "ballad": 0.80,
         "classical": 0.80,
-        "pop": 0.50
+        "folk": 0.60,
+        "pop": 0.50,
+        "dance": 0.20,
+        "rock": 0.10
     },
     "classical": {
         "classical": 1.0,
-        "melody": 0.85,
-        "acoustic": 0.80,
+        "melody": 0.90,
+        "acoustic": 0.85,
         "lo-fi": 0.80,
-        "ballad": 0.70,
-        "folk": 0.60
+        "ballad": 0.80,
+        "folk": 0.60,
+        "pop": 0.40,
+        "dance": 0.10,
+        "rock": 0.10
+    },
+    "instrumental": {
+        "acoustic": 0.95,
+        "melody": 0.90,
+        "ballad": 0.80,
+        "classical": 0.80,
+        "folk": 0.70,
+        "pop": 0.50,
+        "dance": 0.20,
+        "rock": 0.20
+    },
+    "nature sounds": {
+        "acoustic": 0.95,
+        "melody": 0.85,
+        "ballad": 0.80,
+        "classical": 0.80,
+        "folk": 0.70,
+        "pop": 0.30,
+        "dance": 0.05,
+        "rock": 0.05
+    },
+    "soundtrack": {
+        "melody": 0.95,
+        "ballad": 0.90,
+        "pop": 0.85,
+        "acoustic": 0.80,
+        "rock": 0.75,
+        "dance": 0.70,
+        "folk": 0.65
     }
 }
 
@@ -406,13 +441,39 @@ class WeightedSongRecommendationEngine:
         return compat_table.get(s_g, 0.20)
 
     @staticmethod
+    @staticmethod
     def calculate_energy_match(song_energy: str, user_energy: str) -> float:
         """Energy compatibility match according to exact specification."""
         s_e = (song_energy or "medium").strip().lower()
         u_e = (user_energy or "medium").strip().lower()
 
         table = ENERGY_COMPATIBILITY.get(u_e, ENERGY_COMPATIBILITY["medium"])
-        return table.get(s_e, 0.6)
+        return table.get(s_e, 0.50)
+
+    @staticmethod
+    def calculate_stress_anxiety_fit(song_mood: str, song_act: str, song_energy: str, stress: int, anxiety: int) -> float:
+        """Clinical therapy fit based on user's stress and anxiety levels (1-10)."""
+        s_m = (song_mood or "").strip().lower()
+        s_a = (song_act or "").strip().lower()
+        s_e = (song_energy or "").strip().lower()
+        
+        # High stress or acute anxiety (>= 7)
+        if stress >= 7 or anxiety >= 7:
+            if s_e == "high" or s_a in ["party", "workout"]:
+                return 0.05  # Severe contraindication for acute stress/anxiety
+            if s_m in ["calm", "stressed", "emotional", "romantic"] and s_e in ["low", "medium"]:
+                return 1.0  # Therapeutic nervous system down-regulation
+            return 0.50
+
+        # Low stress / low anxiety (<= 3)
+        elif stress <= 3 and anxiety <= 3:
+            if s_e in ["high", "medium"]:
+                return 1.0
+            return 0.75
+
+        # Moderate / baseline (4 to 6)
+        else:
+            return 0.85
 
     @staticmethod
     def calculate_age_match(min_age: int, max_age: int, user_age: int) -> float:
@@ -436,11 +497,8 @@ class WeightedSongRecommendationEngine:
         user_state: Dict[str, Any]
     ) -> Tuple[float, List[str], str]:
         """
-        Calculate weighted score (0.0 - 100.0) and generate explainable reason & matched features.
-        Formula:
-          score = (language_match * 0.30) + (mood_match * 0.25) + (activity_match * 0.20)
-                + (genre_match * 0.15) + (energy_match * 0.05) + (age_match * 0.05)
-          normalized to 0 - 100.
+        Calculate weighted score (0.0 - 100.0) factoring in complete user state:
+        Language (25%), Mood (20%), Activity (20%), Energy (15%), Stress/Anxiety Therapy Fit (10%), Genre (5%), Age (5%).
         """
         user_lang = str(user_state.get("language") or user_state.get("language_pref") or "English").strip()
         user_mood = str(user_state.get("mood") or "Calm").strip()
@@ -448,6 +506,8 @@ class WeightedSongRecommendationEngine:
         user_genre = str(user_state.get("genre") or user_state.get("fav_genre") or "").strip()
         user_energy = str(user_state.get("energy") or "Medium").strip()
         user_age = int(user_state.get("age") or 25)
+        user_stress = int(user_state.get("stress") or 5)
+        user_anxiety = int(user_state.get("anxiety") or 5)
 
         s_lang = str(song_item.get("language") or "").strip()
         s_mood = str(song_item.get("mood") or "").strip()
@@ -458,37 +518,47 @@ class WeightedSongRecommendationEngine:
         s_min_age = int(song_item.get("min_age") or 1)
         s_max_age = int(song_item.get("max_age") or 100)
 
-        # 1. Language Match (30%)
+        # 1. Language Match (25% - Hard Gate)
         lang_match = self.calculate_language_match(s_lang, user_lang)
         if lang_match == 0.0:
             return 0.0, [], "Non-matching language"
 
-        # 2. Mood Match (25%)
+        # 2. Mood Match (20%)
         mood_match = self.calculate_mood_match(s_mood, user_mood)
 
         # 3. Activity Match (20%)
         act_match = self.calculate_activity_match(s_act, user_act)
 
-        # 4. Genre Match (15%)
-        genre_match = self.calculate_genre_match(s_genre, user_genre)
-
-        # 5. Energy Match (5%)
+        # 4. Energy Match (15% - Sharpened to eliminate energy clashes)
         energy_match = self.calculate_energy_match(s_energy, user_energy)
 
-        # 6. Age Compatibility (5%)
+        # 5. Clinical Stress & Anxiety Fit (10%)
+        therapy_fit = self.calculate_stress_anxiety_fit(s_mood, s_act, s_energy, user_stress, user_anxiety)
+
+        # 6. Genre Match (5%)
+        genre_match = self.calculate_genre_match(s_genre, user_genre)
+
+        # 7. Age Compatibility (5%)
         age_match = self.calculate_age_match(s_min_age, s_max_age, user_age)
 
         # Weighted calculation normalized to 0–100
         score = (
-            (lang_match * 0.30) +
-            (mood_match * 0.25) +
+            (lang_match * 0.25) +
+            (mood_match * 0.20) +
             (act_match * 0.20) +
-            (genre_match * 0.15) +
-            (energy_match * 0.05) +
+            (energy_match * 0.15) +
+            (therapy_fit * 0.10) +
+            (genre_match * 0.05) +
             (age_match * 0.05)
         ) * 100.0
 
-        # Secondary personalization from listening history (small secondary factor, does not override mood/activity)
+        # Hard conflict penalty: polar opposite energy during intensity-specific activities
+        if user_energy.lower() == "high" and s_energy.lower() == "low" and user_act.lower() in ["workout", "running", "party"]:
+            score *= 0.50  # Heavy penalty for slow lullabies during high-intensity workout
+        if user_energy.lower() == "low" and s_energy.lower() == "high" and user_act.lower() in ["studying", "sleeping", "meditation"]:
+            score *= 0.50  # Heavy penalty for loud party tracks during quiet study/sleep
+
+        # Secondary personalization from listening history
         history = user_state.get("history") or user_state.get("listening_history") or []
         if history and isinstance(history, list):
             hist_genres = [str(h.get("genre", "")).lower() for h in history if isinstance(h, dict)]
@@ -527,6 +597,9 @@ class WeightedSongRecommendationEngine:
 
         if s_energy.lower() == user_energy.lower():
             matched_features.append(f"✓ {s_energy} energy")
+
+        if therapy_fit >= 0.90 and (user_stress >= 7 or user_anxiety >= 7):
+            matched_features.append("✓ Stress/Anxiety Relief")
 
         if s_min_age <= user_age <= s_max_age:
             matched_features.append(f"✓ Target demographic (age {user_age})")
@@ -575,12 +648,9 @@ class WeightedSongRecommendationEngine:
         ]
 
         if not candidate_items:
-            # If for some unexpected reason language not found in catalog, return empty list
             return []
 
         # Step B: Score all candidate items and group by unique song title + artist
-        # A song can have multiple demographic entries (e.g. Inthandham for age 1-5, 13-17, 26-35)
-        # We select the entry that gives the highest score for this specific user state
         scored_unique_songs: Dict[str, Dict[str, Any]] = {}
 
         for item in candidate_items:
@@ -593,7 +663,7 @@ class WeightedSongRecommendationEngine:
             song_record = {
                 "id": item.get("id"),
                 "song": song_name,
-                "title": song_name, # Alias for player compatibility
+                "title": song_name,
                 "artist": artist,
                 "artist_or_source": artist,
                 "language": item.get("language"),
@@ -607,8 +677,10 @@ class WeightedSongRecommendationEngine:
                 "matched_features": matched_features,
                 "reason": reason,
                 "album_image": item.get("album_image") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop",
+                "cover_image": item.get("album_image") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop",
                 "preview_url": item.get("preview_url") or "",
-                "play_url": item.get("play_url") or f"https://open.spotify.com/search/{song_name}"
+                "play_url": item.get("play_url") or f"https://open.spotify.com/search/{song_name}",
+                "youtube_search_url": f"https://www.youtube.com/results?search_query={song_name.replace(' ', '+')}+{artist.replace(' ', '+')}"
             }
 
             if song_key not in scored_unique_songs or score > scored_unique_songs[song_key]["score"]:
@@ -622,12 +694,15 @@ class WeightedSongRecommendationEngine:
         # Tertiary: Artist ascending (artist.lower())
         unique_song_list.sort(key=lambda s: (-s["score"], s["song"].lower(), s["artist"].lower()))
 
-        # Step D: Apply limit (Top 5–10, default top_n=10, min 5)
-        effective_limit = max(5, min(top_n, len(unique_song_list)))
-        top_recommendations = unique_song_list[:effective_limit]
+        # Step D: Apply quality filter (filter out complete mismatches, guarantee at least 5 songs)
+        high_quality = [s for s in unique_song_list if s["score"] >= 65.0]
+        final_candidates = high_quality if len(high_quality) >= 5 else unique_song_list
+        effective_limit = max(5, min(top_n, len(final_candidates)))
+        top_recommendations = final_candidates[:effective_limit]
 
         # Assign rank 1-indexed
         for idx, rec in enumerate(top_recommendations, start=1):
             rec["rank"] = idx
 
         return top_recommendations
+

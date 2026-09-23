@@ -11,11 +11,12 @@ from backend.recommendation.engine import WeightedSongRecommendationEngine
 from fastapi.testclient import TestClient
 from backend.main import app
 from backend.auth import create_access_token, get_password_hash
-from backend.database import SessionLocal, User
+from backend.database import SessionLocal, User, init_db
 
 class TestWeightedSongRecommendationEngine(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        init_db()
         cls.engine = WeightedSongRecommendationEngine()
         cls.client = TestClient(app)
         

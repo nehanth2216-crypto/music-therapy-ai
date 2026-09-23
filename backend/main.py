@@ -6,6 +6,7 @@ import numpy as np
 import requests
 from typing import List, Optional, Any, Union
 import re
+from urllib.parse import quote_plus
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, field_validator
@@ -1330,6 +1331,7 @@ def get_history(current_user: User = Depends(get_optional_current_user), db: Ses
             "fav_genre": s.fav_genre,
             "language_pref": s.language_pref,
             "activity": s.activity,
+            "energy": getattr(s, "energy", "Medium") or "Medium",
             "result_state": rec.genre if rec else "Calming",
             "playlist_key": s.result_playlist,
             "timestamp": s.timestamp.isoformat(),
@@ -1818,18 +1820,70 @@ def get_mood_history(
 def get_recommendations_by_language(
     language: str = "English",
     genre: Optional[str] = "Lo-fi",
-    mood: Optional[str] = "Calming",
-    activity: Optional[str] = "Relaxation",
+    mood: Optional[str] = "Calm",
+    activity: Optional[str] = None,
+    energy: Optional[str] = None,
+    stress: Optional[int] = None,
+    anxiety: Optional[int] = None,
+    age: Optional[int] = None,
     query: Optional[str] = None,
     playlist_key: Optional[str] = "playlist_1",
-    current_user: User = Depends(get_optional_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     playlist_type = playlist_key if playlist_key in PLAYLIST_THEME_MAPPING else "playlist_1"
     theme_info = PLAYLIST_THEME_MAPPING[playlist_type]
-    
+
+    # Resolve baseline user state from latest survey if user is logged in and params not provided
+    user_latest = None
+    if current_user:
+        user_latest = (
+            db.query(SurveyResponse)
+            .filter(SurveyResponse.user_id == current_user.id)
+            .order_by(SurveyResponse.timestamp.desc())
+            .first()
+        )
+
+    eff_activity = activity or (user_latest.activity if user_latest and user_latest.activity else "Relaxing")
+    eff_energy = energy or (user_latest.energy if user_latest and user_latest.energy else "Medium")
+    eff_stress = stress if stress is not None else (user_latest.stress if user_latest and user_latest.stress is not None else 5)
+    eff_anxiety = anxiety if anxiety is not None else (user_latest.anxiety if user_latest and user_latest.anxiety is not None else 5)
+    eff_age = age if age is not None else (user_latest.age if user_latest and user_latest.age is not None else 25)
+
     if query and query.strip():
-        # Merge iTunes + Deezer results for query searches for maximum catalog depth
+        q = query.strip().lower()
+        catalog_matches = []
+        seen_titles = set()
+        for item in weighted_recommender.catalog:
+            s_lang = (item.get("language") or "").strip().lower()
+            if s_lang == language.strip().lower():
+                s_title = (item.get("song") or item.get("title") or "").strip()
+                s_artist = (item.get("artist") or item.get("artist_or_source") or "").strip()
+                s_movie = (item.get("movie") or item.get("album") or "").strip()
+                if q in s_title.lower() or q in s_artist.lower() or q in s_movie.lower():
+                    if s_title.lower() not in seen_titles:
+                        seen_titles.add(s_title.lower())
+                        song_dict = dict(item)
+                        song_dict["title"] = s_title
+                        song_dict["song"] = s_title
+                        song_dict["artist"] = s_artist
+                        song_dict["artist_or_source"] = s_artist
+                        song_dict["youtube_search_url"] = item.get("youtube_search_url") or make_yt_url(s_title, s_artist)
+                        song_dict["play_url"] = item.get("play_url") or f"https://open.spotify.com/search/{quote_plus(f'{s_title} {s_artist}')}"
+                        song_dict["album_image"] = item.get("album_image") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+                        song_dict["match_score"] = 98.0
+                        song_dict["score"] = 98.0
+                        song_dict["reason"] = f"Direct search match for '{query.strip()}' in {language} catalog"
+                        catalog_matches.append(song_dict)
+        if catalog_matches:
+            return {
+                "language": language,
+                "playlist_key": playlist_type,
+                "playlist_name": f"{language} — {query.strip()} Results",
+                "tracks": catalog_matches[:50]
+            }
+
+        # Fallback to iTunes + Deezer for external query searches
         itunes_tracks = fetch_itunes_tracks(query=query.strip(), limit=50, language=language, genre=genre or "Pop")
         deezer_tracks = fetch_deezer_tracks(query=f"{language} {query.strip()}", limit=50, language=language, genre=genre or "Pop")
         seen = set()
@@ -1848,23 +1902,51 @@ def get_recommendations_by_language(
                 "tracks": merged[:60]
             }
 
-    rec_result = hybrid_recommender.get_recommendations(
-        survey_data={
-            "mood": mood or "Calming",
-            "language_pref": language,
-            "fav_genre": genre or "Lo-fi",
-            "activity": activity or "Relaxation"
-        },
-        user_id=current_user.id if current_user else None,
-        db=db,
-        limit=50
-    )
-    tracks = rec_result.get("tracks", [])
-    t_cat = rec_result.get("predicted_therapy_category", theme_info['name'])
+    # Deterministic weighted song recommendations based on complete user state
+    user_state = {
+        "language": language,
+        "language_pref": language,
+        "genre": genre or "Melody",
+        "fav_genre": genre or "Melody",
+        "mood": mood or "Calm",
+        "activity": eff_activity,
+        "energy": eff_energy,
+        "stress": eff_stress,
+        "anxiety": eff_anxiety,
+        "age": eff_age
+    }
+
+    if current_user:
+        lh_records = (
+            db.query(ListeningHistory)
+            .filter(ListeningHistory.user_id == current_user.id)
+            .order_by(ListeningHistory.played_at.desc())
+            .limit(20)
+            .all()
+        )
+        user_state["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
+
+    tracks = weighted_recommender.recommend(user_state, top_n=20)
+
+    if not tracks:
+        # Fallback to hybrid recommender for uncataloged languages (e.g., Korean, Spanish)
+        rec_result = hybrid_recommender.get_recommendations(
+            survey_data={
+                "mood": mood or "Calming",
+                "language_pref": language,
+                "fav_genre": genre or "Lo-fi",
+                "activity": eff_activity
+            },
+            user_id=current_user.id if current_user else None,
+            db=db,
+            limit=50
+        )
+        tracks = rec_result.get("tracks", [])
+
     return {
         "language": language,
         "playlist_key": playlist_type,
-        "playlist_name": f"{language} {t_cat}",
+        "playlist_name": f"{language} {theme_info['name']}",
         "tracks": tracks
     }
 
