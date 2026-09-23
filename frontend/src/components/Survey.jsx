@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, Loader2, Music, CheckCircle2, Activity, Heart, Moon } from 'lucide-react';
 
-const GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop"];
-const MOODS = ["Happy", "Sad", "Anxiety", "Angry", "Tired"];
-const ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"];
+const GENRES = ["Melody", "Dance", "Pop", "Folk", "Rock", "Acoustic", "Ballad", "Classical", "Instrumental", "Lo-fi", "Nature Sounds"];
+const MOODS = ["Happy", "Sad", "Calm", "Stressed", "Anxious", "Angry", "Energetic", "Romantic", "Bored", "Focused", "Relaxed", "Tired"];
+const ACTIVITIES = ["Studying", "Working", "Workout", "Running", "Walking", "Driving", "Relaxing", "Meditation", "Sleeping", "Party", "Gaming", "Cooking"];
+const ENERGIES = ["Low", "Medium", "High"];
 const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
 const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
-const LANGUAGES = ["English", "Telugu", "Hindi", "Malayalam", "Tamil"];
+const LANGUAGES = ["Telugu", "Tamil", "Hindi", "Malayalam", "English"];
 
 export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComplete }) {
   const [step, setStep] = useState(1);
@@ -16,13 +17,15 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
   // Survey Inputs
   const [age, setAge] = useState(25);
   const [gender, setGender] = useState('Prefer not to say');
-  const [mood, setMood] = useState('Happy');
+  const [mood, setMood] = useState('Calm');
   const [stress, setStress] = useState(5);
   const [sleepQuality, setSleepQuality] = useState('Good');
   const [anxiety, setAnxiety] = useState(5);
-  const [favGenre, setFavGenre] = useState('Lo-fi');
-  const [languagePref, setLanguagePref] = useState('English');
-  const [activity, setActivity] = useState('Relaxation');
+  const [favGenre, setFavGenre] = useState('Melody');
+  const [languagePref, setLanguagePref] = useState('Telugu');
+  const [activity, setActivity] = useState('Studying');
+  const [energy, setEnergy] = useState('Low');
+  const [modelName, setModelName] = useState('LightGBM');
 
   // Result State
   const [result, setResult] = useState(null);
@@ -49,7 +52,9 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
           anxiety: parseInt(anxiety) || 5,
           fav_genre: favGenre,
           language_pref: languagePref,
-          activity: activity
+          activity: activity,
+          energy: energy,
+          model_name: modelName
         })
       });
       
@@ -267,6 +272,34 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
               </div>
             </div>
 
+            <div style={{ marginBottom: '1.75rem' }}>
+              <label className="input-label" htmlFor="energy-input">Current Energy Level</label>
+              <div style={{ display: 'flex', gap: '1rem' }} id="energy-input">
+                {ENERGIES.map(lvl => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setEnergy(lvl)}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: energy === lvl ? '2px solid var(--primary)' : '1px solid var(--border-glass)',
+                      background: energy === lvl ? 'rgba(168, 85, 247, 0.15)' : 'rgba(0, 0, 0, 0.2)',
+                      color: energy === lvl ? 'var(--text-primary)' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      transition: 'var(--transition-fast)'
+                    }}
+                  >
+                    {lvl === 'Low' && '🍃 Low Energy'}
+                    {lvl === 'Medium' && '⚡ Medium Energy'}
+                    {lvl === 'High' && '🔥 High Energy'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div style={{ marginBottom: '2.5rem' }}>
               <label className="input-label" htmlFor="sleep-quality-input">Sleep Quality</label>
               <div style={{ display: 'flex', gap: '1rem' }} id="sleep-quality-input">
@@ -291,6 +324,40 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
                     {sq === 'Fair' && '😐 '}
                     {sq === 'Poor' && '😴 '}
                     {sq}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '2rem' }}>
+              <label className="input-label" htmlFor="model-select">AI Prediction Model</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }} id="model-select">
+                {[
+                  { id: 'LightGBM', name: 'LightGBM', badge: 'Champion (Fastest)' },
+                  { id: 'CatBoost', name: 'CatBoost', badge: 'Categorical Pro' },
+                  { id: 'Ensemble', name: 'Ensemble', badge: 'LightGBM + CatBoost' }
+                ].map(m => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setModelName(m.id)}
+                    style={{
+                      padding: '0.65rem 0.75rem',
+                      borderRadius: '10px',
+                      border: modelName === m.id ? '2px solid var(--primary)' : '1px solid var(--border-glass)',
+                      background: modelName === m.id ? 'rgba(99, 102, 241, 0.18)' : 'rgba(0, 0, 0, 0.25)',
+                      color: modelName === m.id ? 'var(--text-primary)' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '0.2rem',
+                      transition: 'var(--transition-fast)'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.9rem' }}>{m.name}</span>
+                    <span style={{ fontSize: '0.68rem', color: modelName === m.id ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>{m.badge}</span>
                   </button>
                 ))}
               </div>
@@ -342,7 +409,7 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
             
             <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>AI recommendation generated!</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-              Our trained XGBoost model has mapped your parameters to the best target soundscape.
+              Our trained {result.model_used || modelName} model has mapped your parameters to the best target soundscape.
             </p>
 
             <div className="glass-card" style={{
@@ -369,18 +436,133 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
                 {result.result_state}
               </h3>
               
-              <span style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                color: 'var(--text-primary)',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '20px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                border: '1px solid var(--border-glass)'
-              }}>
-                {getSymptomTag(result.result_state).label}
-              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginTop: '1rem' }}>
+                <span style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: 'var(--text-primary)',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  border: '1px solid var(--border-glass)'
+                }}>
+                  {getSymptomTag(result.result_state).label}
+                </span>
+
+                <span style={{
+                  background: 'rgba(99, 102, 241, 0.15)',
+                  color: 'var(--primary)',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  border: '1px solid rgba(99, 102, 241, 0.3)'
+                }}>
+                  ⚡ Model: {result.model_used || modelName}
+                </span>
+
+                <span style={{
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  color: 'var(--accent-emerald)',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  border: '1px solid rgba(16, 185, 129, 0.3)'
+                }}>
+                  🎯 Confidence: {((result.prediction_confidence || 0.95) * 100).toFixed(1)}%
+                </span>
+
+                <span style={{
+                  background: 'rgba(244, 63, 94, 0.15)',
+                  color: 'var(--accent-rose)',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  border: '1px solid rgba(244, 63, 94, 0.3)'
+                }}>
+                  🎵 {result.tracks?.length || 0} Spotify Tracks Ready
+                </span>
+              </div>
             </div>
+
+            {/* Top Recommended Spotify Songs Preview */}
+            {result.tracks && result.tracks.length > 0 && (
+              <div style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span>🎧</span> Top Matched Songs from Spotify:
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {result.tracks.slice(0, 3).map((trk, tIdx) => (
+                    <div
+                      key={tIdx}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 1rem',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '12px',
+                        gap: '0.75rem'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)', minWidth: '20px' }}>
+                          #{tIdx + 1}
+                        </span>
+                        {trk.album_image && (
+                          <img
+                            src={trk.album_image}
+                            alt=""
+                            style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }}
+                          />
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {trk.song || trk.title}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {trk.artist || trk.artist_or_source} • {trk.language} • {trk.genre}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent-emerald)', background: 'rgba(16, 185, 129, 0.15)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>
+                          {trk.score || trk.match_score || 95}%
+                        </span>
+                        <a
+                          href={trk.play_url || trk.spotify_url || `https://open.spotify.com/search/${encodeURIComponent((trk.song || trk.title) + ' ' + (trk.artist || ''))}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            padding: '0.35rem 0.65rem',
+                            background: 'rgba(29, 185, 84, 0.15)',
+                            border: '1px solid rgba(29, 185, 84, 0.4)',
+                            color: '#1db954',
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            textDecoration: 'none'
+                          }}
+                          title="Open on Spotify"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.218.358-.68.472-1.038.254-2.846-1.738-6.428-2.13-10.65-1.167-.406.094-.811-.16-.904-.567-.094-.407.16-.811.567-.905 4.622-1.055 8.583-.615 11.77 1.332.359.218.473.68.255 1.053zm1.468-3.264c-.274.444-.86.587-1.304.313-3.259-2.003-8.227-2.585-12.082-1.413-.497.151-1.026-.134-1.177-.631-.151-.497.134-1.026.631-1.177 4.412-1.341 9.889-.695 13.62 1.604.444.274.587.86.312 1.304zm.126-3.41c-3.908-2.321-10.354-2.535-14.086-1.402-.6.183-1.237-.16-1.42-.76-.183-.6.16-1.237.76-1.42 4.298-1.305 11.418-1.052 15.918 1.62.54.321.716 1.023.395 1.563-.321.54-1.023.716-1.567.4z"/>
+                          </svg>
+                          Spotify
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <button 

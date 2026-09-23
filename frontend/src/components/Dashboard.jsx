@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX, Shuffle, Repeat, Repeat1, X } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Music, Calendar, Smile, Sparkles, ClipboardList, AlertCircle, Disc, Heart, Star, Send, HeartHandshake, Bell, BookOpen, VolumeX, Shuffle, Repeat, Repeat1, X, Plus } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -244,6 +244,8 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   
   // Favorite tracks
   const [favorites, setFavorites] = useState([]);
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [playlistNotice, setPlaylistNotice] = useState('');
   
   // Rating & Feedback State
   const [rating, setRating] = useState(0);
@@ -634,7 +636,65 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   };
 
   const isFavorite = (track) => {
-    return favorites.some(f => f.title === track.title && f.artist === track.artist);
+    const tTitle = track.song || track.title;
+    const tArtist = track.artist || track.artist_or_source;
+    return favorites.some(f => f.title === tTitle && f.artist === tArtist);
+  };
+
+  const handleAddToPlaylist = async (track, e) => {
+    if (e) e.stopPropagation();
+    if (!token) return;
+    try {
+      let pList = userPlaylists;
+      if (pList.length === 0) {
+        const res = await fetch(`${apiBaseUrl}/playlists`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          pList = await res.json();
+          setUserPlaylists(pList);
+        }
+      }
+      let targetPlaylistId = pList.length > 0 ? pList[0].id : null;
+      if (!targetPlaylistId) {
+        const createRes = await fetch(`${apiBaseUrl}/playlists`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name: "My HarmonyRec Mix", description: "Personalized therapeutic playlist" })
+        });
+        if (createRes.ok) {
+          const created = await createRes.json();
+          targetPlaylistId = created.id;
+          setUserPlaylists([{ id: created.id, name: created.name, track_count: 0 }]);
+        }
+      }
+      if (targetPlaylistId) {
+        const addRes = await fetch(`${apiBaseUrl}/playlists/${targetPlaylistId}/tracks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title: track.song || track.title,
+            artist: track.artist || track.artist_or_source,
+            duration: track.duration || "3:30",
+            album_image: track.album_image,
+            play_url: track.play_url,
+            preview_url: track.preview_url
+          })
+        });
+        if (addRes.ok) {
+          setPlaylistNotice(`Added "${track.song || track.title}" to playlist!`);
+          setTimeout(() => setPlaylistNotice(''), 3000);
+        }
+      }
+    } catch (err) {
+      console.error("Add to playlist error:", err);
+    }
   };
 
   // Submit User Feedback
@@ -1239,85 +1299,283 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       {isFavorite(activeTrack) ? 'Saved' : 'Save'}
                     </button>
                   )}
+
+                  {/* Listen on Spotify */}
+                  {activeTrack && (
+                    <a
+                      href={activeTrack.play_url || activeTrack.spotify_url || `https://open.spotify.com/search/${encodeURIComponent(activeTrack.title + ' ' + (activeTrack.artist || ''))}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-secondary"
+                      style={{
+                        padding: '0.45rem 0.9rem',
+                        fontSize: '0.85rem',
+                        borderRadius: '20px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        textDecoration: 'none',
+                        color: '#1db954',
+                        borderColor: 'rgba(29, 185, 84, 0.4)',
+                        background: 'rgba(29, 185, 84, 0.1)',
+                        cursor: 'pointer',
+                        fontWeight: 600
+                      }}
+                      title="Listen full song on Spotify"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.218.358-.68.472-1.038.254-2.846-1.738-6.428-2.13-10.65-1.167-.406.094-.811-.16-.904-.567-.094-.407.16-.811.567-.905 4.622-1.055 8.583-.615 11.77 1.332.359.218.473.68.255 1.053zm1.468-3.264c-.274.444-.86.587-1.304.313-3.259-2.003-8.227-2.585-12.082-1.413-.497.151-1.026-.134-1.177-.631-.151-.497.134-1.026.631-1.177 4.412-1.341 9.889-.695 13.62 1.604.444.274.587.86.312 1.304zm.126-3.41c-3.908-2.321-10.354-2.535-14.086-1.402-.6.183-1.237-.16-1.42-.76-.183-.6.16-1.237.76-1.42 4.298-1.305 11.418-1.052 15.918 1.62.54.321.716 1.023.395 1.563-.321.54-1.023.716-1.567.4z"/>
+                      </svg>
+                      Spotify
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Spotify Recommended Tracks List */}
-            <div className="glass-panel" style={{ padding: '1.5rem 2rem' }}>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                Curated Recommendations
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, marginLeft: '0.25rem' }}>({currentTracks.length} songs loaded)</span>
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {/* 🎵 Recommended For You */}
+            <div className="glass-panel" style={{ padding: '1.75rem 2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <h4 style={{ fontSize: '1.35rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
+                    🎵 Recommended For You
+                  </h4>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                    Ranked by AI matching score for your complete current mental and physical state.
+                  </p>
+                </div>
+                {playlistNotice && (
+                  <span style={{ fontSize: '0.82rem', padding: '0.35rem 0.85rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.2)', color: 'var(--accent-emerald)', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                    ✓ {playlistNotice}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {filterLoading ? (
                   Array.from({ length: 4 }).map((_, sIdx) => (
                     <div
                       key={sIdx}
                       className="pulse"
                       style={{
-                        height: '60px',
-                        borderRadius: '12px',
+                        height: '90px',
+                        borderRadius: '14px',
                         background: 'rgba(255, 255, 255, 0.05)',
                         border: '1px solid var(--border-glass)'
                       }}
                     />
                   ))
-                ) : currentTracks.map((track, idx) => (
-                  <div 
-                    key={idx}
-                    className="track-queue-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '8px',
-                      background: idx === activeTrackIndex ? 'rgba(255,255,255,0.06)' : 'transparent',
-                      border: idx === activeTrackIndex ? '1px solid var(--border-neon)' : '1px solid transparent',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => handlePlayPause(idx)}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <img 
-                        loading="lazy"
-                        decoding="async"
-                        src={track.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"} 
-                        alt="" 
-                        style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
-                      />
-                      <div>
-                        <div style={{ fontWeight: 600, color: idx === activeTrackIndex ? 'var(--primary)' : 'var(--text-primary)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          {track.title}
-                          {track.language && (
-                            <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.2)', color: 'var(--primary)', fontWeight: 700 }}>
-                              {track.language}
-                            </span>
-                          )}
+                ) : currentTracks.map((track, idx) => {
+                  const isCurrent = idx === activeTrackIndex;
+                  const trackScore = track.match_score ?? track.score ?? 95.0;
+                  const trackTitle = track.song || track.title;
+                  const trackArtist = track.artist || track.artist_or_source;
+                  const trackReason = track.reason || "Strong match for your current emotional state and activity session.";
+                  const matchedFeats = track.matched_features || (track.recommendation_tags ? track.recommendation_tags.split(',') : []);
+
+                  return (
+                    <div 
+                      key={idx}
+                      className="track-card-rec"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.85rem',
+                        padding: '1.15rem 1.25rem',
+                        borderRadius: '14px',
+                        background: isCurrent ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                        border: isCurrent ? '1.5px solid var(--primary)' : '1px solid rgba(255, 255, 255, 0.08)',
+                        boxShadow: isCurrent ? '0 0 20px rgba(99, 102, 241, 0.2)' : 'none',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {/* Top row: Rank, Artwork, Song title, Artist, Badges, Match Score */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <span style={{
+                            fontSize: '0.95rem',
+                            fontWeight: 800,
+                            color: isCurrent ? 'var(--primary)' : 'var(--text-muted)',
+                            minWidth: '22px'
+                          }}>
+                            #{track.rank || (idx + 1)}
+                          </span>
+                          <img 
+                            loading="lazy"
+                            decoding="async"
+                            src={track.album_image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150&fit=crop"} 
+                            alt="" 
+                            style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-glass)' }}
+                          />
+                          <div>
+                            <div style={{ fontWeight: 700, color: isCurrent ? 'var(--primary)' : 'var(--text-primary)', fontSize: '1.02rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              {trackTitle}
+                              {track.language && (
+                                <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.22)', color: 'var(--primary)', fontWeight: 700 }}>
+                                  {track.language}
+                                </span>
+                              )}
+                              {track.genre && (
+                                <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.18)', color: 'var(--accent-emerald)', fontWeight: 600 }}>
+                                  {track.genre}
+                                </span>
+                              )}
+                              {track.energy && (
+                                <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(244, 63, 94, 0.15)', color: 'var(--accent-rose)', fontWeight: 600 }}>
+                                  {track.energy} Energy
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                              <span>{trackArtist}</span>
+                              {track.duration && <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>• {track.duration}</span>}
+                            </div>
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
-                          <span>{track.artist}</span>
-                          {track.album && <span style={{ color: 'var(--text-muted)' }}>• {track.album}</span>}
-                          {track.release_year && <span style={{ color: 'var(--text-muted)' }}>• {track.release_year}</span>}
+
+                        {/* Match Score Badge */}
+                        <div style={{
+                          padding: '0.4rem 0.85rem',
+                          borderRadius: '20px',
+                          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 182, 212, 0.18) 100%)',
+                          border: '1px solid rgba(16, 185, 129, 0.4)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem'
+                        }}>
+                          <Sparkles style={{ width: '14px', height: '14px', color: 'var(--accent-emerald)' }} />
+                          <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
+                            {typeof trackScore === 'number' ? trackScore.toFixed(1) : trackScore}% Match
+                          </span>
                         </div>
                       </div>
+
+                      {/* Reason & Matched Features */}
+                      <div style={{
+                        background: 'rgba(0, 0, 0, 0.25)',
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: '8px',
+                        fontSize: '0.82rem',
+                        color: 'var(--text-secondary)',
+                        lineHeight: 1.45
+                      }}>
+                        <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: matchedFeats.length > 0 ? '0.35rem' : '0' }}>
+                          💡 Why recommended: <span style={{ fontWeight: 400, color: 'var(--text-secondary)' }}>{trackReason}</span>
+                        </div>
+                        {matchedFeats.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.3rem' }}>
+                            {matchedFeats.map((feat, fIdx) => (
+                              <span key={fIdx} style={{
+                                fontSize: '0.72rem',
+                                padding: '0.1rem 0.45rem',
+                                borderRadius: '4px',
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                color: 'var(--accent-cyan)',
+                                fontWeight: 500
+                              }}>
+                                {feat.startsWith('✓') ? feat : `✓ ${feat}`}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Bottom action buttons: ▶ Play, ❤️ Favorite, ➕ Add to Playlist */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', paddingTop: '0.2rem' }}>
+                        <button
+                          onClick={() => handlePlayPause(idx)}
+                          className="btn-primary"
+                          style={{
+                            padding: '0.45rem 1rem',
+                            fontSize: '0.82rem',
+                            borderRadius: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {isCurrent && isPlaying ? (
+                            <><Pause style={{ width: '14px', height: '14px' }} /> Pause</>
+                          ) : (
+                            <><Play style={{ width: '14px', height: '14px' }} /> Play</>
+                          )}
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(track);
+                          }}
+                          className="btn-secondary"
+                          style={{
+                            padding: '0.45rem 0.9rem',
+                            fontSize: '0.82rem',
+                            borderRadius: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            borderColor: isFavorite(track) ? 'var(--accent-rose)' : 'var(--border-glass)',
+                            color: isFavorite(track) ? 'var(--accent-rose)' : 'var(--text-secondary)',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Heart style={{
+                            width: '14px',
+                            height: '14px',
+                            fill: isFavorite(track) ? 'var(--accent-rose)' : 'none',
+                            color: isFavorite(track) ? 'var(--accent-rose)' : 'currentColor'
+                          }} />
+                          {isFavorite(track) ? 'Favorited' : 'Favorite'}
+                        </button>
+
+                        <button
+                          onClick={(e) => handleAddToPlaylist(track, e)}
+                          className="btn-secondary"
+                          style={{
+                            padding: '0.45rem 0.9rem',
+                            fontSize: '0.82rem',
+                            borderRadius: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Plus style={{ width: '14px', height: '14px' }} />
+                          Add to Playlist
+                        </button>
+
+                        <a
+                          href={track.play_url || track.spotify_url || `https://open.spotify.com/search/${encodeURIComponent((track.song || track.title) + ' ' + (track.artist || ''))}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-secondary"
+                          style={{
+                            padding: '0.45rem 0.9rem',
+                            fontSize: '0.82rem',
+                            borderRadius: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            textDecoration: 'none',
+                            color: '#1db954',
+                            borderColor: 'rgba(29, 185, 84, 0.4)',
+                            background: 'rgba(29, 185, 84, 0.08)',
+                            cursor: 'pointer',
+                            fontWeight: 600
+                          }}
+                          title="Open and listen on Spotify"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.218.358-.68.472-1.038.254-2.846-1.738-6.428-2.13-10.65-1.167-.406.094-.811-.16-.904-.567-.094-.407.16-.811.567-.905 4.622-1.055 8.583-.615 11.77 1.332.359.218.473.68.255 1.053zm1.468-3.264c-.274.444-.86.587-1.304.313-3.259-2.003-8.227-2.585-12.082-1.413-.497.151-1.026-.134-1.177-.631-.151-.497.134-1.026.631-1.177 4.412-1.341 9.889-.695 13.62 1.604.444.274.587.86.312 1.304zm.126-3.41c-3.908-2.321-10.354-2.535-14.086-1.402-.6.183-1.237-.16-1.42-.76-.183-.6.16-1.237.76-1.42 4.298-1.305 11.418-1.052 15.918 1.62.54.321.716 1.023.395 1.563-.321.54-1.023.716-1.567.4z"/>
+                          </svg>
+                          Spotify
+                        </a>
+                      </div>
                     </div>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{track.duration}</span>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(track);
-                        }} 
-                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                      >
-                        <Heart style={{ width: '14px', height: '14px', fill: isFavorite(track) ? 'var(--accent-rose)' : 'none', color: isFavorite(track) ? 'var(--accent-rose)' : 'var(--text-muted)' }} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Load More Songs Button */}

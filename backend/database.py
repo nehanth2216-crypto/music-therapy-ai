@@ -68,6 +68,7 @@ class SurveyResponse(Base):
     fav_genre = Column(String, nullable=False) # Favorite genre
     language_pref = Column(String, nullable=False) # Language preference
     activity = Column(String, nullable=False) # Studying, Sleeping, Meditation, Exercise, Relaxation
+    energy = Column(String, default="Medium", nullable=True) # Low, Medium, High
     result_playlist = Column(String, nullable=False) # Predicted playlist type (e.g. playlist_1, etc.)
     timestamp = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
@@ -124,6 +125,12 @@ class ListeningHistory(Base):
     album_image = Column(String, nullable=True)
     play_url = Column(String, nullable=True)
     preview_url = Column(String, nullable=True)
+    language = Column(String, nullable=True)
+    genre = Column(String, nullable=True)
+    mood = Column(String, nullable=True)
+    activity = Column(String, nullable=True)
+    energy = Column(String, nullable=True)
+    recommendation_score = Column(Float, nullable=True)
     played_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
     
     user = relationship("User", back_populates="listening_history")
@@ -176,9 +183,10 @@ def init_db():
     # Lightweight schema migration for existing SQLite/Postgres tables
     from sqlalchemy import inspect, text
     inspector = inspect(engine)
-    if "users" in inspector.get_table_names():
-        columns = [c["name"] for c in inspector.get_columns("users")]
-        with engine.connect() as conn:
+    table_names = inspector.get_table_names()
+    with engine.connect() as conn:
+        if "users" in table_names:
+            columns = [c["name"] for c in inspector.get_columns("users")]
             if "full_name" not in columns:
                 conn.execute(text("ALTER TABLE users ADD COLUMN full_name VARCHAR"))
             if "fav_genre" not in columns:
@@ -191,7 +199,77 @@ def init_db():
                 conn.execute(text("ALTER TABLE users ADD COLUMN reset_token VARCHAR"))
             if "reset_token_expires" not in columns:
                 conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP"))
-            conn.commit()
+        
+        if "survey_responses" in table_names:
+            sr_cols = [c["name"] for c in inspector.get_columns("survey_responses")]
+            if "hours_per_day" in sr_cols:
+                # Migrate from legacy schema with obsolete NOT NULL constraints
+                conn.execute(text("""
+                    CREATE TABLE survey_responses_v2 (
+                        id INTEGER PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id),
+                        age INTEGER NOT NULL,
+                        gender VARCHAR,
+                        mood VARCHAR NOT NULL,
+                        stress INTEGER NOT NULL,
+                        sleep_quality VARCHAR NOT NULL,
+                        anxiety INTEGER NOT NULL,
+                        fav_genre VARCHAR NOT NULL,
+                        language_pref VARCHAR NOT NULL,
+                        activity VARCHAR NOT NULL,
+                        energy VARCHAR DEFAULT 'Medium',
+                        result_playlist VARCHAR NOT NULL,
+                        timestamp DATETIME
+                    )
+                """))
+                conn.execute(text("""
+                    INSERT INTO survey_responses_v2 (id, user_id, age, gender, mood, stress, sleep_quality, anxiety, fav_genre, language_pref, activity, energy, result_playlist, timestamp)
+                    SELECT id, user_id, age, COALESCE(gender, 'Not Specified'), COALESCE(mood, 'Calm'), COALESCE(stress, 5), COALESCE(sleep_quality, 'Fair'), anxiety, fav_genre, COALESCE(language_pref, 'English'), COALESCE(activity, 'Relaxation'), COALESCE(energy, 'Medium'), COALESCE(result_playlist, 'Calming'), timestamp
+                    FROM survey_responses
+                """))
+                conn.execute(text("DROP TABLE survey_responses"))
+                conn.execute(text("ALTER TABLE survey_responses_v2 RENAME TO survey_responses"))
+            else:
+                if "gender" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN gender VARCHAR"))
+                if "energy" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN energy VARCHAR DEFAULT 'Medium'"))
+                if "mood" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN mood VARCHAR"))
+                if "stress" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN stress INTEGER"))
+                if "sleep_quality" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN sleep_quality VARCHAR"))
+                if "language_pref" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN language_pref VARCHAR"))
+                if "activity" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN activity VARCHAR"))
+                if "result_playlist" not in sr_cols:
+                    conn.execute(text("ALTER TABLE survey_responses ADD COLUMN result_playlist VARCHAR"))
+                
+        if "recommendations" in table_names:
+            rec_cols = [c["name"] for c in inspector.get_columns("recommendations")]
+            if "rating" not in rec_cols:
+                conn.execute(text("ALTER TABLE recommendations ADD COLUMN rating INTEGER"))
+            if "helped" not in rec_cols:
+                conn.execute(text("ALTER TABLE recommendations ADD COLUMN helped BOOLEAN"))
+
+        if "listening_history" in table_names:
+            lh_cols = [c["name"] for c in inspector.get_columns("listening_history")]
+            if "language" not in lh_cols:
+                conn.execute(text("ALTER TABLE listening_history ADD COLUMN language VARCHAR"))
+            if "genre" not in lh_cols:
+                conn.execute(text("ALTER TABLE listening_history ADD COLUMN genre VARCHAR"))
+            if "mood" not in lh_cols:
+                conn.execute(text("ALTER TABLE listening_history ADD COLUMN mood VARCHAR"))
+            if "activity" not in lh_cols:
+                conn.execute(text("ALTER TABLE listening_history ADD COLUMN activity VARCHAR"))
+            if "energy" not in lh_cols:
+                conn.execute(text("ALTER TABLE listening_history ADD COLUMN energy VARCHAR"))
+            if "recommendation_score" not in lh_cols:
+                conn.execute(text("ALTER TABLE listening_history ADD COLUMN recommendation_score FLOAT"))
+        
+        conn.commit()
 
 def get_db():
     db = SessionLocal()

@@ -15,7 +15,8 @@ class RecommendationRankingEngine:
         favorite_artists: Set[str] = None,
         recent_artists: Set[str] = None,
         liked_titles: Set[str] = None,
-        skipped_titles: Set[str] = None
+        skipped_titles: Set[str] = None,
+        user_age: Any = None
     ) -> float:
         """
         Calculate total recommendation score (0.0 to 100.0).
@@ -103,7 +104,44 @@ class RecommendationRankingEngine:
         pop = float(track.get("popularity", 50))
         pop_score = (pop / 100.0) * 3.0
 
-        total_score = lang_score + genre_score + mood_score + therapy_score + activity_score + history_score + pop_score
+        # 9. Age Group & Therapeutic Context Matching Bonus (0 - 15 points)
+        context_score = 0.0
+        if user_age is not None:
+            try:
+                u_age = int(user_age)
+                if u_age <= 5:
+                    target_ag = "1-5"
+                elif u_age <= 12:
+                    target_ag = "6-12"
+                elif u_age <= 17:
+                    target_ag = "13-17"
+                elif u_age <= 25:
+                    target_ag = "18-25"
+                elif u_age <= 35:
+                    target_ag = "26-35"
+                elif u_age <= 50:
+                    target_ag = "36-50"
+                elif u_age <= 65:
+                    target_ag = "51-65"
+                elif u_age <= 80:
+                    target_ag = "66-80"
+                else:
+                    target_ag = "81-100"
+                
+                track_age_groups = track.get("age_groups", [])
+                if target_ag in track_age_groups:
+                    context_score += 10.0
+            except (ValueError, TypeError):
+                pass
+
+        c_mood = (track.get("context_mood") or "").lower()
+        c_act = (track.get("context_activity") or "").lower()
+        if c_mood and m_lower and (c_mood in m_lower or m_lower in c_mood):
+            context_score += 3.0
+        if c_act and act_lower and (c_act in act_lower or act_lower in c_act):
+            context_score += 2.0
+
+        total_score = lang_score + genre_score + mood_score + therapy_score + activity_score + history_score + pop_score + context_score
         return round(total_score, 2)
 
     def rank_tracks(
@@ -118,6 +156,7 @@ class RecommendationRankingEngine:
         recent_artists: Set[str] = None,
         liked_titles: Set[str] = None,
         skipped_titles: Set[str] = None,
+        user_age: Any = None,
         top_n: int = 20
     ) -> List[Dict[str, Any]]:
         """Rank candidate tracks ensuring strict language and genre filtering."""
@@ -144,7 +183,8 @@ class RecommendationRankingEngine:
                 favorite_artists=fav_art,
                 recent_artists=rec_art,
                 liked_titles=liked_t,
-                skipped_titles=skip_t
+                skipped_titles=skip_t,
+                user_age=user_age
             )
 
             if score > -500.0:

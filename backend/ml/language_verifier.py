@@ -128,13 +128,16 @@ class LanguageVerifier:
                         return False
             return True
 
-        # 5. Explicit Track Language Attribute match (reject if containing conflicting non-target script)
-        if track_lang and track_lang.lower() == t_lang.lower():
-            for lang, pattern in UNICODE_RANGES.items():
-                if lang != t_lang and lang != "English":
-                    if re.search(pattern, full_text):
-                        return False
-            return True
+        # 5. Explicit Track Language Attribute match (strictly reject if mismatching)
+        if track_lang:
+            if track_lang.lower() == t_lang.lower():
+                for lang, pattern in UNICODE_RANGES.items():
+                    if lang != t_lang and lang != "English":
+                        if re.search(pattern, full_text):
+                            return False
+                return True
+            else:
+                return False
 
         # 6. For English target, check standard latin characters without non-English native script
         if t_lang.lower() == "english":
@@ -145,5 +148,5 @@ class LanguageVerifier:
             return True
 
         # 7. Fallback for non-English queries if fetched from target language search
-        return True
+        return False
 

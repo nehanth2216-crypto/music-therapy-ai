@@ -178,6 +178,7 @@ class SpotifyService:
                     seconds = (millis % 60000) // 1000
                     dur_str = f"{minutes}:{seconds:02d}"
 
+                    sp_url = f"https://open.spotify.com/search/{requests.utils.quote(f'{t_name} {t_artist}')}"
                     candidate = {
                         "title": t_name,
                         "artist": t_artist,
@@ -189,7 +190,8 @@ class SpotifyService:
                         "release_year": item.get("releaseDate", "")[:4] or "2023",
                         "album_image": artwork or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop",
                         "preview_url": item.get("previewUrl"),
-                        "play_url": item.get("trackViewUrl"),
+                        "play_url": sp_url,
+                        "spotify_search_url": sp_url,
                         "youtube_search_url": make_yt_url(t_name, t_artist),
                         "embed_url": make_yt_embed_url(t_name, t_artist),
                         "popularity": 60,

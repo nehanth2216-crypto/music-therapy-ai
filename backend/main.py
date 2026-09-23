@@ -4,7 +4,7 @@ import pickle
 import time
 import numpy as np
 import requests
-from typing import List, Optional
+from typing import List, Optional, Any, Union
 import re
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +36,7 @@ from backend.auth import (
 )
 from backend.ml.recommender import HybridRecommender
 from backend.ml.language_verifier import LanguageVerifier
+from backend.recommendation.engine import WeightedSongRecommendationEngine
 
 # Initialize Database on Startup
 init_db()
@@ -57,6 +58,7 @@ load_env()
 app = FastAPI(title="HarmonyRec API", version="1.0.0")
 
 hybrid_recommender = HybridRecommender()
+weighted_recommender = WeightedSongRecommendationEngine()
 
 # Setup CORS
 app.add_middleware(
@@ -916,10 +918,16 @@ class ResetPasswordSubmit(BaseModel):
 class HistoryRecordItem(BaseModel):
     title: str
     artist: str
-    duration: str
+    duration: Optional[str] = "3:30"
     album_image: Optional[str] = None
     play_url: Optional[str] = None
     preview_url: Optional[str] = None
+    language: Optional[str] = None
+    genre: Optional[str] = None
+    mood: Optional[str] = None
+    activity: Optional[str] = None
+    energy: Optional[str] = None
+    recommendation_score: Optional[float] = None
 
 class PlaylistCreate(BaseModel):
     name: str
@@ -938,11 +946,27 @@ class SurveySubmit(BaseModel):
     gender: Optional[str] = "Prefer not to say"
     mood: str
     stress: int
-    sleep_quality: str
+    sleep_quality: Union[int, str, None] = "Good"
     anxiety: int
     fav_genre: str
     language_pref: str
     activity: str
+    energy: Optional[str] = "Medium"
+    model_name: Optional[str] = "LightGBM"
+
+class RecommendationRequest(BaseModel):
+    age: Optional[int] = 25
+    language: Optional[str] = None
+    language_pref: Optional[str] = None
+    genre: Optional[str] = None
+    fav_genre: Optional[str] = None
+    mood: Optional[str] = "Calm"
+    activity: Optional[str] = "Relaxing"
+    energy: Optional[str] = "Medium"
+    stress: Optional[int] = 5
+    anxiety: Optional[int] = 5
+    sleep_quality: Union[int, str, None] = "Good"
+    top_n: Optional[int] = 10
 
 class FeedbackSubmit(BaseModel):
     survey_id: int
@@ -1140,41 +1164,93 @@ def reset_password(req: ResetPasswordSubmit, db: Session = Depends(get_db)):
         "username": user.username
     }
 
-@app.post("/api/recommend/survey")
-def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
-    user_id = current_user.id if current_user else None
+@app.post("/api/recommendations")
+def get_song_recommendations(req: RecommendationRequest, current_user: Optional[User] = Depends(get_optional_current_user), db: Session = Depends(get_db)):
+    user_lang = req.language or req.language_pref or "English"
+    user_genre = req.genre or req.fav_genre or "Melody"
+    user_mood = req.mood or "Calm"
+    user_act = req.activity or "Relaxing"
+    user_energy = req.energy or "Medium"
+    user_age = req.age or 25
     
-    # 1. Execute Production Hybrid Recommendation Engine
+    user_state = {
+        "age": user_age,
+        "language": user_lang,
+        "language_pref": user_lang,
+        "genre": user_genre,
+        "fav_genre": user_genre,
+        "mood": user_mood,
+        "activity": user_act,
+        "energy": user_energy,
+        "stress": req.stress or 5,
+        "anxiety": req.anxiety or 5,
+        "sleep_quality": str(req.sleep_quality) if req.sleep_quality is not None else "Good"
+    }
+    
+    # Optional secondary personalization from listening history
+    if current_user:
+        lh_records = db.query(ListeningHistory).filter(ListeningHistory.user_id == current_user.id).order_by(ListeningHistory.played_at.desc()).limit(20).all()
+        user_state["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
+
+    recommendations = weighted_recommender.recommend(user_state, top_n=req.top_n or 10)
+    
+    return {
+        "input": {
+            "age": user_age,
+            "language": user_lang,
+            "genre": user_genre,
+            "mood": user_mood,
+            "activity": user_act,
+            "energy": user_energy
+        },
+        "recommendation_method": "weighted_song_ranking",
+        "recommendations": recommendations,
+        "tracks": recommendations
+    }
+
+@app.post("/api/recommend/survey")
+def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_id = current_user.id
+    
     survey_dict = survey.model_dump() if hasattr(survey, 'model_dump') else survey.dict()
+    
+    # 1. Execute XGBoost / ML model for playlist/therapy classification (Preserving XGBoost)
     rec_result = hybrid_recommender.get_recommendations(
         survey_data=survey_dict,
         user_id=user_id,
         db=db,
         limit=20
     )
-    
-    tracks = rec_result.get("tracks", [])
     therapy_category = rec_result.get("predicted_therapy_category", "Relaxation")
 
-    # 2. Persist Survey Assessment Record
+    # 2. Execute Weighted Song Recommendation Engine for deterministic song-level recommendations
+    if user_id:
+        lh_records = db.query(ListeningHistory).filter(ListeningHistory.user_id == user_id).order_by(ListeningHistory.played_at.desc()).limit(20).all()
+        survey_dict["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
+
+    weighted_recs = weighted_recommender.recommend(survey_dict, top_n=10)
+    tracks = weighted_recs if weighted_recs else rec_result.get("tracks", [])
+
+    # 3. Persist Survey Assessment Record
     response_record = SurveyResponse(
         user_id=user_id if user_id else 1,
         age=survey.age,
         gender=survey.gender,
         mood=survey.mood,
         stress=survey.stress,
-        sleep_quality=survey.sleep_quality,
+        sleep_quality=str(survey.sleep_quality),
         anxiety=survey.anxiety,
         fav_genre=survey.fav_genre,
         language_pref=survey.language_pref,
         activity=survey.activity,
+        energy=getattr(survey, "energy", "Medium") or "Medium",
         result_playlist=therapy_category
     )
     db.add(response_record)
     db.commit()
     db.refresh(response_record)
     
-    # 3. Store Recommendation Details
+    # 4. Store Recommendation Details
     rec_record = Recommendation(
         survey_id=response_record.id,
         genre=therapy_category,
@@ -1189,6 +1265,9 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_optiona
         "playlist_key": "playlist_1",
         "predicted_therapy_category": therapy_category,
         "prediction_confidence": rec_result.get("prediction_confidence", 0.90),
+        "model_used": rec_result.get("model_used", "XGBoost"),
+        "recommendation_method": "weighted_song_ranking",
+        "recommendations": tracks,
         "tracks": tracks,
         "timestamp": response_record.timestamp.isoformat()
     }
@@ -1328,6 +1407,52 @@ def toggle_favorite(track: FavoriteToggle, current_user: User = Depends(get_curr
         db.add(new_fav)
         db.commit()
         return {"status": "added", "message": f"Added '{track.title}' to favorites"}
+
+@app.post("/api/music/history")
+def record_music_history(item: HistoryRecordItem, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
+    if not current_user:
+        return {"status": "skipped", "message": "Guest user play not recorded in history"}
+    
+    new_entry = ListeningHistory(
+        user_id=current_user.id,
+        title=item.title,
+        artist=item.artist,
+        duration=item.duration or "3:30",
+        album_image=item.album_image,
+        play_url=item.play_url,
+        preview_url=item.preview_url,
+        language=item.language,
+        genre=item.genre,
+        mood=item.mood,
+        activity=item.activity,
+        energy=item.energy,
+        recommendation_score=item.recommendation_score
+    )
+    db.add(new_entry)
+    db.commit()
+    return {"status": "success", "message": f"Recorded '{item.title}' into listening history"}
+
+@app.get("/api/music/history")
+def get_music_history(limit: int = 50, current_user: User = Depends(get_optional_current_user), db: Session = Depends(get_db)):
+    if not current_user:
+        return []
+    history = db.query(ListeningHistory).filter(ListeningHistory.user_id == current_user.id).order_by(ListeningHistory.played_at.desc()).limit(limit).all()
+    return [{
+        "id": h.id,
+        "title": h.title,
+        "artist": h.artist,
+        "duration": h.duration,
+        "album_image": h.album_image,
+        "play_url": h.play_url,
+        "preview_url": h.preview_url,
+        "language": h.language,
+        "genre": h.genre,
+        "mood": h.mood,
+        "activity": h.activity,
+        "energy": h.energy,
+        "recommendation_score": h.recommendation_score,
+        "played_at": h.played_at.isoformat() if h.played_at else None
+    } for h in history]
 
 MOTIVATIONAL_QUOTES = [
     {"quote": "You don't have to control your thoughts. You just have to stop letting them control you.", "author": "Dan Millman"},
@@ -1496,7 +1621,13 @@ def record_listening_history(
         duration=item.duration,
         album_image=item.album_image,
         play_url=item.play_url,
-        preview_url=item.preview_url
+        preview_url=item.preview_url,
+        language=getattr(item, "language", None),
+        genre=getattr(item, "genre", None),
+        mood=getattr(item, "mood", None),
+        activity=getattr(item, "activity", None),
+        energy=getattr(item, "energy", None),
+        recommendation_score=getattr(item, "recommendation_score", None)
     )
     db.add(entry)
     db.commit()
@@ -1522,6 +1653,12 @@ def get_listening_history(
         "album_image": r.album_image,
         "play_url": r.play_url,
         "preview_url": r.preview_url,
+        "language": getattr(r, "language", None),
+        "genre": getattr(r, "genre", None),
+        "mood": getattr(r, "mood", None),
+        "activity": getattr(r, "activity", None),
+        "energy": getattr(r, "energy", None),
+        "recommendation_score": getattr(r, "recommendation_score", None),
         "played_at": r.played_at.strftime("%Y-%m-%d %H:%M")
     } for r in records]
 

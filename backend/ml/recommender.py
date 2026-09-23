@@ -121,9 +121,10 @@ class HybridRecommender:
         feedback_summary = self.feedback_manager.get_user_feedback_summary(user_id, db) if (user_id and db) else {}
         history_summary = self.history_manager.get_history_summary(user_id, db) if (user_id and db) else {}
 
-        # 2. Feature Engineering & XGBoost Therapy Category Prediction
+        # 2. Feature Engineering & Multi-Model Therapy Category Prediction (LightGBM & CatBoost)
         features = self.feature_engineer.extract_features(survey_data, history_summary)
-        therapy_category, confidence = self.predictor.predict_therapy_category(features)
+        selected_model = survey_data.get("model_name") or "LightGBM"
+        therapy_category, confidence = self.predictor.predict_therapy_category(features, model_name=selected_model)
 
         selected_language = (survey_data.get("language_pref") or "English").strip()
         fav_genre = (survey_data.get("fav_genre") or "Lo-fi").strip()
@@ -142,6 +143,9 @@ class HybridRecommender:
                 if t_key not in seen_keys:
                     seen_keys.add(t_key)
                     candidates.append(st)
+
+        # Refresh catalog to guarantee latest enriched tracks
+        self.catalog = load_multilingual_catalog()
 
         # 3. Pull authentic verified tracks from local multilingual catalog
         if selected_language in self.catalog:
@@ -193,11 +197,12 @@ class HybridRecommender:
                     if official_meta.get("play_url"):
                         track["play_url"] = official_meta["play_url"]
 
-        # 7. Recommendation Ranking Engine
+        # 7. Recommendation Ranking Engine with Age & Context Matching
         favorite_artists = feedback_summary.get("favorite_artists", set()).union(history_summary.get("recent_artists", set()))
         recent_artists = history_summary.get("recent_artists", set())
         liked_titles = feedback_summary.get("liked_titles", set())
         skipped_titles = feedback_summary.get("skipped_titles", set())
+        user_age = survey_data.get("age")
 
         ranked_tracks = self.ranking_engine.rank_tracks(
             tracks=candidates,
@@ -210,12 +215,14 @@ class HybridRecommender:
             recent_artists=recent_artists,
             liked_titles=liked_titles,
             skipped_titles=skipped_titles,
+            user_age=user_age,
             top_n=limit
         )
 
         return {
             "predicted_therapy_category": therapy_category,
             "prediction_confidence": confidence,
+            "model_used": selected_model,
             "selected_language": selected_language,
             "fav_genre": fav_genre,
             "tracks": ranked_tracks
