@@ -318,137 +318,6 @@ def make_yt_embed_url(title: str, artist: str) -> str:
     q = requests.utils.quote(f"{artist} {title}".strip())
     return f"https://www.youtube.com/embed?listType=search&list={q}"
 
-def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", genre: str = "Pop") -> List[dict]:
-    cache_key = f"itunes_{language}_{genre}_{query}_{limit}"
-    cached = get_cached_tracks(cache_key)
-    if cached:
-        return cached
-
-    try:
-        search_term = f"{language} {query}" if language and language != "English" else query
-        url = "https://itunes.apple.com/search"
-        params = {
-            "term": search_term,
-            "media": "music",
-            "entity": "song",
-            "limit": limit
-        }
-        resp = requests.get(url, params=params, timeout=6)
-        results = resp.json().get("results", []) if resp.status_code == 200 else []
-        
-        # If language prefix search returned no tracks, retry with raw query
-        if not results and language and language != "English":
-            params["term"] = query
-            resp = requests.get(url, params=params, timeout=6)
-            results = resp.json().get("results", []) if resp.status_code == 200 else []
-
-        tracks = []
-        for item in results:
-            preview_url = item.get("previewUrl")
-            if not preview_url:
-                continue
-            artwork = item.get("artworkUrl100", "").replace("100x100bb.jpg", "500x500bb.jpg")
-            if not artwork:
-                artwork = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
-            
-            millis = item.get("trackTimeMillis", 0)
-            minutes = millis // 60000
-            seconds = (millis % 60000) // 1000
-            duration_str = f"{minutes}:{seconds:02d}" if millis > 0 else "3:30"
-
-            collection_name = item.get("collectionName", "")
-            track_name = item.get("trackName", "")
-            album_name = collection_name or "Original Soundtrack"
-            if "From \"" in track_name:
-                try:
-                    extracted = track_name.split("From \"")[1].split("\"")[0]
-                    if extracted:
-                        album_name = f"Movie: {extracted}"
-                except Exception:
-                    pass
-            
-            release_date = item.get("releaseDate", "")
-            release_year = release_date[:4] if release_date else "2023"
-            
-            t_artist = item.get("artistName", "Unknown Artist")
-            candidate = {
-                "title": track_name,
-                "artist": t_artist,
-                "mood": genre or "Calm",
-                "album": album_name,
-                "language": language,
-                "genre": item.get("primaryGenreName", genre),
-                "duration": duration_str,
-                "release_year": release_year,
-                "album_image": artwork,
-                "preview_url": preview_url,
-                "play_url": item.get("trackViewUrl"),
-                "youtube_search_url": make_yt_url(track_name, t_artist),
-                "embed_url": make_yt_embed_url(track_name, t_artist),
-                "is_search_result": True
-            }
-            if LanguageVerifier.verify_track_language(candidate, language):
-                tracks.append(candidate)
-        if tracks:
-            set_cached_tracks(cache_key, tracks)
-            return tracks
-    except Exception as e:
-        print(f"Exception during iTunes track fetch: {e}")
-    return []
-
-def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", genre: str = "Pop") -> List[dict]:
-    """Fetch tracks from Deezer public API — 90M+ catalog, no auth required."""
-    cache_key = f"deezer_{language}_{genre}_{query}_{limit}"
-    cached = get_cached_tracks(cache_key)
-    if cached:
-        return cached
-    try:
-        lang_prefix = language if language != "English" else ""
-        search_term = f"{lang_prefix} {query}".strip()
-        url = "https://api.deezer.com/search"
-        params = {"q": search_term, "limit": limit, "order": "RANKING"}
-        resp = requests.get(url, params=params, timeout=8)
-        if resp.status_code == 200:
-            results = resp.json().get("data", [])
-            tracks = []
-            for item in results:
-                preview_url = item.get("preview")
-                if not preview_url:
-                    continue
-                album = item.get("album", {})
-                artist = item.get("artist", {})
-                duration_s = item.get("duration", 0)
-                minutes = duration_s // 60
-                seconds = duration_s % 60
-                duration_str = f"{minutes}:{seconds:02d}" if duration_s > 0 else "3:30"
-                cover = album.get("cover_xl") or album.get("cover_big") or album.get("cover_medium") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
-                t_artist = artist.get("name", "Unknown Artist")
-                t_title = item.get("title", "")
-                candidate = {
-                    "title": t_title,
-                    "artist": t_artist,
-                    "mood": genre or "Calm",
-                    "album": album.get("title", "Unknown Album"),
-                    "language": language,
-                    "genre": genre,
-                    "duration": duration_str,
-                    "release_year": "2024",
-                    "album_image": cover,
-                    "preview_url": preview_url,
-                    "play_url": item.get("link", ""),
-                    "youtube_search_url": make_yt_url(t_title, t_artist),
-                    "embed_url": make_yt_embed_url(t_title, t_artist),
-                    "is_search_result": True
-                }
-                if LanguageVerifier.verify_track_language(candidate, language):
-                    tracks.append(candidate)
-            if tracks:
-                set_cached_tracks(cache_key, tracks)
-                return tracks
-    except Exception as e:
-        print(f"Exception during Deezer track fetch: {e}")
-    return []
-
 # Comprehensive movie soundtrack keyword catalog per language
 MOVIE_CATALOG = {
     "Telugu": [
@@ -568,6 +437,211 @@ ARTIST_CATALOG = {
     ]
 }
 
+LANGUAGE_KEYWORDS = {
+    "English": "english",
+    "Telugu": "telugu tollywood",
+    "Hindi": "hindi bollywood",
+    "Tamil": "tamil kollywood",
+    "Malayalam": "malayalam mollywood",
+    "Kannada": "kannada sandalwood",
+    "Punjabi": "punjabi",
+    "Bengali": "bengali",
+    "Marathi": "marathi"
+}
+
+# Keyword sets used to validate that a fetched track's title/album/genre text
+# actually corresponds to the survey's selected FavGenre, since iTunes/Deezer
+# don't return a clean genre taxonomy that lines up with our survey options.
+GENRE_KEYWORDS = {
+    "Lo-fi": ["lo-fi", "lofi", "lo fi", "chill beats", "study beats", "chillhop"],
+    "Classical": ["classical", "piano", "orchestra", "symphony", "sonata", "concerto"],
+    "Nature Sounds": ["nature", "ambient", "meditation", "calming", "rain", "ocean", "forest", "birds", "white noise"],
+    "Instrumental": ["instrumental", "acoustic", "guitar", "piano", "orchestral"],
+    "Pop": ["pop", "dance", "hits", "chart", "top 40"],
+    "Melody": ["melody", "romantic", "love", "feelings", "soft", "sweet", "song"],
+    "Dance": ["dance", "party", "club", "electronic", "edm", "fast", "beat"],
+    "Rock": ["rock", "metal", "guitar", "alternative", "band"],
+    "Ballad": ["ballad", "slow", "emotional", "sad"],
+    "Acoustic": ["acoustic", "unplugged", "guitar", "live"]
+}
+
+def _is_language_match(track: dict, language: str) -> bool:
+    """Best-effort check that a fetched track actually belongs to the requested
+    language, using known artist/movie catalogs rather than trusting the label
+    we stamped on the track object (which always mirrors the input)."""
+    artist = (track.get("artist") or "").lower()
+    title = (track.get("title") or "").lower()
+    album = (track.get("album") or "").lower()
+    combined = f"{title} {album} {artist}"
+
+    lang_key = (language or "English").strip().title()
+
+    if lang_key == "English":
+        # Exclude if the artist is clearly a known artist from another language's catalog
+        for other_lang, artists in ARTIST_CATALOG.items():
+            if other_lang == "English":
+                continue
+            if any(a.lower() in artist for a in artists if a):
+                return False
+        return True
+
+    lang_artists = [a.lower() for a in ARTIST_CATALOG.get(lang_key, [])]
+    lang_movies = [m.lower() for m in MOVIE_CATALOG.get(lang_key, [])]
+
+    if any(a in artist for a in lang_artists if a):
+        return True
+    if any(m in title or m in album for m in lang_movies if m):
+        return True
+
+    lang_kw = LANGUAGE_KEYWORDS.get(lang_key, lang_key.lower())
+    if any(kw in combined for kw in lang_kw.split() if kw):
+        return True
+
+    return False
+
+def _is_genre_match(track: dict, genre: str) -> bool:
+    """Best-effort check that a fetched track's text actually reflects the
+    requested FavGenre, rather than trusting the label we stamped on it."""
+    if not genre:
+        return True
+    keywords = [k.lower() for k in GENRE_KEYWORDS.get(genre, [genre.lower()])]
+    api_genre = (track.get("genre") or "").lower()
+    text = f"{track.get('title','')} {track.get('album','')} {api_genre}".lower()
+    return any(k in text for k in keywords)
+
+def fetch_itunes_tracks(query: str, limit: int = 30, language: str = "English", genre: str = "Pop") -> List[dict]:
+    cache_key = f"itunes_{language}_{genre}_{query}_{limit}"
+    cached = get_cached_tracks(cache_key)
+    if cached:
+        return cached
+
+    try:
+        search_term = f"{language} {query}" if language and language != "English" else query
+        url = "https://itunes.apple.com/search"
+        params = {
+            "term": search_term,
+            "media": "music",
+            "entity": "song",
+            "limit": limit
+        }
+        resp = requests.get(url, params=params, timeout=6)
+        results = resp.json().get("results", []) if resp.status_code == 200 else []
+        
+        # If language prefix search returned no tracks, retry with raw query
+        if not results and language and language != "English":
+            params["term"] = query
+            resp = requests.get(url, params=params, timeout=6)
+            results = resp.json().get("results", []) if resp.status_code == 200 else []
+
+        tracks = []
+        for item in results:
+            preview_url = item.get("previewUrl")
+            if not preview_url:
+                continue
+            artwork = item.get("artworkUrl100", "").replace("100x100bb.jpg", "500x500bb.jpg")
+            if not artwork:
+                artwork = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+            
+            millis = item.get("trackTimeMillis", 0)
+            minutes = millis // 60000
+            seconds = (millis % 60000) // 1000
+            duration_str = f"{minutes}:{seconds:02d}" if millis > 0 else "3:30"
+
+            collection_name = item.get("collectionName", "")
+            track_name = item.get("trackName", "")
+            album_name = collection_name or "Original Soundtrack"
+            if "From \"" in track_name:
+                try:
+                    extracted = track_name.split("From \"")[1].split("\"")[0]
+                    if extracted:
+                        album_name = f"Movie: {extracted}"
+                except Exception:
+                    pass
+            
+            release_date = item.get("releaseDate", "")
+            release_year = release_date[:4] if release_date else "2023"
+            
+            t_artist = item.get("artistName", "Unknown Artist")
+            api_genre = item.get("primaryGenreName", genre)
+            candidate = {
+                "title": track_name,
+                "artist": t_artist,
+                "mood": genre or "Calm",
+                "album": album_name,
+                "language": language,
+                "genre": api_genre,
+                "duration": duration_str,
+                "release_year": release_year,
+                "album_image": artwork,
+                "preview_url": preview_url,
+                "play_url": item.get("trackViewUrl"),
+                "youtube_search_url": make_yt_url(track_name, t_artist),
+                "embed_url": make_yt_embed_url(track_name, t_artist),
+                "is_search_result": True
+            }
+            if _is_language_match(candidate, language) and LanguageVerifier.verify_track_language(candidate, language):
+                tracks.append(candidate)
+        if tracks:
+            set_cached_tracks(cache_key, tracks)
+            return tracks
+    except Exception as e:
+        print(f"Exception during iTunes track fetch: {e}")
+    return []
+
+def fetch_deezer_tracks(query: str, limit: int = 50, language: str = "English", genre: str = "Pop") -> List[dict]:
+    """Fetch tracks from Deezer public API — 90M+ catalog, no auth required."""
+    cache_key = f"deezer_{language}_{genre}_{query}_{limit}"
+    cached = get_cached_tracks(cache_key)
+    if cached:
+        return cached
+    try:
+        lang_prefix = language if language != "English" else ""
+        search_term = f"{lang_prefix} {query}".strip()
+        url = "https://api.deezer.com/search"
+        params = {"q": search_term, "limit": limit, "order": "RANKING"}
+        resp = requests.get(url, params=params, timeout=8)
+        if resp.status_code == 200:
+            results = resp.json().get("data", [])
+            tracks = []
+            for item in results:
+                preview_url = item.get("preview")
+                if not preview_url:
+                    continue
+                album = item.get("album", {})
+                artist = item.get("artist", {})
+                duration_s = item.get("duration", 0)
+                minutes = duration_s // 60
+                seconds = duration_s % 60
+                duration_str = f"{minutes}:{seconds:02d}" if duration_s > 0 else "3:30"
+                cover = album.get("cover_xl") or album.get("cover_big") or album.get("cover_medium") or "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop"
+                t_artist = artist.get("name", "Unknown Artist")
+                t_title = item.get("title", "")
+                t_album = album.get("title", "Unknown Album")
+                candidate = {
+                    "title": t_title,
+                    "artist": t_artist,
+                    "mood": genre or "Calm",
+                    "album": t_album,
+                    "language": language,
+                    "genre": genre,
+                    "duration": duration_str,
+                    "release_year": "2024",
+                    "album_image": cover,
+                    "preview_url": preview_url,
+                    "play_url": item.get("link", ""),
+                    "youtube_search_url": make_yt_url(t_title, t_artist),
+                    "embed_url": make_yt_embed_url(t_title, t_artist),
+                    "is_search_result": True
+                }
+                if _is_language_match(candidate, language) and LanguageVerifier.verify_track_language(candidate, language):
+                    tracks.append(candidate)
+            if tracks:
+                set_cached_tracks(cache_key, tracks)
+                return tracks
+    except Exception as e:
+        print(f"Exception during Deezer track fetch: {e}")
+    return []
+
 def build_search_matrix(language: str, genre: str, mood: str, activity: str) -> List[str]:
     """Build a comprehensive 30+ query search matrix for maximum catalog depth."""
     movies = MOVIE_CATALOG.get(language, MOVIE_CATALOG["English"])
@@ -663,11 +737,34 @@ def fetch_hybrid_recommendations(
 
     all_tracks.sort(key=lambda x: x.get("hybrid_score", 0), reverse=True)
 
+    # --- Strict Genre + Language filtering ---
+    # Only trust tracks whose actual title/artist/album text supports the
+    # requested language and genre, instead of the language/genre labels we
+    # stamped onto every track object (which always mirror the input).
+    MIN_STRICT_RESULTS = min(10, limit)
+
+    strict_matches = [
+        t for t in all_tracks
+        if _is_language_match(t, language) and _is_genre_match(t, genre)
+    ]
+    language_only_matches = [
+        t for t in all_tracks
+        if _is_language_match(t, language) and t not in strict_matches
+    ]
+
+    if len(strict_matches) >= MIN_STRICT_RESULTS:
+        all_tracks = strict_matches
+    else:
+        # Not enough exact genre+language matches — keep every strict match,
+        # then fill in with language-correct (but genre-relaxed) tracks so we
+        # never silently swap in the wrong language.
+        all_tracks = strict_matches + language_only_matches
+
     # Fallback to curated library if still empty
     if len(all_tracks) < 5 and language in MULTI_LANG_LIBRARY:
         for t in MULTI_LANG_LIBRARY[language]:
             t_title = (t.get("title") or "").lower()
-            if t_title not in seen_titles:
+            if t_title not in seen_titles and _is_language_match(t, language):
                 seen_titles.add(t_title)
                 all_tracks.append({
                     "title": t["title"],
@@ -679,24 +776,14 @@ def fetch_hybrid_recommendations(
                     "release_year": "2023",
                     "album_image": t.get("album_image"),
                     "preview_url": t.get("preview_url"),
-                    "play_url": t.get("play_url")
+                    "play_url": t.get("play_url"),
+                    "youtube_search_url": make_yt_url(t["title"], t["artist"]),
+                    "embed_url": make_yt_embed_url(t["title"], t["artist"])
                 })
 
     result_set = all_tracks[:limit]
     set_cached_tracks(cache_key, result_set)
     return result_set
-
-LANGUAGE_KEYWORDS = {
-    "English": "english",
-    "Telugu": "telugu tollywood",
-    "Hindi": "hindi bollywood",
-    "Tamil": "tamil kollywood",
-    "Malayalam": "malayalam mollywood",
-    "Kannada": "kannada sandalwood",
-    "Punjabi": "punjabi",
-    "Bengali": "bengali",
-    "Marathi": "marathi"
-}
 
 def fetch_spotify_tracks(
     query: str,
