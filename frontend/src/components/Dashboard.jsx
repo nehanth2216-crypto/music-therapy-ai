@@ -634,7 +634,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   // Daily Journal State
   const [journals, setJournals] = useState([]);
-  const [journalMood, setJournalMood] = useState('Happy');
+  const [journalMood, setJournalMood] = useState('Calm');
   const [journalStress, setJournalStress] = useState(5);
   const [journalText, setJournalText] = useState('');
   const [journalSuccess, setJournalSuccess] = useState('');
