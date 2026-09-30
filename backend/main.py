@@ -2074,7 +2074,17 @@ def get_recommendations_by_language(
         db=db,
         limit=30
     )
-    tracks = rec_result.get("tracks", [])
+    raw_tracks = rec_result.get("tracks", [])
+    tracks = [
+        t for t in raw_tracks
+        if LanguageVerifier.verify_track_language(t, language) and (t.get("language") or "").strip().lower() == language.strip().lower()
+    ]
+    if not tracks:
+        lang_catalog = hybrid_recommender.catalog.get(language.strip().title(), [])
+        tracks = [
+            dict(ct, language=language) for ct in lang_catalog
+            if LanguageVerifier.verify_track_language(ct, language)
+        ][:30]
 
     return {
         "language": language,

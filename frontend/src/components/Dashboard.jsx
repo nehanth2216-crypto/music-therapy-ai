@@ -405,6 +405,49 @@ const CURATED_STARTER_TRACKS = [
   }
 ];
 
+const WESTERN_ARTIST_BLOCKLIST = [
+  "kirk franklin", "marconi union", "piano guys", "the piano guys", "coldplay", "ed sheeran",
+  "taylor swift", "soundhelix", "brandon lake", "dua lipa", "adele", "the weeknd",
+  "melodies from heaven", "weightless", "a thousand years", "stereo hearts"
+];
+
+const isAuthenticLanguageTrack = (track, targetLang) => {
+  if (!track) return false;
+  const tLang = (track.language || '').toLowerCase().trim();
+  const reqLang = (targetLang || 'English').toLowerCase().trim();
+  
+  if (reqLang !== 'english') {
+    if (tLang && tLang !== reqLang) return false;
+    const artist = (track.artist || track.artist_or_source || '').toLowerCase();
+    const title = (track.title || track.song || '').toLowerCase();
+    if (WESTERN_ARTIST_BLOCKLIST.some(w => artist.includes(w) || title.includes(w))) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const getCuratedTracksForLanguageAndMood = (targetLang, targetMood) => {
+  const tLang = (targetLang || 'English').toLowerCase().trim();
+  const tMood = (targetMood || 'Calm').toLowerCase().trim();
+  const langTracks = CURATED_STARTER_TRACKS.filter(t => t.language && t.language.toLowerCase() === tLang);
+  if (langTracks.length === 0) return CURATED_STARTER_TRACKS;
+
+  const exact = langTracks.filter(t => {
+    if (!targetMood) return true;
+    const tm = (t.mood || '').toLowerCase();
+    return tm === tMood ||
+           (tMood.includes('calm') && (tm.includes('calm') || tm.includes('relax'))) ||
+           (tMood.includes('happy') && tm.includes('happy')) ||
+           (tMood.includes('romantic') && tm.includes('romantic')) ||
+           (tMood.includes('sad') && tm.includes('sad')) ||
+           (tMood.includes('sleep') && (tm.includes('sleep') || tm.includes('relax'))) ||
+           (tMood.includes('anxi') && (tm.includes('anxi') || tm.includes('stress'))) ||
+           (tMood.includes('motivat') && tm.includes('motivat')) ||
+           (tMood.includes('energet') && tm.includes('energet'));
+  });
+  return exact.length > 0 ? exact : langTracks;
+};
 
 const LYRICS_DATABASE = {
   "Samayama": {
@@ -695,10 +738,13 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
           const latest = historyData[historyData.length - 1];
           const targetLang = latest.language_pref || 'English';
           const surveyTracks = parseTracksArray(latest.tracks);
-          const strictlyLangTracks = surveyTracks.filter(t => !t.language || t.language.toLowerCase() === targetLang.toLowerCase());
+          const strictlyLangTracks = surveyTracks.filter(t => isAuthenticLanguageTrack(t, targetLang));
 
           if (strictlyLangTracks.length > 0) {
             setCurrentTracks(strictlyLangTracks);
+          } else {
+            const fallbackList = getCuratedTracksForLanguageAndMood(targetLang, latest.mood || 'Calm');
+            setCurrentTracks(fallbackList);
           }
           setCurrentMoodState(latest.result_state || 'Calming');
           setLatestSurveyId(latest.id);
@@ -768,6 +814,14 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     setSelectedMood(mood);
     setFilterLoading(true);
     setCatalogPage(1);
+
+    // Instant zero-latency switch to curated tracks for the selected language & mood
+    const instantCurated = getCuratedTracksForLanguageAndMood(lang, mood);
+    if (!query && instantCurated.length > 0) {
+      setCurrentTracks(instantCurated);
+      setActiveTrackIndex(0);
+    }
+
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       const latest = history && history.length > 0 ? history[history.length - 1] : null;
@@ -781,65 +835,23 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
       if (res.ok) {
         const data = await res.json();
         const parsed = parseTracksArray(data.tracks);
-        const strictlyLangTracks = parsed.filter(t => !t.language || t.language.toLowerCase() === lang.toLowerCase());
+        const strictlyLangTracks = parsed.filter(t => isAuthenticLanguageTrack(t, lang));
         if (strictlyLangTracks.length > 0) {
           setCurrentTracks(strictlyLangTracks);
           setActiveTrackIndex(0);
-          setIsPlaying(false);
           return;
         }
       }
-      // Resilient fallback when backend is unreachable or returns no tracks
-      const filterStarterList = (targetLang, targetMood) => {
-        const tLang = (targetLang || 'English').toLowerCase();
-        const tMood = (targetMood || 'Calm').toLowerCase();
-        const exact = CURATED_STARTER_TRACKS.filter(t => {
-          const lMatch = !t.language || t.language.toLowerCase() === tLang;
-          const mMatch = !targetMood || (t.mood && t.mood.toLowerCase() === tMood) ||
-                         (tMood.includes('calm') && t.mood?.toLowerCase().includes('calm')) ||
-                         (tMood.includes('happy') && t.mood?.toLowerCase().includes('happy')) ||
-                         (tMood.includes('romantic') && t.mood?.toLowerCase().includes('romantic')) ||
-                         (tMood.includes('sad') && t.mood?.toLowerCase().includes('sad')) ||
-                         (tMood.includes('sleep') && (t.mood?.toLowerCase().includes('sleep') || t.mood?.toLowerCase().includes('relax'))) ||
-                         (tMood.includes('anxi') && (t.mood?.toLowerCase().includes('anxi') || t.mood?.toLowerCase().includes('stress'))) ||
-                         (tMood.includes('motivat') && t.mood?.toLowerCase().includes('motivat')) ||
-                         (tMood.includes('energet') && t.mood?.toLowerCase().includes('energet'));
-          return lMatch && mMatch;
-        });
-        if (exact.length > 0) return exact;
-        const langOnly = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === tLang);
-        return langOnly.length > 0 ? langOnly : CURATED_STARTER_TRACKS;
-      };
-      const fallbackList = filterStarterList(lang, mood);
-      setCurrentTracks(fallbackList);
-      setActiveTrackIndex(0);
-      setIsPlaying(false);
+      if (instantCurated.length > 0) {
+        setCurrentTracks(instantCurated);
+        setActiveTrackIndex(0);
+      }
     } catch (err) {
       console.warn("Error fetching filtered tracks, using curated fallback:", err);
-      const filterStarterList = (targetLang, targetMood) => {
-        const tLang = (targetLang || 'English').toLowerCase();
-        const tMood = (targetMood || 'Calm').toLowerCase();
-        const exact = CURATED_STARTER_TRACKS.filter(t => {
-          const lMatch = !t.language || t.language.toLowerCase() === tLang;
-          const mMatch = !targetMood || (t.mood && t.mood.toLowerCase() === tMood) ||
-                         (tMood.includes('calm') && t.mood?.toLowerCase().includes('calm')) ||
-                         (tMood.includes('happy') && t.mood?.toLowerCase().includes('happy')) ||
-                         (tMood.includes('romantic') && t.mood?.toLowerCase().includes('romantic')) ||
-                         (tMood.includes('sad') && t.mood?.toLowerCase().includes('sad')) ||
-                         (tMood.includes('sleep') && (t.mood?.toLowerCase().includes('sleep') || t.mood?.toLowerCase().includes('relax'))) ||
-                         (tMood.includes('anxi') && (t.mood?.toLowerCase().includes('anxi') || t.mood?.toLowerCase().includes('stress'))) ||
-                         (tMood.includes('motivat') && t.mood?.toLowerCase().includes('motivat')) ||
-                         (tMood.includes('energet') && t.mood?.toLowerCase().includes('energet'));
-          return lMatch && mMatch;
-        });
-        if (exact.length > 0) return exact;
-        const langOnly = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === tLang);
-        return langOnly.length > 0 ? langOnly : CURATED_STARTER_TRACKS;
-      };
-      const fallbackList = filterStarterList(lang, mood);
-      setCurrentTracks(fallbackList);
-      setActiveTrackIndex(0);
-      setIsPlaying(false);
+      if (instantCurated.length > 0) {
+        setCurrentTracks(instantCurated);
+        setActiveTrackIndex(0);
+      }
     } finally {
       setFilterLoading(false);
     }

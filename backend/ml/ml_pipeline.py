@@ -6,9 +6,18 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
-import lightgbm as lgb
-import catboost as cb
-from pytorch_tabnet.tab_model import TabNetClassifier as OfficialTabNetClassifier
+try:
+    import lightgbm as lgb
+except ImportError:
+    lgb = None
+try:
+    import catboost as cb
+except ImportError:
+    cb = None
+try:
+    from pytorch_tabnet.tab_model import TabNetClassifier as OfficialTabNetClassifier
+except ImportError:
+    OfficialTabNetClassifier = None
 from imblearn.over_sampling import SMOTE
 from sklearn.metrics import classification_report, confusion_matrix
 

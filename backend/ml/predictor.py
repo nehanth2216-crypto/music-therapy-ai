@@ -3,8 +3,14 @@ import pickle
 import numpy as np
 from typing import Dict, Any, Tuple, Optional
 from xgboost import XGBClassifier
-import lightgbm as lgb
-import catboost as cb
+try:
+    import lightgbm as lgb
+except ImportError:
+    lgb = None
+try:
+    import catboost as cb
+except ImportError:
+    cb = None
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
