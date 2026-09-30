@@ -3,13 +3,16 @@ from sqlalchemy.orm import Session
 from backend.database import ListeningHistory, SurveyResponse
 
 class HistoryManager:
-    """Manages user listening history and survey assessment history."""
+    """Manages user listening history and survey assessment history (Requirement 8)."""
 
     def get_history_summary(self, user_id: int, db: Session) -> Dict[str, Any]:
-        """Fetch recently played tracks and artists."""
+        """Fetch recently played tracks, artists, genres, and languages."""
         summary = {
             "recent_artists": set(),
             "recent_titles": set(),
+            "recent_genres": set(),
+            "recent_languages": set(),
+            "recent_tracks": [],
             "last_survey": None
         }
         if not db or not user_id:
@@ -28,6 +31,17 @@ class HistoryManager:
                     summary["recent_artists"].add(r.artist.strip().lower())
                 if r.title:
                     summary["recent_titles"].add(r.title.strip().lower())
+                if r.genre:
+                    summary["recent_genres"].add(r.genre.strip().lower())
+                if r.language:
+                    summary["recent_languages"].add(r.language.strip().lower())
+
+                summary["recent_tracks"].append({
+                    "title": r.title,
+                    "artist": r.artist,
+                    "genre": r.genre,
+                    "energy": r.energy
+                })
 
             last_s = (
                 db.query(SurveyResponse)

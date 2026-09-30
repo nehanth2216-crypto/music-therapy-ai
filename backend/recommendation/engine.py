@@ -876,10 +876,12 @@ class WeightedSongRecommendationEngine:
         """
         user_lang = str(user_state.get("language") or user_state.get("language_pref") or "English").strip()
 
+        from backend.ml.language_verifier import LanguageVerifier
         # Step A: Filter by target language (Hard filter: Telugu/Tamil/Hindi/Malayalam/English)
         candidate_items = [
             it for it in self.catalog
             if it.get("language", "").strip().lower() == user_lang.lower()
+            and LanguageVerifier.verify_track_language(it, user_lang)
         ]
 
         if len(candidate_items) < 10:

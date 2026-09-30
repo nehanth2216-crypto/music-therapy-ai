@@ -1326,7 +1326,13 @@ def get_song_recommendations(req: RecommendationRequest, current_user: Optional[
         lh_records = db.query(ListeningHistory).filter(ListeningHistory.user_id == current_user.id).order_by(ListeningHistory.played_at.desc()).limit(20).all()
         user_state["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
 
-    recommendations = weighted_recommender.recommend(user_state, top_n=req.top_n or 10)
+    rec_res = hybrid_recommender.get_recommendations(
+        survey_data=user_state,
+        user_id=current_user.id if current_user else None,
+        db=db,
+        limit=req.top_n or 10
+    )
+    recommendations = rec_res.get("tracks", [])
     
     return {
         "input": {
@@ -1338,6 +1344,10 @@ def get_song_recommendations(req: RecommendationRequest, current_user: Optional[
             "energy": user_energy
         },
         "recommendation_method": "weighted_song_ranking",
+        "method": "hybrid_xgboost_ranking",
+        "predicted_therapy_category": rec_res.get("predicted_therapy_category", "Relaxation"),
+        "prediction_confidence": rec_res.get("prediction_confidence", 0.90),
+        "model_used": rec_res.get("model_used", "XGBoost"),
         "recommendations": recommendations,
         "tracks": recommendations
     }
@@ -1348,7 +1358,7 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current
     
     survey_dict = survey.model_dump() if hasattr(survey, 'model_dump') else survey.dict()
     
-    # 1. Execute XGBoost / ML model for playlist/therapy classification (Preserving XGBoost)
+    # 1. Execute Production Hybrid Recommender with XGBoost Therapy Category Prediction & 6-Factor Ranking
     rec_result = hybrid_recommender.get_recommendations(
         survey_data=survey_dict,
         user_id=user_id,
@@ -1356,29 +1366,10 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current
         limit=20
     )
     therapy_category = rec_result.get("predicted_therapy_category", "Relaxation")
-
-    # 2. Execute Weighted Song Recommendation Engine for deterministic song-level recommendations
-    if user_id:
-        lh_records = db.query(ListeningHistory).filter(ListeningHistory.user_id == user_id).order_by(ListeningHistory.played_at.desc()).limit(20).all()
-        survey_dict["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
-
-    weighted_recs = weighted_recommender.recommend(survey_dict, top_n=10)
-    raw_tracks = weighted_recs if weighted_recs else rec_result.get("tracks", [])
-
+    tracks = rec_result.get("tracks", [])
     target_lang = (survey.language_pref or "English").strip().title()
-    tracks = [
-        t for t in raw_tracks
-        if (t.get("language") or "").strip().lower() == target_lang.lower()
-        and LanguageVerifier.verify_track_language(t, target_lang)
-    ]
-    if not tracks:
-        cat_matches = [
-            s for s in weighted_recommender.catalog
-            if (s.get("language") or "").strip().lower() == target_lang.lower()
-        ]
-        tracks = cat_matches[:10]
 
-    # 3. Persist Survey Assessment Record
+    # 2. Persist Survey Assessment Record
     response_record = SurveyResponse(
         user_id=user_id if user_id else 1,
         age=survey.age,
@@ -1397,7 +1388,7 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current
     db.commit()
     db.refresh(response_record)
     
-    # 4. Store Recommendation Details
+    # 3. Store Recommendation Details
     rec_record = Recommendation(
         survey_id=response_record.id,
         genre=therapy_category,
@@ -1413,7 +1404,8 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current
         "predicted_therapy_category": therapy_category,
         "prediction_confidence": rec_result.get("prediction_confidence", 0.90),
         "model_used": rec_result.get("model_used", "XGBoost"),
-        "recommendation_method": "weighted_song_ranking",
+        "recommendation_method": "hybrid_xgboost_ranking",
+        "selected_language": rec_result.get("selected_language", target_lang),
         "recommendations": tracks,
         "tracks": tracks,
         "timestamp": response_record.timestamp.isoformat()
@@ -2000,7 +1992,10 @@ def get_recommendations_by_language(
         q = query.strip().lower()
         catalog_matches = []
         seen_titles = set()
-        for item in weighted_recommender.catalog:
+        lang_catalog = hybrid_recommender.catalog.get(language.strip().title(), [])
+        if not lang_catalog:
+            lang_catalog = [t for trs in hybrid_recommender.catalog.values() for t in trs]
+        for item in lang_catalog:
             s_lang = (item.get("language") or "").strip().lower()
             if s_lang == language.strip().lower():
                 s_title = (item.get("song") or item.get("title") or "").strip()
@@ -2073,44 +2068,21 @@ def get_recommendations_by_language(
         )
         user_state["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
 
-    raw_tracks = weighted_recommender.recommend(user_state, top_n=30)
-    tracks = [
-        t for t in raw_tracks
-        if (t.get("language") or "").strip().lower() == language.strip().lower()
-        and LanguageVerifier.verify_track_language(t, language)
-    ]
-
-    if not tracks:
-        # Fallback to hybrid recommender for uncataloged languages (e.g., Korean, Spanish)
-        rec_result = hybrid_recommender.get_recommendations(
-            survey_data={
-                "mood": mood or "Calming",
-                "language_pref": language,
-                "fav_genre": genre or "Melody",
-                "activity": eff_activity
-            },
-            user_id=current_user.id if current_user else None,
-            db=db,
-            limit=50
-        )
-        tracks = [
-            t for t in rec_result.get("tracks", [])
-            if (t.get("language") or "").strip().lower() == language.strip().lower()
-            and LanguageVerifier.verify_track_language(t, language)
-        ]
-
-    if not tracks:
-        # Direct fallback to authentic catalog songs for this language
-        cat_matches = [
-            dict(s, language=language) for s in weighted_recommender.catalog
-            if (s.get("language") or "").strip().lower() == language.strip().lower()
-        ]
-        tracks = cat_matches[:30]
+    rec_result = hybrid_recommender.get_recommendations(
+        survey_data=user_state,
+        user_id=current_user.id if current_user else None,
+        db=db,
+        limit=30
+    )
+    tracks = rec_result.get("tracks", [])
 
     return {
         "language": language,
         "playlist_key": playlist_type,
         "playlist_name": f"{language} {theme_info['name']}",
+        "predicted_therapy_category": rec_result.get("predicted_therapy_category", "Relaxation"),
+        "prediction_confidence": rec_result.get("prediction_confidence", 0.90),
+        "model_used": rec_result.get("model_used", "XGBoost"),
         "tracks": tracks
     }
 

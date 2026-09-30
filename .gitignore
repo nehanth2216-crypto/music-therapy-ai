@@ -34,3 +34,4 @@ pip-delete-this-directory.txt
 *.sln
 *.sw?
 scratch/
+catboost_info/

@@ -29,61 +29,382 @@ const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam"]
 
 const CURATED_STARTER_TRACKS = [
   {
-    id: "starter-1",
-    title: "Weightless Harmony",
-    artist: "Marconi Union Style",
-    genre: "Ambient",
-    language: "English",
-    mood: "Calm",
-    therapy_category: "Stress Relief",
-    duration: "4:15",
-    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+    "id": "telugu-1",
+    "title": "Vachindamma",
+    "artist": "Sid Sriram",
+    "album": "Geetha Govindam",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Happy",
+    "therapy_category": "Happiness",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/68/f1/52/68f1523b-3c40-f2cc-7d4a-376642897adb/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/3b/a0/a1/3ba0a1ce-bf63-bbaf-48f6-48593c231168/mzaf_16000697806590920631.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/vachindamma/1419151786?i=1419152719&uo=4"
   },
   {
-    id: "starter-2",
-    title: "Samayama",
-    artist: "Anurag Kulkarni",
-    genre: "Melody",
-    language: "Telugu",
-    mood: "Relaxed",
-    therapy_category: "Relaxation",
-    duration: "3:48",
-    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+    "id": "telugu-2",
+    "title": "Butta Bomma",
+    "artist": "Armaan Malik",
+    "album": "Ala Vaikunthapurramuloo",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Happy",
+    "therapy_category": "Happiness",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/46/aa/48/46aa4863-c1ec-4574-e98e-80b8c1f3ef69/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/28/e0/d3/28e0d30a-2afe-66e4-ac03-69b6d779fecd/mzaf_7857615290499608693.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/butta-bomma-remix-from-ala-vaikunthapurramuloo/1736706821?i=1736707044&uo=4"
   },
   {
-    id: "starter-3",
-    title: "Kesariya Soothing Mix",
-    artist: "Arijit Singh",
-    genre: "Melody",
-    language: "Hindi",
-    mood: "Happy",
-    therapy_category: "Emotional Healing",
-    duration: "4:02",
-    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+    "id": "telugu-3",
+    "title": "Na Roja Nuvve",
+    "artist": "Hesham Abdul Wahab",
+    "album": "Kushi",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Happy",
+    "therapy_category": "Happiness",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/b5/28/a5/b528a58b-5633-d045-5205-894a3c105d1f/197188849610.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6a/94/8a/6a948abe-1f62-4824-6d07-071854e5f4b1/mzaf_7845856316638946970.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/na-roja-nuvve-from-kushi/1687526663?i=1687526684&uo=4"
   },
   {
-    id: "starter-4",
-    title: "Deep Theta Waves",
-    artist: "Binaural Mind",
-    genre: "Meditation",
-    language: "English",
-    mood: "Calm",
-    therapy_category: "Meditation",
-    duration: "5:12",
-    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+    "id": "telugu-4",
+    "title": "Inthandham",
+    "artist": "S.P. Charan, Vishal Chandrashekar",
+    "album": "Sita Ramam",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Calm",
+    "therapy_category": "Relaxation",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/bd/50/2a/bd502abd-0ef7-3906-bce8-ee29516d5206/196589460875.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/e3/dc/d7/e3dcd75a-a562-ac84-2dd1-2ea7e8db26d4/mzaf_5058541019549724977.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/inthandham/1644086776?i=1644086802&uo=4"
   },
   {
-    id: "starter-5",
-    title: "Neeyum Naanum Chill",
-    artist: "Anirudh",
-    genre: "Acoustic",
-    language: "Tamil",
-    mood: "Romantic",
-    therapy_category: "Relaxation",
-    duration: "3:30",
-    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
+    "id": "telugu-5",
+    "title": "Samayama",
+    "artist": "Hesham Abdul Wahab, Anurag Kulkarni",
+    "album": "Hi Nanna",
+    "genre": "Lo-fi",
+    "language": "Telugu",
+    "mood": "Calm",
+    "therapy_category": "Relaxation",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/samayama-from-hi-nanna/1707658230?i=1707658237&uo=4"
+  },
+  {
+    "id": "telugu-6",
+    "title": "Maate Vinadhuga",
+    "artist": "Sid Sriram",
+    "album": "Taxiwaala",
+    "genre": "Lo-fi",
+    "language": "Telugu",
+    "mood": "Calm",
+    "therapy_category": "Relaxation",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1d/a0/941da079-ee93-ce60-6340-3c7d0f7633a3/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/07/27/4c/07274cc8-f662-8747-e425-1108ba2a2390/mzaf_12339835384962827073.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/maate-vinadhuga/1441393357?i=1441393541&uo=4"
+  },
+  {
+    "id": "telugu-7",
+    "title": "Inkem Inkem Inkem Kaavaale",
+    "artist": "Sid Sriram",
+    "album": "Geetha Govindam",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Romantic",
+    "therapy_category": "Emotional Healing",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/68/f1/52/68f1523b-3c40-f2cc-7d4a-376642897adb/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6d/5a/f1/6d5af141-475c-7404-495c-0ef55283457c/mzaf_3028662401385709025.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/inkem-inkem-inkem-kaavaale/1419151786?i=1419151804&uo=4"
+  },
+  {
+    "id": "telugu-8",
+    "title": "Samajavaragamana",
+    "artist": "Sid Sriram",
+    "album": "Ala Vaikunthapurramuloo",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Romantic",
+    "therapy_category": "Emotional Healing",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/53/98/c1/5398c1cf-7c16-24a6-bfa3-391dc6015376/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/29/a7/55/29a75528-3808-d849-ad00-9e714bf12621/mzaf_2813549342968292058.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/samajavaragamana-from-ala-vaikunthapurramuloo/1481685063?i=1481685076&uo=4"
+  },
+  {
+    "id": "telugu-9",
+    "title": "Chuttamalle",
+    "artist": "Shilpa Rao, Anirudh Ravichander",
+    "album": "Devara Part 1",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Romantic",
+    "therapy_category": "Emotional Healing",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/86/7c/53/867c53cc-4efe-faef-a20e-8d9c896053db/8903431011411_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/f9/28/29/f92829b4-5473-17a9-879a-2efe96b8f95b/mzaf_4766756883763132198.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/chuttamalle-from-devara-part-1/1761152592?i=1761152593&uo=4"
+  },
+  {
+    "id": "telugu-10",
+    "title": "Gaaju Bomma",
+    "artist": "Hesham Abdul Wahab",
+    "album": "Hi Nanna",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Sad",
+    "therapy_category": "Emotional Healing",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/64/4c/1d/644c1db5-68f8-0640-21e2-dd440f7290e7/8903431963253_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/d2/fa/25/d2fa2568-17fb-2b01-be35-e25958deb59b/mzaf_13469061968631996874.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/gaaju-bomma/1721188515?i=1721188516&uo=4"
+  },
+  {
+    "id": "telugu-11",
+    "title": "Priyathama",
+    "artist": "Chinmayi Sripaada",
+    "album": "Majili",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Sad",
+    "therapy_category": "Emotional Healing",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/0e/3e/04/0e3e04f9-6732-2694-932e-9ffd47779f91/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/a6/c2/d5/a6c2d507-f120-46e2-5057-9db3adc54d3f/mzaf_9714569010590451692.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/priyathama-priyathama/1457658537?i=1457658545&uo=4"
+  },
+  {
+    "id": "telugu-12",
+    "title": "Adhento Gaani Vunnapaatuga",
+    "artist": "Anirudh Ravichander",
+    "album": "Jersey",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Sad",
+    "therapy_category": "Emotional Healing",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/92/79/d0/9279d067-bb03-ec01-cd1d-e02feb37000d/8718857677994.png/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/f1/9c/4b/f19c4b64-0347-afc5-b88c-5b2c3f48b1a0/mzaf_17596197404174098685.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/adhento-gaani-vunnapaatuga/1529547564?i=1529547565&uo=4"
+  },
+  {
+    "id": "telugu-13",
+    "title": "Kadalalle",
+    "artist": "Sid Sriram, Aishwarya Ravichandran",
+    "album": "Dear Comrade",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Anxious",
+    "therapy_category": "Anxiety Relief",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b0/34/9a/b0349aa0-c9e3-d5b0-0c63-f973d5259f58/8903431718556_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/e1/7a/7e/e17a7e48-fb87-e7b7-9ad4-fe959313b080/mzaf_3424967942281023373.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/kadalalle/1474048950?i=1474048958&uo=4"
+  },
+  {
+    "id": "telugu-14",
+    "title": "O Rendu Prema Meghaalila",
+    "artist": "Vijai Bulganin, Sreerama Chandra",
+    "album": "Baby",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Stressed",
+    "therapy_category": "Stress Relief",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/a0/e1/4e/a0e14e48-64ce-9c99-1a77-62c80454e48e/196871299732.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/47/a4/53/47a4535a-59a4-70f6-bbc4-561aff46ac44/mzaf_569950692249724000.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/o-rendu-prema-meghaalila-first-love-song/1696563083?i=1696563087&uo=4"
+  },
+  {
+    "id": "telugu-15",
+    "title": "Vellake (Unplugged)",
+    "artist": "Bharatt-Saurabh, Yazin Nizar, Anirudh Ravichander",
+    "album": "Vellake",
+    "genre": "Acoustic",
+    "language": "Telugu",
+    "mood": "Anxious",
+    "therapy_category": "Anxiety Relief",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/9a/f5/3c/9af53c7c-a2f7-6ead-e3d2-a6053cc72e6d/196871064040.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/09/89/d8/0989d8e8-8ac5-b561-9b40-c17dc11db682/mzaf_17789346173859512542.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/vellake/1687309230?i=1687309231&uo=4"
+  },
+  {
+    "id": "telugu-16",
+    "title": "Dheevara",
+    "artist": "Ramya Behara, Deepu, M.M. Keeravaani",
+    "album": "Baahubali - The Beginning",
+    "genre": "Dance",
+    "language": "Telugu",
+    "mood": "Energetic",
+    "therapy_category": "Workout",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/1a/8e/da/1a8edac5-80a7-22aa-c014-f4f1a0190f7a/8905750011301.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/61/70/26/617026bc-2eaf-d430-9334-4ee60126598f/mzaf_16635309545604915098.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/dhivara/1841899055?i=1841899059&uo=4"
+  },
+  {
+    "id": "telugu-17",
+    "title": "Ramuloo Ramulaa",
+    "artist": "Anurag Kulkarni, Mangli",
+    "album": "Ala Vaikunthapurramuloo",
+    "genre": "Dance",
+    "language": "Telugu",
+    "mood": "Energetic",
+    "therapy_category": "Workout",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/4d/7c/4a/4d7c4a33-0c3b-b0e5-1e5a-8182d9a25811/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/21/7b/7d/217b7d89-df73-12db-ca5f-2fee71f47dce/mzaf_2385408187580859158.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/ramuloo-ramulaa-from-ala-vaikunthapurramuloo/1485104772?i=1485104774&uo=4"
+  },
+  {
+    "id": "telugu-18",
+    "title": "Mind Block",
+    "artist": "Blaaze, Ranina Reddy, Devi Sri Prasad",
+    "album": "Sarileru Neekevvaru",
+    "genre": "Dance",
+    "language": "Telugu",
+    "mood": "Energetic",
+    "therapy_category": "Workout",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b9/65/11/b96511a1-db8d-7b6f-7c3f-1dd761b2a7ca/8903431760432_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/66/ea/3d/66ea3d64-3566-ce92-0210-1c47309c908c/mzaf_13556438678857040956.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/mind-block/1493788531?i=1493788786&uo=4"
+  },
+  {
+    "id": "telugu-19",
+    "title": "Dheera Dheera",
+    "artist": "Nikitha Nigam, M.M. Keeravaani",
+    "album": "Magadheera",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Motivated",
+    "therapy_category": "Motivation",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music5/v4/f6/26/81/f6268128-40ec-9db1-83ca-24a2c0c51d92/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/97/1e/f2/971ef28b-24d1-6715-3e2a-e86e7c303612/mzaf_11247937308848400387.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/dheera-dheera/925489793?i=925489821&uo=4"
+  },
+  {
+    "id": "telugu-20",
+    "title": "Naatu Naatu",
+    "artist": "Rahul Sipligunj, Kaala Bhairava, M.M. Keeravaani",
+    "album": "RRR",
+    "genre": "Dance",
+    "language": "Telugu",
+    "mood": "Motivated",
+    "therapy_category": "Motivation",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/dd/39/14/dd3914e5-a2f3-b355-51f3-9a1f0e3ca246/8903431853592_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/8e/dd/a4/8edda474-3fe1-3fe6-43d3-765db520a29b/mzaf_11740310005222997767.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/naatu-naatu-from-rrr/1594544793?i=1594544794&uo=4"
+  },
+  {
+    "id": "telugu-21",
+    "title": "Komuram Bheemudo",
+    "artist": "Kaala Bhairava, M.M. Keeravaani",
+    "album": "RRR",
+    "genre": "Classical",
+    "language": "Telugu",
+    "mood": "Motivated",
+    "therapy_category": "Motivation",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a9/f8/92/a9f892cd-6f28-a3da-ea07-8a849a71ad0e/8903431859501_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/6b/64/10/6b6410f8-3620-44af-8da7-378da8959bc3/mzaf_8455483532068537598.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/komuram-bheemudo-from-rrr/1602054631?i=1602054632&uo=4"
+  },
+  {
+    "id": "telugu-22",
+    "title": "Inthandham",
+    "artist": "S.P. Charan, Vishal Chandrashekar",
+    "album": "Sita Ramam",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Sleep",
+    "therapy_category": "Sleep Therapy",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/bd/50/2a/bd502abd-0ef7-3906-bce8-ee29516d5206/196589460875.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/e3/dc/d7/e3dcd75a-a562-ac84-2dd1-2ea7e8db26d4/mzaf_5058541019549724977.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/inthandham/1644086776?i=1644086802&uo=4"
+  },
+  {
+    "id": "telugu-23",
+    "title": "Oohale",
+    "artist": "Govind Vasantha, Chinmayi Sripaada",
+    "album": "Jaanu",
+    "genre": "Melody",
+    "language": "Telugu",
+    "mood": "Sleep",
+    "therapy_category": "Sleep Therapy",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/31/45/9c/31459c47-96f3-a716-74e8-2fb05ff5a6fb/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/9e/89/a8/9e89a883-4858-a311-786e-f1ee96137cdd/mzaf_10663441610848496018.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/oohale-from-jaanu/1496549101?i=1496549102&uo=4"
+  },
+  {
+    "id": "telugu-24",
+    "title": "Samayama",
+    "artist": "Hesham Abdul Wahab, Anurag Kulkarni",
+    "album": "Hi Nanna",
+    "genre": "Lo-fi",
+    "language": "Telugu",
+    "mood": "Relaxing",
+    "therapy_category": "Sleep Therapy",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a",
+    "play_url": "https://music.apple.com/us/album/samayama-from-hi-nanna/1707658230?i=1707658237&uo=4"
+  },
+  {
+    "id": "starter-en-1",
+    "title": "Weightless",
+    "artist": "Marconi Union",
+    "genre": "Ambient",
+    "language": "English",
+    "mood": "Calm",
+    "therapy_category": "Stress Relief",
+    "duration": "4:15",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/c3/3a/d6/c33ad6a3-ec91-62e4-0912-d4a873d4fed0/cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/65/69/07/656907c9-eb54-c59c-72b9-dad8489a0165/mzaf_3316991574698499044.plus.aac.p.m4a",
+    "play_url": "https://open.spotify.com/search/Marconi%20Union%20Weightless"
+  },
+  {
+    "id": "starter-hi-1",
+    "title": "Kesariya",
+    "artist": "Arijit Singh",
+    "genre": "Melody",
+    "language": "Hindi",
+    "mood": "Happy",
+    "therapy_category": "Emotional Healing",
+    "duration": "4:28",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/b4/2c/3e/b42c3eb6-87e3-0d53-a87f-3fa90875456f/8902894371490_cover.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/5e/5c/d1/5e5cd1ff-778f-6240-4dc6-4e50ebdd8ca0/mzaf_5819777598822004246.plus.aac.p.m4a",
+    "play_url": "https://open.spotify.com/search/Kesariya%20Arijit%20Singh"
+  },
+  {
+    "id": "starter-ta-1",
+    "title": "Neeyum Naanum",
+    "artist": "Anirudh Ravichander",
+    "genre": "Melody",
+    "language": "Tamil",
+    "mood": "Romantic",
+    "therapy_category": "Relaxation",
+    "duration": "3:45",
+    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/f9/2d/d1/f92dd185-708f-2c4c-446e-81a3791cc979/730792835404.jpg/500x500bb.jpg",
+    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/6c/46/bb/6c46bb00-98fe-abe5-a191-05a30e4ce11e/mzaf_17637533678834679920.plus.aac.p.m4a",
+    "play_url": "https://open.spotify.com/search/Neeyum%20Naanum"
   }
 ];
+
 
 const LYRICS_DATABASE = {
   "Samayama": {
@@ -469,14 +790,54 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         }
       }
       // Resilient fallback when backend is unreachable or returns no tracks
-      const langMatches = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === lang.toLowerCase());
-      setCurrentTracks(langMatches.length > 0 ? langMatches : CURATED_STARTER_TRACKS);
+      const filterStarterList = (targetLang, targetMood) => {
+        const tLang = (targetLang || 'English').toLowerCase();
+        const tMood = (targetMood || 'Calm').toLowerCase();
+        const exact = CURATED_STARTER_TRACKS.filter(t => {
+          const lMatch = !t.language || t.language.toLowerCase() === tLang;
+          const mMatch = !targetMood || (t.mood && t.mood.toLowerCase() === tMood) ||
+                         (tMood.includes('calm') && t.mood?.toLowerCase().includes('calm')) ||
+                         (tMood.includes('happy') && t.mood?.toLowerCase().includes('happy')) ||
+                         (tMood.includes('romantic') && t.mood?.toLowerCase().includes('romantic')) ||
+                         (tMood.includes('sad') && t.mood?.toLowerCase().includes('sad')) ||
+                         (tMood.includes('sleep') && (t.mood?.toLowerCase().includes('sleep') || t.mood?.toLowerCase().includes('relax'))) ||
+                         (tMood.includes('anxi') && (t.mood?.toLowerCase().includes('anxi') || t.mood?.toLowerCase().includes('stress'))) ||
+                         (tMood.includes('motivat') && t.mood?.toLowerCase().includes('motivat')) ||
+                         (tMood.includes('energet') && t.mood?.toLowerCase().includes('energet'));
+          return lMatch && mMatch;
+        });
+        if (exact.length > 0) return exact;
+        const langOnly = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === tLang);
+        return langOnly.length > 0 ? langOnly : CURATED_STARTER_TRACKS;
+      };
+      const fallbackList = filterStarterList(lang, mood);
+      setCurrentTracks(fallbackList);
       setActiveTrackIndex(0);
       setIsPlaying(false);
     } catch (err) {
       console.warn("Error fetching filtered tracks, using curated fallback:", err);
-      const langMatches = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === lang.toLowerCase());
-      setCurrentTracks(langMatches.length > 0 ? langMatches : CURATED_STARTER_TRACKS);
+      const filterStarterList = (targetLang, targetMood) => {
+        const tLang = (targetLang || 'English').toLowerCase();
+        const tMood = (targetMood || 'Calm').toLowerCase();
+        const exact = CURATED_STARTER_TRACKS.filter(t => {
+          const lMatch = !t.language || t.language.toLowerCase() === tLang;
+          const mMatch = !targetMood || (t.mood && t.mood.toLowerCase() === tMood) ||
+                         (tMood.includes('calm') && t.mood?.toLowerCase().includes('calm')) ||
+                         (tMood.includes('happy') && t.mood?.toLowerCase().includes('happy')) ||
+                         (tMood.includes('romantic') && t.mood?.toLowerCase().includes('romantic')) ||
+                         (tMood.includes('sad') && t.mood?.toLowerCase().includes('sad')) ||
+                         (tMood.includes('sleep') && (t.mood?.toLowerCase().includes('sleep') || t.mood?.toLowerCase().includes('relax'))) ||
+                         (tMood.includes('anxi') && (t.mood?.toLowerCase().includes('anxi') || t.mood?.toLowerCase().includes('stress'))) ||
+                         (tMood.includes('motivat') && t.mood?.toLowerCase().includes('motivat')) ||
+                         (tMood.includes('energet') && t.mood?.toLowerCase().includes('energet'));
+          return lMatch && mMatch;
+        });
+        if (exact.length > 0) return exact;
+        const langOnly = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === tLang);
+        return langOnly.length > 0 ? langOnly : CURATED_STARTER_TRACKS;
+      };
+      const fallbackList = filterStarterList(lang, mood);
+      setCurrentTracks(fallbackList);
       setActiveTrackIndex(0);
       setIsPlaying(false);
     } finally {
