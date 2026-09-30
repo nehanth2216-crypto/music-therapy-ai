@@ -30,6 +30,7 @@ class TestHarmonyRecBackend(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create test database tables
+        Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
         app.dependency_overrides[get_db] = override_get_db
         cls.client = TestClient(app)
@@ -294,6 +295,29 @@ class TestHarmonyRecBackend(unittest.TestCase):
         data = resp.json()
         self.assertEqual(data["language"], "Korean")
         self.assertTrue(len(data["tracks"]) > 0)
+
+    def test_14_guest_login_and_access(self):
+        # 1. Sign in as guest
+        resp = self.client.post("/api/auth/guest")
+        self.assertEqual(resp.status_code, 200)
+        guest_data = resp.json()
+        self.assertIn("access_token", guest_data)
+        self.assertTrue(guest_data.get("is_guest"))
+        self.assertTrue(guest_data["username"].startswith("guest_"))
+        guest_token = guest_data["access_token"]
+        guest_headers = {"Authorization": f"Bearer {guest_token}"}
+
+        # 2. Get profile with guest token
+        me_resp = self.client.get("/api/auth/me", headers=guest_headers)
+        self.assertEqual(me_resp.status_code, 200)
+        me_data = me_resp.json()
+        self.assertTrue(me_data.get("is_guest"))
+        self.assertEqual(me_data["username"], guest_data["username"])
+
+        # 3. Submit survey with guest token
+        survey_resp = self.client.post("/api/recommend/survey", json=self.survey_payload, headers=guest_headers)
+        self.assertEqual(survey_resp.status_code, 200)
+        self.assertIn("recommendations", survey_resp.json())
 
 if __name__ == "__main__":
     unittest.main()

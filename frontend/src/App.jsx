@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldCheck, LogOut, Disc, ClipboardList, BarChart3, User, Sparkles, Key, CheckCircle, ArrowLeft, Settings, Bot } from 'lucide-react';
+import { ShieldCheck, LogOut, Disc, ClipboardList, BarChart3, User, Sparkles, Key, CheckCircle, ArrowLeft, Settings, Bot, UserCheck } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 import Dashboard from './components/Dashboard';
 import Survey from './components/Survey';
@@ -25,6 +25,8 @@ const API_BASE_URL = getApiBaseUrl();
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token') || '');
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
+  const [isGuest, setIsGuest] = useState(() => localStorage.getItem('is_guest') === 'true');
+  const [isGuestLoading, setIsGuestLoading] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('harmonyrec_current_view') || 'dashboard'); // 'dashboard', 'chatbot', 'survey', 'analytics'
   const [authMode, setAuthMode] = useState('login'); // 'login', 'signup', 'forgot', 'reset'
@@ -62,6 +64,10 @@ export default function App() {
           setUsername(profileData.username);
           localStorage.setItem('username', profileData.username);
         }
+        if (profileData && profileData.is_guest !== undefined) {
+          setIsGuest(Boolean(profileData.is_guest));
+          localStorage.setItem('is_guest', profileData.is_guest ? 'true' : 'false');
+        }
       }
     } catch (err) {
       console.warn("Could not verify session with backend:", err);
@@ -86,6 +92,7 @@ export default function App() {
   const handleLogout = () => {
     setToken('');
     setUsername('');
+    setIsGuest(false);
     setUserProfile(null);
     setAuthUsername('');
     setAuthEmail('');
@@ -97,7 +104,43 @@ export default function App() {
     setIsProfileOpen(false);
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('is_guest');
     localStorage.removeItem('harmonyrec_current_view');
+  };
+
+  const handleGuestLogin = async () => {
+    setIsGuestLoading(true);
+    setAuthError('');
+    setAuthSuccess('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/guest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(formatApiError(data.detail, 'Failed to sign in as guest'));
+      }
+      
+      setToken(data.access_token);
+      setUsername(data.username);
+      setIsGuest(true);
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('username', data.username);
+      localStorage.setItem('is_guest', 'true');
+      setAuthSuccess('Welcome! Exploring HarmonyRec in Guest Mode.');
+    } catch (err) {
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
+        ? (isLocal
+            ? 'Unable to connect to local HarmonyRec backend. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
+            : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat.')
+        : err.message;
+      setAuthError(msg);
+    } finally {
+      setIsGuestLoading(false);
+    }
   };
 
   const formatApiError = (detail, fallbackMsg = 'Request failed') => {
@@ -548,6 +591,41 @@ export default function App() {
           )}
 
           {(authMode === 'login' || authMode === 'signup') && (
+            <>
+              {/* Divider */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                margin: '1.25rem 0 1rem 0',
+                gap: '0.75rem'
+              }}>
+                <div style={{ flex: 1, height: '1px', background: 'var(--border-glass)' }} />
+                <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  or explore without an account
+                </span>
+                <div style={{ flex: 1, height: '1px', background: 'var(--border-glass)' }} />
+              </div>
+
+              {/* Guest Sign-In Button */}
+              <button
+                id="guest-signin-btn"
+                type="button"
+                onClick={handleGuestLogin}
+                disabled={isGuestLoading}
+                className="btn-guest"
+                title="Instant access without creating an account"
+              >
+                <UserCheck style={{ width: '18px', height: '18px', color: 'var(--primary-light)' }} />
+                {isGuestLoading ? 'Entering as Guest...' : 'Sign in as Guest'}
+              </button>
+              
+              <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                Instant access to music therapy, AI assistant, and ML recommendations.
+              </p>
+            </>
+          )}
+
+          {(authMode === 'login' || authMode === 'signup') && (
             <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
               <span style={{ color: 'var(--text-muted)' }}>
                 {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
@@ -716,6 +794,11 @@ export default function App() {
               <User style={{ width: '14px', height: '14px' }} />
             </div>
             <span style={{ fontWeight: 600 }}>{userProfile?.full_name || username}</span>
+            {isGuest && (
+              <span className="badge-guest" style={{ marginLeft: '0.2rem' }}>
+                Guest
+              </span>
+            )}
             <Settings style={{ width: '14px', height: '14px', color: 'var(--text-muted)' }} />
           </button>
           
@@ -750,9 +833,11 @@ export default function App() {
           onClose={() => setIsProfileOpen(false)}
           token={token}
           apiBaseUrl={API_BASE_URL}
+          isGuest={isGuest}
           onProfileUpdated={(updated) => {
             setUserProfile(updated);
             if (updated.username) setUsername(updated.username);
+            if (updated.is_guest !== undefined) setIsGuest(Boolean(updated.is_guest));
           }}
         />
       )}

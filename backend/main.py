@@ -2,6 +2,8 @@ import os
 import json
 import pickle
 import time
+import uuid
+import secrets
 import numpy as np
 import requests
 from typing import List, Optional, Any, Union
@@ -973,6 +975,7 @@ class TokenResponse(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     fav_genre: Optional[str] = "Lo-fi"
+    is_guest: Optional[bool] = False
 
 class UserProfileResponse(BaseModel):
     id: int
@@ -983,6 +986,7 @@ class UserProfileResponse(BaseModel):
     language_pref: Optional[str] = "English"
     default_activity: Optional[str] = "Relaxation"
     created_at: Optional[str] = None
+    is_guest: Optional[bool] = False
 
 class UserProfileUpdate(BaseModel):
     full_name: Optional[str] = None
@@ -1140,8 +1144,49 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
         "fav_genre": user.fav_genre or "Lo-fi"
     }
 
+@app.post("/api/auth/guest", response_model=TokenResponse)
+def guest_login(db: Session = Depends(get_db)):
+    """
+    Allow seamless guest sign-in without registration.
+    Creates a temporary guest profile and valid JWT token.
+    """
+    guest_suffix = uuid.uuid4().hex[:6]
+    guest_username = f"guest_{guest_suffix}"
+    guest_email = f"{guest_username}@guest.harmonyrec.local"
+    random_pwd = secrets.token_urlsafe(16)
+    hashed_pwd = get_password_hash(random_pwd)
+
+    guest_user = User(
+        username=guest_username,
+        email=guest_email,
+        hashed_password=hashed_pwd,
+        full_name="Guest Explorer",
+        fav_genre="Lo-fi",
+        language_pref="English",
+        default_activity="Relaxation"
+    )
+    db.add(guest_user)
+    db.commit()
+    db.refresh(guest_user)
+
+    token = create_access_token(data={"sub": guest_user.username})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "username": guest_user.username,
+        "email": guest_user.email,
+        "full_name": guest_user.full_name,
+        "fav_genre": guest_user.fav_genre,
+        "is_guest": True
+    }
+
 @app.get("/api/auth/me", response_model=UserProfileResponse)
 def get_me(current_user: User = Depends(get_optional_current_user)):
+    is_guest = bool(
+        current_user.username.startswith("guest_") 
+        or current_user.username == "guest" 
+        or (current_user.email and "@guest." in current_user.email)
+    )
     return {
         "id": current_user.id,
         "username": current_user.username,
@@ -1150,7 +1195,8 @@ def get_me(current_user: User = Depends(get_optional_current_user)):
         "fav_genre": current_user.fav_genre or "Lo-fi",
         "language_pref": current_user.language_pref or "English",
         "default_activity": current_user.default_activity or "Relaxation",
-        "created_at": current_user.created_at.strftime("%Y-%m-%d %H:%M") if current_user.created_at else None
+        "created_at": current_user.created_at.strftime("%Y-%m-%d %H:%M") if current_user.created_at else None,
+        "is_guest": is_guest
     }
 
 @app.put("/api/auth/profile", response_model=UserProfileResponse)
@@ -1317,7 +1363,20 @@ def submit_survey(survey: SurveySubmit, current_user: User = Depends(get_current
         survey_dict["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
 
     weighted_recs = weighted_recommender.recommend(survey_dict, top_n=10)
-    tracks = weighted_recs if weighted_recs else rec_result.get("tracks", [])
+    raw_tracks = weighted_recs if weighted_recs else rec_result.get("tracks", [])
+
+    target_lang = (survey.language_pref or "English").strip().title()
+    tracks = [
+        t for t in raw_tracks
+        if (t.get("language") or "").strip().lower() == target_lang.lower()
+        and LanguageVerifier.verify_track_language(t, target_lang)
+    ]
+    if not tracks:
+        cat_matches = [
+            s for s in weighted_recommender.catalog
+            if (s.get("language") or "").strip().lower() == target_lang.lower()
+        ]
+        tracks = cat_matches[:10]
 
     # 3. Persist Survey Assessment Record
     response_record = SurveyResponse(
@@ -1978,9 +2037,10 @@ def get_recommendations_by_language(
         for t in itunes_tracks + deezer_tracks:
             title_key = (t.get("title") or "").lower().strip()
             if title_key and title_key not in seen:
-                seen.add(title_key)
-                t["youtube_search_url"] = make_yt_url(t.get("title", ""), t.get("artist", ""))
-                merged.append(t)
+                if _is_language_match(t, language) and LanguageVerifier.verify_track_language(t, language):
+                    seen.add(title_key)
+                    t["youtube_search_url"] = make_yt_url(t.get("title", ""), t.get("artist", ""))
+                    merged.append(t)
         if merged:
             return {
                 "language": language,
@@ -2003,7 +2063,7 @@ def get_recommendations_by_language(
         "age": eff_age
     }
 
-    if current_user:
+    if current_user and db:
         lh_records = (
             db.query(ListeningHistory)
             .filter(ListeningHistory.user_id == current_user.id)
@@ -2013,7 +2073,12 @@ def get_recommendations_by_language(
         )
         user_state["history"] = [{"genre": h.genre, "artist": h.artist, "energy": h.energy} for h in lh_records]
 
-    tracks = weighted_recommender.recommend(user_state, top_n=20)
+    raw_tracks = weighted_recommender.recommend(user_state, top_n=30)
+    tracks = [
+        t for t in raw_tracks
+        if (t.get("language") or "").strip().lower() == language.strip().lower()
+        and LanguageVerifier.verify_track_language(t, language)
+    ]
 
     if not tracks:
         # Fallback to hybrid recommender for uncataloged languages (e.g., Korean, Spanish)
@@ -2021,14 +2086,26 @@ def get_recommendations_by_language(
             survey_data={
                 "mood": mood or "Calming",
                 "language_pref": language,
-                "fav_genre": genre or "Lo-fi",
+                "fav_genre": genre or "Melody",
                 "activity": eff_activity
             },
             user_id=current_user.id if current_user else None,
             db=db,
             limit=50
         )
-        tracks = rec_result.get("tracks", [])
+        tracks = [
+            t for t in rec_result.get("tracks", [])
+            if (t.get("language") or "").strip().lower() == language.strip().lower()
+            and LanguageVerifier.verify_track_language(t, language)
+        ]
+
+    if not tracks:
+        # Direct fallback to authentic catalog songs for this language
+        cat_matches = [
+            dict(s, language=language) for s in weighted_recommender.catalog
+            if (s.get("language") or "").strip().lower() == language.strip().lower()
+        ]
+        tracks = cat_matches[:30]
 
     return {
         "language": language,

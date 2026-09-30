@@ -3,8 +3,9 @@ import { User, Lock, Save, X, CheckCircle, AlertCircle, Sparkles, Shield } from 
 
 const LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam", "Spanish", "Other"];
 
-export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, onProfileUpdated }) {
+export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, isGuest = false, onProfileUpdated }) {
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'security'
+  const [isGuestUser, setIsGuestUser] = useState(isGuest);
   
   // Profile form state
   const [username, setUsername] = useState('');
@@ -43,6 +44,9 @@ export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, o
         setDefaultActivity(data.default_activity || 'Relaxation');
         if (data.created_at) {
           setCreatedAt(new Date(data.created_at).toLocaleDateString());
+        }
+        if (data.is_guest !== undefined) {
+          setIsGuestUser(Boolean(data.is_guest));
         }
       }
     } catch (err) {
@@ -286,6 +290,25 @@ export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, o
         {/* Tab 1: Profile & Preferences */}
         {activeTab === 'profile' && (
           <form onSubmit={handleProfileSubmit}>
+            {isGuestUser && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%)',
+                border: '1px solid rgba(168, 85, 247, 0.35)',
+                borderRadius: '12px',
+                padding: '0.85rem 1rem',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                fontSize: '0.85rem',
+                color: 'var(--text-primary)'
+              }}>
+                <Sparkles style={{ width: '18px', height: '18px', color: 'var(--primary-light)', flexShrink: 0 }} />
+                <div>
+                  <strong>Guest Mode:</strong> You are exploring anonymously. Customize your preferences freely for this session. Sign up anytime to save history permanently.
+                </div>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
               <div>
                 <label className="input-label">Username</label>
@@ -355,6 +378,24 @@ export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, o
 
         {/* Tab 2: Security & Password */}
         {activeTab === 'security' && (
+          isGuestUser ? (
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid var(--border-glass)',
+              borderRadius: '14px',
+              padding: '2rem 1.5rem',
+              textAlign: 'center'
+            }}>
+              <Shield style={{ width: '38px', height: '38px', color: 'var(--primary-light)', margin: '0 auto 0.75rem' }} />
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Guest Session</h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+                Guest accounts are temporary session accounts and do not require or maintain a permanent password.
+              </p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                To save your playlist favorites and recommendations across devices, log out and create a permanent account.
+              </p>
+            </div>
+          ) : (
           <form onSubmit={handlePasswordSubmit}>
             <div style={{ marginBottom: '1.25rem' }}>
               <label className="input-label">Current Password</label>
@@ -402,6 +443,7 @@ export default function UserProfileModal({ isOpen, onClose, token, apiBaseUrl, o
               {loading ? 'Updating Password...' : 'Update Password'}
             </button>
           </form>
+          )
         )}
       </div>
     </div>

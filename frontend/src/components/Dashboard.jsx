@@ -314,7 +314,13 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         setHistory(historyData);
         if (historyData.length > 0) {
           const latest = historyData[historyData.length - 1];
-          setCurrentTracks(parseTracksArray(latest.tracks));
+          const targetLang = latest.language_pref || 'English';
+          const surveyTracks = parseTracksArray(latest.tracks);
+          const strictlyLangTracks = surveyTracks.filter(t => !t.language || t.language.toLowerCase() === targetLang.toLowerCase());
+
+          if (strictlyLangTracks.length > 0) {
+            setCurrentTracks(strictlyLangTracks);
+          }
           setCurrentMoodState(latest.result_state || 'Calming');
           setLatestSurveyId(latest.id);
           // Set feedback default if already submitted
@@ -323,6 +329,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
           if (latest.language_pref) setSelectedLanguage(latest.language_pref);
           if (latest.mood) setSelectedMood(latest.mood);
           if (latest.fav_genre) setSelectedGenre(latest.fav_genre);
+
+          if (strictlyLangTracks.length === 0 && targetLang) {
+            handleMultiFilterSearch(targetLang, latest.fav_genre || 'Melody', latest.mood || 'Calm');
+          }
         }
       }
 
@@ -386,8 +396,9 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
       if (res.ok) {
         const data = await res.json();
         const parsed = parseTracksArray(data.tracks);
-        if (parsed.length > 0) {
-          setCurrentTracks(parsed);
+        const strictlyLangTracks = parsed.filter(t => !t.language || t.language.toLowerCase() === lang.toLowerCase());
+        if (strictlyLangTracks.length > 0) {
+          setCurrentTracks(strictlyLangTracks);
           setActiveTrackIndex(0);
           setIsPlaying(false);
         }

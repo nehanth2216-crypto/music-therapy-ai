@@ -885,27 +885,27 @@ class WeightedSongRecommendationEngine:
         if len(candidate_items) < 10:
             try:
                 from backend.ml.recommender import fetch_live_itunes_tracks
+                from backend.ml.language_verifier import LanguageVerifier
                 genre_term = str(user_state.get("genre") or user_state.get("fav_genre") or "").strip()
                 mood_term = str(user_state.get("mood") or "").strip()
-                queries_to_try = [genre_term, mood_term, "hits", "popular"]
+                queries_to_try = [f"{user_lang} {genre_term}", f"{user_lang} {mood_term}", f"{user_lang} hits", f"{user_lang} popular songs"]
                 for q in queries_to_try:
                     if len(candidate_items) >= 15:
                         break
-                    if not q:
-                        continue
                     live_tracks = fetch_live_itunes_tracks(
                         q,
                         language=user_lang,
                         limit=15
                     )
                     for lt in live_tracks:
-                        lt_copy = dict(lt)
-                        lt_copy["language"] = user_lang
-                        if not lt_copy.get("genre"):
-                            lt_copy["genre"] = genre_term or "Pop"
-                        if not lt_copy.get("mood"):
-                            lt_copy["mood"] = mood_term or "Calm"
-                        candidate_items.append(lt_copy)
+                        if LanguageVerifier.verify_track_language(lt, user_lang):
+                            lt_copy = dict(lt)
+                            lt_copy["language"] = user_lang
+                            if not lt_copy.get("genre"):
+                                lt_copy["genre"] = genre_term or "Pop"
+                            if not lt_copy.get("mood"):
+                                lt_copy["mood"] = mood_term or "Calm"
+                            candidate_items.append(lt_copy)
             except Exception:
                 pass
 
@@ -959,8 +959,9 @@ class WeightedSongRecommendationEngine:
         unique_song_list.sort(key=lambda s: (-s["score"], s["song"].lower(), s["artist"].lower()))
 
         # Step D: Apply quality filter (filter out complete mismatches, guarantee at least 5 songs)
-        high_quality = [s for s in unique_song_list if s["score"] >= 65.0]
-        final_candidates = high_quality if len(high_quality) >= 5 else unique_song_list
+        lang_filtered_songs = [s for s in unique_song_list if s.get("language", "").strip().lower() == user_lang.lower()]
+        high_quality = [s for s in lang_filtered_songs if s["score"] >= 65.0]
+        final_candidates = high_quality if len(high_quality) >= 5 else lang_filtered_songs
         effective_limit = max(5, min(top_n, len(final_candidates)))
         top_recommendations = final_candidates[:effective_limit]
 

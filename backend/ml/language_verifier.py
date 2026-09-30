@@ -84,7 +84,7 @@ ENGLISH_ONLY_TITLES = {
 }
 
 class LanguageVerifier:
-    """Strict language verification utility."""
+    """Strict language verification utility ensuring ZERO cross-language leakage."""
 
     @staticmethod
     def verify_track_language(track: Dict[str, Any], target_language: str) -> bool:
@@ -95,66 +95,76 @@ class LanguageVerifier:
         if not target_language:
             return True
 
-        t_lang = (target_language or "English").strip()
-        track_lang = (track.get("language") or "").strip()
-        title = (track.get("title") or "").strip().lower()
-        artist = (track.get("artist") or "").strip().lower()
-        album = (track.get("album") or "").strip().lower()
+        t_lang = (target_language or "English").strip().title()
+        track_lang = (track.get("language") or "").strip().title()
+        title = (track.get("title") or track.get("song") or "").strip().lower()
+        artist = (track.get("artist") or track.get("artist_or_source") or "").strip().lower()
+        album = (track.get("album") or track.get("movie") or "").strip().lower()
 
         full_text = f"{title} {artist} {album}"
 
-        # 1. If target is non-English, reject known English-only titles
-        if t_lang.lower() != "english":
-            if any(eng in title for eng in ENGLISH_ONLY_TITLES):
-                return False
+        # If track has explicit language set and it's DIFFERENT from target, reject immediately
+        if track_lang and track_lang.lower() != t_lang.lower():
+            return False
 
-        # 2. Check Native Unicode Character Script matching
+        # If track is from authentic catalog for this language, accept
+        if track.get("is_catalog_verified") and track_lang.lower() == t_lang.lower():
+            return True
+
+        # Check Native Unicode Character Script matching for this target language
         if t_lang in UNICODE_RANGES:
             pattern = UNICODE_RANGES[t_lang]
             if re.search(pattern, full_text):
                 return True
 
-        # 3. Check Artist/Movie Catalog matches
+        # Check Artist/Movie Catalog matches
         if t_lang in LANGUAGE_ARTIST_CATALOG:
             keywords = LANGUAGE_ARTIST_CATALOG[t_lang]
             if any(kw in full_text for kw in keywords):
                 return True
 
-        # 4. Catalog or Search Result matching target language
-        if track.get("is_catalog_verified"):
+        # Check explicit language name keyword in track text
+        if t_lang.lower() in full_text:
             return True
 
-        if track.get("is_search_result"):
+        # If track is marked as an external search result (Spotify/iTunes/Deezer):
+        if track.get("is_search_result") or track.get("is_spotify"):
+            # For non-English external tracks, MUST have matched unicode, artist, or keyword above!
             if t_lang.lower() != "english":
-                keywords = LANGUAGE_ARTIST_CATALOG.get(t_lang, [])
-                has_keyword = any(kw in full_text for kw in keywords) or t_lang.lower() in full_text
-                if not has_keyword:
-                    return False
-            for lang, pattern in UNICODE_RANGES.items():
-                if lang != t_lang and lang != "English":
-                    if re.search(pattern, full_text):
-                        return False
-            return True
-
-        # 5. Explicit Track Language Attribute match (strictly reject if mismatching)
-        if track_lang:
-            if track_lang.lower() == t_lang.lower():
+                return False
+            else:
+                # For English external search results: must not contain regional scripts or artists
+                for reg_lang, keywords in LANGUAGE_ARTIST_CATALOG.items():
+                    if reg_lang != "English":
+                        for kw in keywords:
+                            if len(kw) > 4 and kw in artist:
+                                return False
                 for lang, pattern in UNICODE_RANGES.items():
-                    if lang != t_lang and lang != "English":
+                    if lang not in ["English", "Spanish", "French", "German", "Italian"]:
                         if re.search(pattern, full_text):
                             return False
                 return True
-            else:
-                return False
 
-        # 6. For English target, check standard latin characters without non-English native script
+        # For internal mock/test tracks (not search results):
+        if track_lang and track_lang.lower() == t_lang.lower():
+            # If target is non-English, reject known English-only titles
+            if t_lang.lower() != "english":
+                if any(eng in title for eng in ENGLISH_ONLY_TITLES):
+                    return False
+            return True
+
+        # English target language: MUST NOT contain regional Indian characters or artists
         if t_lang.lower() == "english":
             for lang, pattern in UNICODE_RANGES.items():
                 if lang not in ["English", "Spanish", "French", "German", "Italian"]:
                     if re.search(pattern, full_text):
                         return False
+            for reg_lang, keywords in LANGUAGE_ARTIST_CATALOG.items():
+                if reg_lang != "English":
+                    for kw in keywords:
+                        if len(kw) > 4 and kw in artist:
+                            return False
             return True
 
-        # 7. Fallback for non-English queries if fetched from target language search
         return False
 

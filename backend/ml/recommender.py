@@ -181,7 +181,7 @@ class HybridRecommender:
         itunes_live = fetch_live_itunes_tracks(genre_search_term, language=selected_language, limit=30)
         for it in itunes_live:
             t_key = (it["title"].lower(), it["artist"].lower())
-            if t_key not in seen_keys:
+            if t_key not in seen_keys and LanguageVerifier.verify_track_language(it, selected_language):
                 seen_keys.add(t_key)
                 candidates.append(it)
 
@@ -219,12 +219,24 @@ class HybridRecommender:
             top_n=limit
         )
 
+        # HARD LANGUAGE ISOLATION: Ensure every returned track strictly belongs to selected_language
+        strict_language_tracks = [
+            t for t in ranked_tracks
+            if LanguageVerifier.verify_track_language(t, selected_language)
+            and t.get("language", "").strip().lower() == selected_language.lower()
+        ]
+
+        if not strict_language_tracks and selected_language in self.catalog:
+            strict_language_tracks = [
+                dict(t, language=selected_language) for t in self.catalog[selected_language]
+            ][:limit]
+
         return {
             "predicted_therapy_category": therapy_category,
             "prediction_confidence": confidence,
             "model_used": selected_model,
             "selected_language": selected_language,
             "fav_genre": fav_genre,
-            "tracks": ranked_tracks
+            "tracks": strict_language_tracks
         }
 
