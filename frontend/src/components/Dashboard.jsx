@@ -27,6 +27,64 @@ ChartJS.register(
 const MOODS = ["Calm", "Happy", "Stressed", "Sad", "Emotional", "Romantic", "Energetic", "Anxiety", "Relaxed", "Tired", "Angry", "Focused"];
 const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam"];
 
+const CURATED_STARTER_TRACKS = [
+  {
+    id: "starter-1",
+    title: "Weightless Harmony",
+    artist: "Marconi Union Style",
+    genre: "Ambient",
+    language: "English",
+    mood: "Calm",
+    therapy_category: "Stress Relief",
+    duration: "4:15",
+    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+  },
+  {
+    id: "starter-2",
+    title: "Samayama",
+    artist: "Anurag Kulkarni",
+    genre: "Melody",
+    language: "Telugu",
+    mood: "Relaxed",
+    therapy_category: "Relaxation",
+    duration: "3:48",
+    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+  },
+  {
+    id: "starter-3",
+    title: "Kesariya Soothing Mix",
+    artist: "Arijit Singh",
+    genre: "Melody",
+    language: "Hindi",
+    mood: "Happy",
+    therapy_category: "Emotional Healing",
+    duration: "4:02",
+    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+  },
+  {
+    id: "starter-4",
+    title: "Deep Theta Waves",
+    artist: "Binaural Mind",
+    genre: "Meditation",
+    language: "English",
+    mood: "Calm",
+    therapy_category: "Meditation",
+    duration: "5:12",
+    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+  },
+  {
+    id: "starter-5",
+    title: "Neeyum Naanum Chill",
+    artist: "Anirudh",
+    genre: "Acoustic",
+    language: "Tamil",
+    mood: "Romantic",
+    therapy_category: "Relaxation",
+    duration: "3:30",
+    preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
+  }
+];
+
 const LYRICS_DATABASE = {
   "Samayama": {
     subtitles: [
@@ -344,8 +402,14 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         setJournals(journalData);
       }
 
+      // Populate curated tracks if user has no survey history yet or backend returned empty
+      if (!historyData || historyData.length === 0) {
+        handleMultiFilterSearch('English', 'Melody', 'Calm');
+      }
+
     } catch (err) {
       setError(err.message);
+      handleMultiFilterSearch('English', 'Melody', 'Calm');
     } finally {
       setLoading(false);
     }
@@ -401,10 +465,20 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
           setCurrentTracks(strictlyLangTracks);
           setActiveTrackIndex(0);
           setIsPlaying(false);
+          return;
         }
       }
+      // Resilient fallback when backend is unreachable or returns no tracks
+      const langMatches = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === lang.toLowerCase());
+      setCurrentTracks(langMatches.length > 0 ? langMatches : CURATED_STARTER_TRACKS);
+      setActiveTrackIndex(0);
+      setIsPlaying(false);
     } catch (err) {
-      console.warn("Error fetching filtered tracks:", err);
+      console.warn("Error fetching filtered tracks, using curated fallback:", err);
+      const langMatches = CURATED_STARTER_TRACKS.filter(t => !t.language || t.language.toLowerCase() === lang.toLowerCase());
+      setCurrentTracks(langMatches.length > 0 ? langMatches : CURATED_STARTER_TRACKS);
+      setActiveTrackIndex(0);
+      setIsPlaying(false);
     } finally {
       setFilterLoading(false);
     }

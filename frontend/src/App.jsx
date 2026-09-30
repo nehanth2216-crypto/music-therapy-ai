@@ -53,6 +53,16 @@ export default function App() {
   const [newPasswordInput, setNewPasswordInput] = useState('');
 
   const verifySession = useCallback(async (authToken) => {
+    if (authToken && authToken.startsWith('guest_token_')) {
+      setUserProfile({
+        username: username || 'Guest Explorer',
+        full_name: 'Guest Explorer',
+        fav_genre: 'Lo-fi',
+        language_pref: 'English',
+        is_guest: true
+      });
+      return;
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
@@ -72,7 +82,7 @@ export default function App() {
     } catch (err) {
       console.warn("Could not verify session with backend:", err);
     }
-  }, []);
+  }, [username]);
 
   // Verify session on mount and restore user details
   useEffect(() => {
@@ -118,26 +128,40 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' }
       });
       
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(formatApiError(data.detail, 'Failed to sign in as guest'));
+      if (response.ok) {
+        const data = await response.json();
+        setToken(data.access_token);
+        setUsername(data.username);
+        setIsGuest(true);
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('is_guest', 'true');
+        setAuthSuccess('Welcome! Exploring HarmonyRec in Guest Mode.');
+        return;
       }
       
-      setToken(data.access_token);
-      setUsername(data.username);
+      // If remote backend returned 404 or other status, seamlessly log in with a client guest session
+      console.warn("Backend auth/guest returned", response.status, "- fallback to client guest session.");
+      const clientGuestToken = `guest_token_${Date.now()}`;
+      const clientGuestUsername = `guest_${Math.random().toString(36).substring(2, 8)}`;
+      setToken(clientGuestToken);
+      setUsername(clientGuestUsername);
       setIsGuest(true);
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('username', data.username);
+      localStorage.setItem('token', clientGuestToken);
+      localStorage.setItem('username', clientGuestUsername);
       localStorage.setItem('is_guest', 'true');
       setAuthSuccess('Welcome! Exploring HarmonyRec in Guest Mode.');
     } catch (err) {
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
-        ? (isLocal
-            ? 'Unable to connect to local HarmonyRec backend. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
-            : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat.')
-        : err.message;
-      setAuthError(msg);
+      console.warn("Backend unreachable - initializing client guest session:", err);
+      const clientGuestToken = `guest_token_${Date.now()}`;
+      const clientGuestUsername = `guest_${Math.random().toString(36).substring(2, 8)}`;
+      setToken(clientGuestToken);
+      setUsername(clientGuestUsername);
+      setIsGuest(true);
+      localStorage.setItem('token', clientGuestToken);
+      localStorage.setItem('username', clientGuestUsername);
+      localStorage.setItem('is_guest', 'true');
+      setAuthSuccess('Welcome! Exploring HarmonyRec in Guest Mode.');
     } finally {
       setIsGuestLoading(false);
     }
@@ -172,8 +196,16 @@ export default function App() {
           })
         });
         
-        const data = await response.json();
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
         if (!response.ok) {
+          if (response.status === 404 || data.detail === 'Not Found') {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            throw new Error(isLocal
+              ? 'Backend API not found on http://127.0.0.1:8000. Please ensure run.bat is running.'
+              : 'Backend server not found on cloud (https://harmonyrec-backend.onrender.com). Please use "Sign in as Guest" below to explore without a backend!'
+            );
+          }
           throw new Error(formatApiError(data.detail, 'Authentication failed'));
         }
         
@@ -185,7 +217,7 @@ export default function App() {
         const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
           ? (isLocal
               ? 'Unable to connect to local HarmonyRec backend. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
-              : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat.')
+              : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat, or use "Sign in as Guest".')
           : err.message;
         setAuthError(msg);
       }
@@ -202,8 +234,16 @@ export default function App() {
           })
         });
         
-        const data = await response.json();
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
         if (!response.ok) {
+          if (response.status === 404 || data.detail === 'Not Found') {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            throw new Error(isLocal
+              ? 'Backend API not found on http://127.0.0.1:8000. Please ensure run.bat is running.'
+              : 'Backend server not found on cloud (https://harmonyrec-backend.onrender.com). Please use "Sign in as Guest" below to explore without a backend!'
+            );
+          }
           throw new Error(formatApiError(data.detail, 'Signup failed'));
         }
         
@@ -215,7 +255,7 @@ export default function App() {
         const msg = (err.message === 'Failed to fetch' || err.name === 'TypeError')
           ? (isLocal
               ? 'Unable to connect to local HarmonyRec backend. Please ensure backend is running on http://127.0.0.1:8000 (execute run.bat).'
-              : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat.')
+              : 'Unable to connect to backend server. For local testing, please open http://localhost:5173 in your browser after running run.bat, or use "Sign in as Guest".')
           : err.message;
         setAuthError(msg);
       }
