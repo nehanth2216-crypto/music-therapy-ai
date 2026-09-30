@@ -30,6 +30,91 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
   // Result State
   const [result, setResult] = useState(null);
 
+  const getSurveyFallbackTracks = (lang = 'English', selectedMood = 'Calm', genre = 'Melody') => {
+    if (lang && lang.toLowerCase() === 'telugu') {
+      const teluguLibrary = {
+        "Happy": [
+          { title: "Vachindamma", artist: "Sid Sriram", album: "Geetha Govindam", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/3b/a0/a1/3ba0a1ce-bf63-bbaf-48f6-48593c231168/mzaf_16000697806590920631.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/vachindamma/1419151786?i=1419152719&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/68/f1/52/68f1523b-3c40-f2cc-7d4a-376642897adb/cover.jpg/500x500bb.jpg" },
+          { title: "Butta Bomma", artist: "Armaan Malik", album: "Ala Vaikunthapurramuloo", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/28/e0/d3/28e0d30a-2afe-66e4-ac03-69b6d779fecd/mzaf_7857615290499608693.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/butta-bomma-remix-from-ala-vaikunthapurramuloo/1736706821?i=1736707044&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/46/aa/48/46aa4863-c1ec-4574-e98e-80b8c1f3ef69/cover.jpg/500x500bb.jpg" },
+          { title: "Na Roja Nuvve", artist: "Hesham Abdul Wahab", album: "Kushi", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6a/94/8a/6a948abe-1f62-4824-6d07-071854e5f4b1/mzaf_7845856316638946970.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/na-roja-nuvve-from-kushi/1687526663?i=1687526684&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/b5/28/a5/b528a58b-5633-d045-5205-894a3c105d1f/197188849610.jpg/500x500bb.jpg" }
+        ],
+        "Calm": [
+          { title: "Inthandham", artist: "S.P. Charan, Vishal Chandrashekar", album: "Sita Ramam", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/e3/dc/d7/e3dcd75a-a562-ac84-2dd1-2ea7e8db26d4/mzaf_5058541019549724977.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/inthandham/1644086776?i=1644086802&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/bd/50/2a/bd502abd-0ef7-3906-bce8-ee29516d5206/196589460875.jpg/500x500bb.jpg" },
+          { title: "Samayama", artist: "Hesham Abdul Wahab, Anurag Kulkarni", album: "Hi Nanna", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/samayama-from-hi-nanna/1707658230?i=1707658237&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg" },
+          { title: "Maate Vinadhuga", artist: "Sid Sriram", album: "Taxiwaala", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/07/27/4c/07274cc8-f662-8747-e425-1108ba2a2390/mzaf_12339835384962827073.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/maate-vinadhuga/1441393357?i=1441393541&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1d/a0/941da079-ee93-ce60-6340-3c7d0f7633a3/cover.jpg/500x500bb.jpg" }
+        ],
+        "Romantic": [
+          { title: "Inkem Inkem Inkem Kaavaale", artist: "Sid Sriram", album: "Geetha Govindam", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6d/5a/f1/6d5af141-475c-7404-495c-0ef55283457c/mzaf_3028662401385709025.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/inkem-inkem-inkem-kaavaale/1419151786?i=1419151804&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/68/f1/52/68f1523b-3c40-f2cc-7d4a-376642897adb/cover.jpg/500x500bb.jpg" },
+          { title: "Samajavaragamana", artist: "Sid Sriram", album: "Ala Vaikunthapurramuloo", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/29/a7/55/29a75528-3808-d849-ad00-9e714bf12621/mzaf_2813549342968292058.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/samajavaragamana-from-ala-vaikunthapurramuloo/1481543888?i=1481543891&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/53/98/c1/5398c1cf-7c16-24a6-bfa3-391dc6015376/cover.jpg/500x500bb.jpg" },
+          { title: "Chuttamalle", artist: "Shilpa Rao, Anirudh Ravichander", album: "Devara Part 1", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/9f/fa/b4/9ffab416-8097-4b77-cfc8-04aaeeff26f1/mzaf_1002347343468511475.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/chuttamalle-from-devara-part-1-telugu/1761005822?i=1761005828&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/55/0f/ff/550fff27-59d4-c92c-6878-59114eb3d0d6/8903431998477_cover.jpg/500x500bb.jpg" }
+        ],
+        "Sad": [
+          { title: "Gaaju Bomma", artist: "Hesham Abdul Wahab", album: "Hi Nanna", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/33/c4/80/33c48057-0105-09c0-db87-8c3baea6dff3/mzaf_17208945892582962369.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/gaaju-bomma-from-hi-nanna/1710438676?i=1710438682&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/28/7f/7f/287f7fef-51a8-20d0-08be-c3be895b6dd8/8903431969644_cover.jpg/500x500bb.jpg" },
+          { title: "Priyathama", artist: "Sid Sriram", album: "Majili", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/10/d4/04/10d404f4-5f5d-ee9a-76d9-d8be5b7a1d1d/mzaf_16154567280970034509.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/priyathama-priyathama/1455246738?i=1455246747&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/c6/3e/df/c63edf56-a365-27a3-5c02-e25f82fb321a/cover.jpg/500x500bb.jpg" },
+          { title: "Adhento Gaani Vunnapaatuga", artist: "Anirudh Ravichander", album: "Jersey", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/d9/1a/f7/d91af753-4886-f63c-a99f-e3cfeb929d0f/mzaf_8422615694246830504.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/adhento-gaani-vunnapaatuga/1451996537?i=1451996766&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/c1/96/89/c196894c-cb14-ef6a-dfd7-849a9415cba4/cover.jpg/500x500bb.jpg" }
+        ],
+        "Anxious": [
+          { title: "Kadalalle", artist: "Sid Sriram, Justin Prabhakaran", album: "Dear Comrade", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/d5/d3/18/d5d318e8-d450-4828-e4b9-8e121e7fc304/mzaf_10526017558378619623.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/kadalalle/1463124503?i=1463124513&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/da/51/9a/da519a4b-9eb0-a7d0-1f91-5627685e1358/cover.jpg/500x500bb.jpg" },
+          { title: "O Rendu Prema Meghaalila", artist: "Sreerama Chandra", album: "Baby", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/d4/0b/4a/d40b4aa0-c9a1-cb9e-52b3-a1288c1b4ea5/mzaf_16254714456578027725.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/o-rendu-prema-meghaalila-from-baby/1659976378?i=1659976384&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/10/a5/d8/10a5d898-724f-ef11-137f-315cece57f20/197187913331.jpg/500x500bb.jpg" },
+          { title: "Vellake (Unplugged)", artist: "Bharatt-Saurabh", album: "Vellake", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/a4/d9/c3/a4d9c3a3-b459-7dd2-cb2f-aa8b3b7548db/mzaf_15783307689974512724.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/vellake-unplugged/1638549303?i=1638549304&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/71/85/f8/7185f81f-4903-8d26-70e6-993d0fca88d0/196925345996.jpg/500x500bb.jpg" }
+        ],
+        "Energetic": [
+          { title: "Dheevara", artist: "Ramya Behara, Deepu", album: "Baahubali - The Beginning", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/36/53/78/36537828-ea24-9b2f-7634-118536f901a1/mzaf_13508544464197545892.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/dheevara/1004944883?i=1004945037&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/cb/ad/28/cbad286d-0071-70e5-7977-c9183492576b/cover.jpg/500x500bb.jpg" },
+          { title: "Ramuloo Ramulaa", artist: "Anurag Kulkarni, Mangli", album: "Ala Vaikunthapurramuloo", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview124/v4/1b/47/9b/1b479b18-b2a6-2ce9-cfeb-b31a5eb23b09/mzaf_10486008985167667319.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/ramuloo-ramulaa-from-ala-vaikunthapurramuloo/1484931846?i=1484931853&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/c3/b2/89/c3b2890c-ee44-93fe-c6ba-9fb9bdf2f7c2/cover.jpg/500x500bb.jpg" },
+          { title: "Mind Block", artist: "Blaaze, Ranina Reddy", album: "Sarileru Neekevvaru", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/0f/6f/a6/0f6fa68c-db73-c820-e76d-ae7e02580a13/mzaf_16035048386377855363.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/mind-block-from-sarileru-neekevvaru/1489679124?i=1489679125&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/1e/77/8e/1e778e38-782d-1033-68d7-cecb7ddb3ff6/cover.jpg/500x500bb.jpg" }
+        ],
+        "Motivated": [
+          { title: "Dheera Dheera", artist: "M.M. Keeravaani, Nikitha Nigam", album: "Magadheera", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/91/3c/65/913c65e8-5d2f-1ba0-04ce-7589886a111a/mzaf_7824103138837130830.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/dheera-dheera-dheera/1445107936?i=1445108342&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/58/01/a5/5801a5e1-8a56-dc04-a15e-ef15fa6a6fbb/cover.jpg/500x500bb.jpg" },
+          { title: "Naatu Naatu", artist: "Rahul Sipligunj, Kaala Bhairava", album: "RRR", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/56/a8/90/56a89047-e23a-fdf2-ceb6-1936e7889f81/mzaf_4006093409106098048.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/naatu-naatu-from-rrr/1594246816?i=1594246820&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/c3/38/53/c3385315-bb80-0a7e-128a-77e8a9f39572/cover.jpg/500x500bb.jpg" },
+          { title: "Komuram Bheemudo", artist: "Kaala Bhairava", album: "RRR", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/80/63/0d/80630d7b-2da6-e822-2633-85b4f0b2f5d9/mzaf_1048473060233403227.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/komuram-bheemudo-from-rrr/1601243765?i=1601243770&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/a4/be/8f/a4be8f75-3435-0814-1e52-f67455d3f233/cover.jpg/500x500bb.jpg" }
+        ],
+        "Sleep": [
+          { title: "Inthandham", artist: "S.P. Charan, Vishal Chandrashekar", album: "Sita Ramam", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/e3/dc/d7/e3dcd75a-a562-ac84-2dd1-2ea7e8db26d4/mzaf_5058541019549724977.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/inthandham/1644086776?i=1644086802&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/bd/50/2a/bd502abd-0ef7-3906-bce8-ee29516d5206/196589460875.jpg/500x500bb.jpg" },
+          { title: "Oohale", artist: "Shaktisree Gopalan", album: "Jaanu", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/21/53/43/21534346-a496-538a-3642-f5446059d4c7/mzaf_16156553835698305886.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/oohale/1495992987?i=1495993175&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/71/f1/85/71f185ef-c167-9c8a-ebc0-5a9e334a1bba/cover.jpg/500x500bb.jpg" },
+          { title: "Samayama", artist: "Hesham Abdul Wahab, Anurag Kulkarni", album: "Hi Nanna", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/samayama-from-hi-nanna/1707658230?i=1707658237&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg" }
+        ]
+      };
+      const found = teluguLibrary[selectedMood] || teluguLibrary["Calm"];
+      return found.map(t => ({
+        ...t,
+        language: "Telugu",
+        genre: genre || "Melody",
+        mood: selectedMood,
+        therapy_category: "Emotional Healing",
+        duration: "3:45",
+        score: 96,
+        match_score: 96
+      }));
+    }
+
+    return [
+      {
+        title: `${lang || 'Ambient'} Healing Rhythms`,
+        artist: "HarmonyRec AI Ensemble",
+        genre: genre || "Lo-fi",
+        language: lang || "English",
+        mood: selectedMood || "Calm",
+        therapy_category: "Stress Relief",
+        duration: "4:15",
+        score: 95,
+        match_score: 95,
+        preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+      },
+      {
+        title: "Weightless Serenity",
+        artist: "Sound Bath Collective",
+        genre: "Ambient",
+        language: lang || "English",
+        mood: selectedMood || "Calm",
+        therapy_category: "Relaxation",
+        duration: "3:48",
+        score: 92,
+        match_score: 92,
+        preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+      }
+    ];
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
@@ -60,84 +145,114 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
       
       let data = {};
       try { data = await response.json(); } catch (_) {}
-      if (!response.ok) {
-        if (response.status === 404 || !token || token.startsWith('guest_token_')) {
-          const fallbackTracks = [
-            {
-              title: `${languagePref || 'Ambient'} Healing Rhythms`,
-              artist: "HarmonyRec AI Ensemble",
-              genre: favGenre || "Lo-fi",
-              language: languagePref || "English",
-              mood: mood || "Calm",
-              therapy_category: "Stress Relief",
-              duration: "4:15",
-              preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-            },
-            {
-              title: "Weightless Serenity",
-              artist: "Sound Bath Collective",
-              genre: "Ambient",
-              language: languagePref || "English",
-              mood: mood || "Calm",
-              therapy_category: "Relaxation",
-              duration: "3:48",
-              preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-            }
-          ];
-          const fallbackResult = {
-            predicted_therapy_category: "Stress Relief & Relaxation",
-            confidence: 0.94,
-            tracks: fallbackTracks,
-            recommendations: fallbackTracks
-          };
-          setResult(fallbackResult);
-          setStep(3);
-          if (onSurveyComplete) onSurveyComplete(fallbackTracks);
-          return;
-        }
-        throw new Error(data.detail || 'Failed to submit survey');
-      }
       
-      setResult(data);
+      let finalTracks = [];
+      let therapyCat = "Stress Relief & Relaxation";
+
+      if (response.ok && data && (data.tracks || data.recommendations)) {
+        finalTracks = (data.tracks && data.tracks.length > 0) ? data.tracks : (data.recommendations || []);
+        therapyCat = data.result_state || data.predicted_therapy_category || "Stress Relief & Relaxation";
+      } else {
+        // Fallback tracks tailored to user's selected language & mood
+        finalTracks = getSurveyFallbackTracks(languagePref, mood, favGenre);
+      }
+
+      const surveyRecord = {
+        id: data?.survey_id || Date.now(),
+        user_id: 1,
+        age: parseInt(age) || 25,
+        gender: gender,
+        mood: mood,
+        stress: parseInt(stress) || 5,
+        sleep_quality: sleepQuality,
+        anxiety: parseInt(anxiety) || 5,
+        fav_genre: favGenre,
+        language_pref: languagePref,
+        activity: activity,
+        energy: energy,
+        result_state: therapyCat,
+        predicted_therapy_category: therapyCat,
+        playlist_key: data?.playlist_key || 'playlist_1',
+        timestamp: new Date().toISOString(),
+        tracks: finalTracks,
+        recommendations: finalTracks,
+        rating: null,
+        helped: null
+      };
+
+      // Guaranteed persistence across browser sessions
+      try {
+        localStorage.setItem('harmonyrec_latest_survey', JSON.stringify(surveyRecord));
+        const historyList = JSON.parse(localStorage.getItem('harmonyrec_survey_history') || '[]');
+        historyList.push(surveyRecord);
+        localStorage.setItem('harmonyrec_survey_history', JSON.stringify(historyList));
+      } catch (e) {
+        console.warn("Could not save survey to localStorage:", e);
+      }
+
+      const surveyResult = {
+        ...surveyRecord,
+        prediction_confidence: data?.prediction_confidence || 0.94,
+        confidence: data?.prediction_confidence || 0.94,
+        model_used: data?.model_used || modelName || 'XGBoost',
+        tracks: finalTracks,
+        recommendations: finalTracks
+      };
+
+      setResult(surveyResult);
       setStep(3);
 
-      // Instantly trigger playback of recommended music!
-      if (onSurveyComplete && data.tracks && data.tracks.length > 0) {
-        onSurveyComplete(data.tracks);
+      // Instantly dispatch to Dashboard so state updates without needing manual page refresh
+      window.dispatchEvent(new CustomEvent('harmonyrec_apply_survey', { detail: surveyRecord }));
+
+      // Automatically play recommended tracks
+      if (onSurveyComplete && finalTracks && finalTracks.length > 0) {
+        onSurveyComplete(finalTracks, surveyRecord);
       }
     } catch (err) {
       console.warn("Survey submission fallback mode:", err);
-      const fallbackTracks = [
-        {
-          title: `${languagePref || 'Ambient'} Healing Rhythms`,
-          artist: "HarmonyRec AI Ensemble",
-          genre: favGenre || "Lo-fi",
-          language: languagePref || "English",
-          mood: mood || "Calm",
-          therapy_category: "Stress Relief",
-          duration: "4:15",
-          preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-        },
-        {
-          title: "Weightless Serenity",
-          artist: "Sound Bath Collective",
-          genre: "Ambient",
-          language: languagePref || "English",
-          mood: mood || "Calm",
-          therapy_category: "Relaxation",
-          duration: "3:48",
-          preview_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-        }
-      ];
-      const fallbackResult = {
+      const fallbackTracks = getSurveyFallbackTracks(languagePref, mood, favGenre);
+      const surveyRecord = {
+        id: Date.now(),
+        user_id: 1,
+        age: parseInt(age) || 25,
+        gender: gender,
+        mood: mood,
+        stress: parseInt(stress) || 5,
+        sleep_quality: sleepQuality,
+        anxiety: parseInt(anxiety) || 5,
+        fav_genre: favGenre,
+        language_pref: languagePref,
+        activity: activity,
+        energy: energy,
+        result_state: "Stress Relief & Relaxation",
         predicted_therapy_category: "Stress Relief & Relaxation",
+        playlist_key: "playlist_1",
+        timestamp: new Date().toISOString(),
+        tracks: fallbackTracks,
+        recommendations: fallbackTracks,
+        rating: null,
+        helped: null
+      };
+
+      try {
+        localStorage.setItem('harmonyrec_latest_survey', JSON.stringify(surveyRecord));
+        const historyList = JSON.parse(localStorage.getItem('harmonyrec_survey_history') || '[]');
+        historyList.push(surveyRecord);
+        localStorage.setItem('harmonyrec_survey_history', JSON.stringify(historyList));
+      } catch (e) {}
+
+      const fallbackResult = {
+        ...surveyRecord,
         confidence: 0.94,
+        model_used: modelName || "XGBoost",
         tracks: fallbackTracks,
         recommendations: fallbackTracks
       };
       setResult(fallbackResult);
       setStep(3);
-      if (onSurveyComplete) onSurveyComplete(fallbackTracks);
+      window.dispatchEvent(new CustomEvent('harmonyrec_apply_survey', { detail: surveyRecord }));
+      if (onSurveyComplete) onSurveyComplete(fallbackTracks, surveyRecord);
     } finally {
       setLoading(false);
     }

@@ -732,33 +732,51 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         resJournals.ok ? resJournals.json() : Promise.resolve([])
       ]);
 
-      if (resHistory.ok && Array.isArray(historyData)) {
-        setHistory(historyData);
-        if (historyData.length > 0) {
-          const latest = historyData[historyData.length - 1];
-          const targetLang = latest.language_pref || 'English';
-          const surveyTracks = parseTracksArray(latest.tracks);
-          const strictlyLangTracks = surveyTracks.filter(t => isAuthenticLanguageTrack(t, targetLang));
-
-          if (strictlyLangTracks.length > 0) {
-            setCurrentTracks(strictlyLangTracks);
-          } else {
-            const fallbackList = getCuratedTracksForLanguageAndMood(targetLang, latest.mood || 'Calm');
-            setCurrentTracks(fallbackList);
+      let finalHistory = [];
+      if (resHistory.ok && Array.isArray(historyData) && historyData.length > 0) {
+        finalHistory = historyData;
+      } else {
+        // Fallback to localStorage survey cache so user surveys are never lost
+        try {
+          const cachedHistory = JSON.parse(localStorage.getItem('harmonyrec_survey_history') || '[]');
+          const latestCached = JSON.parse(localStorage.getItem('harmonyrec_latest_survey') || 'null');
+          if (Array.isArray(cachedHistory) && cachedHistory.length > 0) {
+            finalHistory = cachedHistory;
+          } else if (latestCached) {
+            finalHistory = [latestCached];
           }
-          setCurrentMoodState(latest.result_state || 'Calming');
-          setLatestSurveyId(latest.id);
-          // Set feedback default if already submitted
-          setRating(latest.rating || 0);
-          setHelped(latest.helped);
-          if (latest.language_pref) setSelectedLanguage(latest.language_pref);
-          if (latest.mood) setSelectedMood(latest.mood);
-          if (latest.fav_genre) setSelectedGenre(latest.fav_genre);
-
-          if (strictlyLangTracks.length === 0 && targetLang) {
-            handleMultiFilterSearch(targetLang, latest.fav_genre || 'Melody', latest.mood || 'Calm');
-          }
+        } catch (e) {
+          console.warn("Error reading cached survey from localStorage:", e);
         }
+      }
+
+      if (finalHistory.length > 0) {
+        setHistory(finalHistory);
+        const latest = finalHistory[finalHistory.length - 1];
+        const targetLang = latest.language_pref || 'Telugu';
+        const surveyTracks = parseTracksArray(latest.tracks);
+        const strictlyLangTracks = surveyTracks.filter(t => isAuthenticLanguageTrack(t, targetLang));
+
+        if (strictlyLangTracks.length > 0) {
+          setCurrentTracks(strictlyLangTracks);
+        } else {
+          const fallbackList = getCuratedTracksForLanguageAndMood(targetLang, latest.mood || 'Calm');
+          setCurrentTracks(fallbackList);
+        }
+        setCurrentMoodState(latest.result_state || 'Calming');
+        setLatestSurveyId(latest.id);
+        // Set feedback default if already submitted
+        setRating(latest.rating || 0);
+        setHelped(latest.helped);
+        if (latest.language_pref) setSelectedLanguage(latest.language_pref);
+        if (latest.mood) setSelectedMood(latest.mood);
+        if (latest.fav_genre) setSelectedGenre(latest.fav_genre);
+      } else {
+        // Default to curated Telugu songs if user hasn't completed diagnostic survey yet
+        const defaultTracks = getCuratedTracksForLanguageAndMood('Telugu', 'Calm');
+        setCurrentTracks(defaultTracks);
+        setSelectedLanguage('Telugu');
+        setSelectedMood('Calm');
       }
 
       if (resFavs.ok && Array.isArray(favsData)) {
@@ -769,14 +787,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         setJournals(journalData);
       }
 
-      // Populate curated tracks if user has no survey history yet or backend returned empty
-      if (!historyData || historyData.length === 0) {
-        handleMultiFilterSearch('English', 'Melody', 'Calm');
-      }
-
     } catch (err) {
       setError(err.message);
-      handleMultiFilterSearch('English', 'Melody', 'Calm');
+      const defaultTracks = getCuratedTracksForLanguageAndMood('Telugu', 'Calm');
+      setCurrentTracks(defaultTracks);
     } finally {
       setLoading(false);
     }
@@ -784,6 +798,34 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   useEffect(() => {
     fetchDashboardData();
+
+    const handleApplySurvey = (e) => {
+      if (e.detail) {
+        const s = e.detail;
+        setHistory(prev => {
+          const filtered = prev.filter(item => item.id !== s.id);
+          return [...filtered, s];
+        });
+        const targetLang = s.language_pref || 'Telugu';
+        setSelectedLanguage(targetLang);
+        if (s.mood) setSelectedMood(s.mood);
+        if (s.fav_genre) setSelectedGenre(s.fav_genre);
+        setCurrentMoodState(s.result_state || 'Calming');
+        setLatestSurveyId(s.id);
+        const sTracks = parseTracksArray(s.tracks);
+        const validTracks = sTracks.filter(t => isAuthenticLanguageTrack(t, targetLang));
+        const finalTracks = validTracks.length > 0 ? validTracks : getCuratedTracksForLanguageAndMood(targetLang, s.mood || 'Calm');
+        setCurrentTracks(finalTracks);
+        setActiveTrackIndex(0);
+        setIsPlaying(true);
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.play().catch(err => console.warn("Auto-play check:", err));
+          }
+        }, 150);
+      }
+    };
+    window.addEventListener('harmonyrec_apply_survey', handleApplySurvey);
 
     const handleCustomPlay = (e) => {
       if (e.detail) {
@@ -805,7 +847,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
       }
     };
     window.addEventListener('harmonyrec_play_track', handleCustomPlay);
-    return () => window.removeEventListener('harmonyrec_play_track', handleCustomPlay);
+    return () => {
+      window.removeEventListener('harmonyrec_apply_survey', handleApplySurvey);
+      window.removeEventListener('harmonyrec_play_track', handleCustomPlay);
+    };
   }, [fetchDashboardData]);
 
   const handleMultiFilterSearch = async (lang = selectedLanguage, genre = selectedGenre, mood = selectedMood, query = filterQuery) => {
@@ -1413,20 +1458,51 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         )}
       </div>
 
-      {history.length === 0 ? (
-        <div className="glass-panel" style={{ padding: '4rem 2rem', textAlign: 'center', minHeight: '350px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <AlertCircle style={{ width: '56px', height: '56px', color: 'var(--primary)', marginBottom: '1.5rem' }} />
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>No Diagnostic Survey Found</h3>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', marginBottom: '2rem' }}>
-            We need to evaluate your current emotional state first to curate a custom therapeutic playlist.
-          </p>
-          <button id="dashboard-take-survey-btn" className="btn-primary" onClick={() => onViewChange('survey')}>
+      {history.length === 0 && (
+        <div className="glass-panel" style={{
+          padding: '1.25rem 1.75rem',
+          marginBottom: '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08))',
+          border: '1px solid rgba(99, 102, 241, 0.3)',
+          borderRadius: '16px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: 'rgba(99, 102, 241, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Sparkles style={{ color: 'var(--primary)', width: '22px', height: '22px' }} />
+            </div>
+            <div>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.2rem' }}>Personalize Your Therapy Recommendations</h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
+                Complete a 2-minute diagnostic survey to calibrate machine learning models specifically for your stress and anxiety levels.
+              </p>
+            </div>
+          </div>
+          <button
+            id="banner-take-survey-btn"
+            className="btn-primary"
+            onClick={() => onViewChange('survey')}
+            style={{ padding: '0.55rem 1.1rem', fontSize: '0.88rem', flexShrink: 0, whiteSpace: 'nowrap' }}
+          >
+            <ClipboardList style={{ width: '16px', height: '16px' }} />
             Take Diagnostic Survey
-            <ClipboardList style={{ width: '18px', height: '18px' }} />
           </button>
         </div>
-      ) : (
-        <div className="dashboard-grid">
+      )}
+
+      <div className="dashboard-grid">
           
           {/* Main Area: Player, Playlist, Feedback, and Grounding */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -2421,7 +2497,6 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
           </div>
 
         </div>
-      )}
 
       {/* Lyrics & Subtitles Glassmorphic Modal */}
       {showLyricsModal && activeTrack && (
