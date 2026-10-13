@@ -180,6 +180,17 @@ class RecommendationRankingEngine:
             # General: dynamically match with clinical target energy and acousticness
             activity_affinity = 0.50 * (1.0 - abs(t_energy - target_energy)) + 0.50 * (1.0 - abs(t_acousticness - target_acousticness))
 
+        track_act = str(track.get("activity") or "").strip().lower()
+        if track_act:
+            if track_act == act_lower:
+                activity_affinity = min(1.0, activity_affinity * 1.15 + 0.10)
+            elif (track_act in ["exercise", "workout"] and any(k in act_lower for k in ["exercise", "workout"])) or \
+                 (track_act in ["relaxation", "relaxing"] and any(k in act_lower for k in ["relaxation", "relaxing"])) or \
+                 (track_act in ["sleeping", "sleep"] and any(k in act_lower for k in ["sleeping", "sleep"])) or \
+                 (track_act in ["studying", "study"] and any(k in act_lower for k in ["studying", "study"])) or \
+                 (track_act in ["meditation", "meditate"] and any(k in act_lower for k in ["meditation", "meditate"])):
+                activity_affinity = min(1.0, activity_affinity * 1.15 + 0.10)
+
         activity_score = min(15.0, max(0.0, round(activity_affinity * 15.0, 2)))
 
         # -------------------------------------------------------------------------

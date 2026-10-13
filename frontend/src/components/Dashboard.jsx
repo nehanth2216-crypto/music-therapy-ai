@@ -366,16 +366,93 @@ const CURATED_STARTER_TRACKS = [
   },
   {
     "id": "starter-en-1",
-    "title": "Weightless",
-    "artist": "Marconi Union",
-    "genre": "Ambient",
+    "title": "Weightless Lofi Chill",
+    "artist": "Lofi Dreamer Collective",
+    "album": "Deep Relaxation Lofi Vol 1",
+    "genre": "Lo-fi",
     "language": "English",
     "mood": "Calm",
     "therapy_category": "Stress Relief",
-    "duration": "4:15",
-    "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/c3/3a/d6/c33ad6a3-ec91-62e4-0912-d4a873d4fed0/cover.jpg/500x500bb.jpg",
-    "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/65/69/07/656907c9-eb54-c59c-72b9-dad8489a0165/mzaf_3316991574698499044.plus.aac.p.m4a",
-    "play_url": "https://open.spotify.com/search/Marconi%20Union%20Weightless"
+    "duration": "3:20",
+    "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&h=500&fit=crop",
+    "preview_url": "/audio/lofi_chill.mp3",
+    "embed_url": "https://www.youtube-nocookie.com/embed/jfKfPfyJRdk",
+    "play_url": "https://open.spotify.com/search/Weightless%20Lofi"
+  },
+  {
+    "id": "starter-en-2",
+    "title": "Peaceful Piano Reverie",
+    "artist": "Harmonic Solitude",
+    "album": "Therapeutic Piano Essentials",
+    "genre": "Piano",
+    "language": "English",
+    "mood": "Relaxation",
+    "therapy_category": "Relaxation",
+    "duration": "5:02",
+    "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=500&h=500&fit=crop",
+    "preview_url": "/audio/peaceful_piano.mp3",
+    "embed_url": "https://www.youtube-nocookie.com/embed/4Tr0otuiQuU",
+    "play_url": "https://open.spotify.com/search/Peaceful%20Piano%20Reverie"
+  },
+  {
+    "id": "starter-en-3",
+    "title": "Zen Tibetan Meditation",
+    "artist": "Mindfulness Soundscapes",
+    "album": "Healing Singing Bowls & Chimes",
+    "genre": "Meditation",
+    "language": "English",
+    "mood": "Anxiety",
+    "therapy_category": "Meditation",
+    "duration": "5:44",
+    "album_image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=500&h=500&fit=crop",
+    "preview_url": "/audio/zen_meditation.mp3",
+    "embed_url": "https://www.youtube-nocookie.com/embed/1ZYbU8JGB46",
+    "play_url": "https://open.spotify.com/search/Zen%20Tibetan%20Meditation"
+  },
+  {
+    "id": "starter-en-4",
+    "title": "Bansuri Bamboo Flute Healing",
+    "artist": "Pranam Flute Ensemble",
+    "album": "Sacred Indian Bamboo Meditation",
+    "genre": "Flute",
+    "language": "English",
+    "mood": "Calm",
+    "therapy_category": "Emotional Healing",
+    "duration": "6:12",
+    "album_image": "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=500&h=500&fit=crop",
+    "preview_url": "/audio/bamboo_flute.mp3",
+    "embed_url": "https://www.youtube-nocookie.com/embed/2OEL4P1Rz04",
+    "play_url": "https://open.spotify.com/search/Bansuri%20Bamboo%20Flute%20Healing"
+  },
+  {
+    "id": "starter-en-5",
+    "title": "Rain & Forest Sleep Soundscape",
+    "artist": "Deep Nature Acoustics",
+    "album": "Nature Sleep & Deep Rest",
+    "genre": "Sleep",
+    "language": "English",
+    "mood": "Tired",
+    "therapy_category": "Sleep Therapy",
+    "duration": "6:29",
+    "album_image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500&h=500&fit=crop",
+    "preview_url": "/audio/rain_sleep.mp3",
+    "embed_url": "https://www.youtube-nocookie.com/embed/mPZkdNFkNps",
+    "play_url": "https://open.spotify.com/search/Rain%20Forest%20Sleep%20Soundscape"
+  },
+  {
+    "id": "starter-en-6",
+    "title": "Sunny Study Chillhop",
+    "artist": "Study Beats Collective",
+    "album": "Daytime Focus & Memory",
+    "genre": "Lo-fi",
+    "language": "English",
+    "mood": "Happy",
+    "therapy_category": "Focus",
+    "duration": "2:45",
+    "album_image": "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=500&h=500&fit=crop",
+    "preview_url": "/audio/study_focus.mp3",
+    "embed_url": "https://www.youtube-nocookie.com/embed/5qap5aO4i9A",
+    "play_url": "https://open.spotify.com/search/Sunny%20Study%20Chillhop"
   },
   {
     "id": "starter-hi-1",
@@ -637,6 +714,53 @@ Your mind is at peace.`
   };
 };
 
+const KNOWN_YOUTUBE_VIDEO_IDS = {
+  // Continuous 2-6 min local music assets
+  "sunny study chillhop": "5qap5aO4i9A",
+  "rain & forest sleep soundscape": "mPZkdNFkNps",
+  "bansuri bamboo flute healing": "2OEL4P1Rz04",
+  "zen tibetan meditation": "1ZYbU8JGB46",
+  "peaceful piano reverie": "4Tr0otuiQuU",
+  "weightless lofi chill": "jfKfPfyJRdk",
+  // Commercial & Curated catalog favorites
+  "weightless": "UfcAVejslrU",
+  "samayama": "x5vK7FzW4_E",
+  "kanulanu thaake": "v0R7Q-iUo90",
+  "kesariya": "BddP6PY48gs",
+  "butta bomma": "2mDCVzruYzQ",
+  "tum hi ho": "IJq0yyWug1k",
+  "priyathama": "9u4M8fXgL2g",
+  "adhento gaani vunnapaatuga": "Z-7E6jGf7E0",
+  "kadalalle": "vT3T1U0v5n4",
+  "o rendu prema meghaalila": "kUaIe6tqN5k",
+  "vellake": "GvXmH00kZ9o",
+  "dheevara": "zLh1T7z-lXg",
+  "ramuloo ramulaa": "1Z9_VdZlZqE",
+  "closer": "PT2_F-1esPk",
+  "sunset serenade": "jfKfPfyJRdk"
+};
+
+const getTrackYoutubeEmbedUrl = (track) => {
+  if (!track) return null;
+  // If track already has a valid direct video embed URL, use it
+  if (track.embed_url && track.embed_url.includes('/embed/') && !track.embed_url.includes('listType=')) {
+    return track.embed_url;
+  }
+  // If track has a direct video ID property
+  if (track.youtube_video_id) {
+    return `https://www.youtube-nocookie.com/embed/${track.youtube_video_id}?autoplay=1`;
+  }
+  // Check known titles mapping
+  const titleKey = (track.title || track.song || '').toLowerCase().trim();
+  if (!titleKey) return null;
+  for (const [key, id] of Object.entries(KNOWN_YOUTUBE_VIDEO_IDS)) {
+    if (titleKey.includes(key) || key.includes(titleKey)) {
+      return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1`;
+    }
+  }
+  return null;
+};
+
 export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -704,6 +828,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const [breathingActive, setBreathingActive] = useState(false);
 
   const audioRef = useRef(null);
+  const loopCountRef = useRef(0);
+  const lastTrackSourceRef = useRef('');
+  const [targetSessionDuration, setTargetSessionDuration] = useState(120); // 120s (2:00 max) or 90s (1:30 min)
+  const [showYoutubePlayer, setShowYoutubePlayer] = useState(false);
 
   const parseTracksArray = (raw) => {
     if (Array.isArray(raw)) return raw;
@@ -928,6 +1056,15 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     }
   };
 
+  // Track selected audio source independently of audio.src to reset loopCountRef even when paused
+  const selectedTrackSource = currentTracks[activeTrackIndex]?.preview_url || '';
+  useEffect(() => {
+    if (selectedTrackSource !== lastTrackSourceRef.current) {
+      lastTrackSourceRef.current = selectedTrackSource;
+      loopCountRef.current = 0;
+    }
+  }, [selectedTrackSource]);
+
   // HTML5 Audio playback logic with resilient error recovery
   useEffect(() => {
     const audio = audioRef.current;
@@ -935,7 +1072,17 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
     const track = currentTracks[activeTrackIndex];
     if (isPlaying && track && track.preview_url) {
-      if (audio.src !== track.preview_url) {
+      if (showYoutubePlayer) {
+        setShowYoutubePlayer(false);
+      }
+      let normalizedTarget = track.preview_url;
+      try {
+        normalizedTarget = new URL(track.preview_url, window.location.href).href;
+      } catch {
+        normalizedTarget = track.preview_url;
+      }
+      if (audio.src !== normalizedTarget) {
+        loopCountRef.current = 0;
         audio.src = track.preview_url;
         audio.load();
       }
@@ -951,7 +1098,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     } else {
       audio.pause();
     }
-  }, [isPlaying, activeTrackIndex, currentTracks]);
+  }, [isPlaying, activeTrackIndex, currentTracks, showYoutubePlayer]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -1003,9 +1150,25 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   const activeTrack = currentTracks[activeTrackIndex];
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-      setDuration(audioRef.current.duration || 0);
+    const audio = audioRef.current;
+    if (!audio) return;
+    const rawDur = audio.duration || 0;
+    if (rawDur > 0 && rawDur <= 45) {
+      const virtualElapsed = (loopCountRef.current * rawDur) + audio.currentTime;
+      if (virtualElapsed >= targetSessionDuration) {
+        if (isPlaying) {
+          handleTrackEnded(true);
+        } else {
+          setCurrentTime(targetSessionDuration);
+          if (audio) audio.currentTime = Math.min(rawDur - 0.1, rawDur);
+        }
+        return;
+      }
+      setCurrentTime(virtualElapsed);
+      setDuration(targetSessionDuration);
+    } else {
+      setCurrentTime(audio.currentTime);
+      setDuration(rawDur || 0);
     }
   };
 
@@ -1029,6 +1192,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   };
 
   const handlePlayPause = (index) => {
+    if (showYoutubePlayer) setShowYoutubePlayer(false);
     if (index !== undefined) {
       if (index === activeTrackIndex) {
         const nextState = !isPlaying;
@@ -1037,6 +1201,8 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
           recordTrackPlay(currentTracks[index]);
         }
       } else {
+        loopCountRef.current = 0;
+        setCurrentTime(0);
         setActiveTrackIndex(index);
         setIsPlaying(true);
         if (currentTracks[index]) {
@@ -1053,6 +1219,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   };
 
   const handleNextTrack = () => {
+    if (showYoutubePlayer) setShowYoutubePlayer(false);
     if (currentTracks.length === 0) return;
     let nextIndex;
     if (isShuffle) {
@@ -1060,8 +1227,16 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     } else {
       nextIndex = (activeTrackIndex + 1) % currentTracks.length;
     }
-    setActiveTrackIndex(nextIndex);
+    loopCountRef.current = 0;
     setCurrentTime(0);
+    if (nextIndex === activeTrackIndex) {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => setIsPlaying(false));
+      }
+    } else {
+      setActiveTrackIndex(nextIndex);
+    }
     setIsPlaying(true);
     if (currentTracks[nextIndex]) {
       recordTrackPlay(currentTracks[nextIndex]);
@@ -1069,9 +1244,11 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   };
 
   const handlePrevTrack = () => {
+    if (showYoutubePlayer) setShowYoutubePlayer(false);
     if (currentTracks.length === 0) return;
     if (currentTime > 3) {
       if (audioRef.current) audioRef.current.currentTime = 0;
+      loopCountRef.current = 0;
       setCurrentTime(0);
       return;
     }
@@ -1081,19 +1258,46 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
     } else {
       prevIndex = (activeTrackIndex - 1 + currentTracks.length) % currentTracks.length;
     }
-    setActiveTrackIndex(prevIndex);
+    loopCountRef.current = 0;
     setCurrentTime(0);
+    if (prevIndex === activeTrackIndex) {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => setIsPlaying(false));
+      }
+    } else {
+      setActiveTrackIndex(prevIndex);
+    }
     setIsPlaying(true);
     if (currentTracks[prevIndex]) {
       recordTrackPlay(currentTracks[prevIndex]);
     }
   };
 
-  const handleTrackEnded = () => {
+  const handleTrackEnded = (forceNext = false) => {
+    const audio = audioRef.current;
+    const rawDur = audio?.duration || 0;
+
+    // Seamless loop up to targetSessionDuration (90s = 1.5 min, 120s = 2 min) for preview clips
+    if (!forceNext && rawDur > 0 && rawDur <= 45) {
+      const nextLoop = loopCountRef.current + 1;
+      const totalElapsed = nextLoop * rawDur;
+      if (totalElapsed < targetSessionDuration - 2) {
+        loopCountRef.current = nextLoop;
+        if (audio) {
+          audio.currentTime = 0;
+          audio.play().catch(() => setIsPlaying(false));
+        }
+        return;
+      }
+    }
+
+    loopCountRef.current = 0;
+    setCurrentTime(0);
     if (repeatMode === 'one') {
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => setIsPlaying(false));
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => setIsPlaying(false));
       }
     } else if (repeatMode === 'all' || isShuffle) {
       handleNextTrack();
@@ -1101,7 +1305,28 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
       if (activeTrackIndex < currentTracks.length - 1) {
         handleNextTrack();
       } else {
+        if (audio) audio.currentTime = 0;
         setIsPlaying(false);
+      }
+    }
+  };
+
+  const toggleSessionDuration = () => {
+    const nextTarget = targetSessionDuration === 120 ? 90 : 120;
+    setTargetSessionDuration(nextTarget);
+    const audio = audioRef.current;
+    if (audio) {
+      const rawDur = audio.duration || 0;
+      if (rawDur > 0 && rawDur <= 45) {
+        setDuration(nextTarget);
+        if (currentTime >= nextTarget) {
+          if (isPlaying) {
+            handleTrackEnded(true);
+          } else {
+            setCurrentTime(nextTarget);
+            audio.currentTime = Math.min(rawDur - 0.1, rawDur);
+          }
+        }
       }
     }
   };
@@ -1124,9 +1349,19 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   const handleSeek = (e) => {
     const time = parseFloat(e.target.value);
-    setCurrentTime(time);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const rawDur = audio.duration || 0;
+    if (rawDur > 0 && rawDur <= 45) {
+      const targetLoop = Math.floor(time / rawDur);
+      const subTime = time % rawDur;
+      loopCountRef.current = targetLoop;
+      audio.currentTime = Math.min(subTime, Math.max(0, rawDur - 0.1));
+      setCurrentTime(time);
+    } else {
+      audio.currentTime = time;
+      setCurrentTime(time);
     }
   };
 
@@ -1586,7 +1821,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       onChange={(e) => handleMultiFilterSearch(selectedLanguage, e.target.value, selectedMood, filterQuery)}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
                     >
-                      {["Melody", "Pop", "Dance", "Acoustic", "Ballad", "Rock", "Lo-fi", "Classical", "Instrumental", "Nature Sounds", "Soundtrack"].map(g => (
+                      {["Melody", "Pop", "Dance", "Acoustic", "Ballad", "Rock", "Lo-fi", "Piano", "Meditation", "Flute", "Classical", "Instrumental", "Nature Sounds", "Soundtrack"].map(g => (
                         <option key={g} value={g}>{g}</option>
                       ))}
                     </select>
@@ -1663,19 +1898,170 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     </p>
                     
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.75rem' }}>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        padding: '0.2rem 0.5rem',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid var(--border-glass)',
-                        borderRadius: '4px',
-                        color: 'var(--text-muted)'
-                      }}>
-                        Duration: {activeTrack.duration}
-                      </span>
+                      {activeTrack.duration && (
+                        <span style={{
+                          fontSize: '0.75rem',
+                          padding: '0.2rem 0.5rem',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid var(--border-glass)',
+                          borderRadius: '4px',
+                          color: 'var(--text-muted)'
+                        }}>
+                          Original: {activeTrack.duration}
+                        </span>
+                      )}
+
+                      {/* Extended Playback Mode Selector (shown for previews <= 45s) */}
+                      {Boolean((audioRef.current?.duration && audioRef.current.duration > 45) || (audioRef.current?.src && audioRef.current.src.includes('SoundHelix'))) ? (
+                        <span style={{
+                          fontSize: '0.75rem',
+                          padding: '0.25rem 0.65rem',
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
+                          borderRadius: '20px',
+                          color: 'var(--accent-emerald)',
+                          fontWeight: 600
+                        }}>
+                          🎵 Full Length Audio
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            id="playback-duration-mode-toggle"
+                            onClick={toggleSessionDuration}
+                            title="Click to toggle session duration between 2:00 Max and 1:30 Min"
+                            style={{
+                              fontSize: '0.75rem',
+                              padding: '0.25rem 0.65rem',
+                              background: targetSessionDuration === 120 ? 'rgba(99, 102, 241, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                              border: `1px solid ${targetSessionDuration === 120 ? 'var(--primary)' : 'var(--accent-emerald)'}`,
+                              borderRadius: '20px',
+                              color: targetSessionDuration === 120 ? 'var(--primary-glow)' : 'var(--accent-emerald)',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              fontWeight: 600,
+                              transition: 'all 0.2s ease',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                            }}
+                          >
+                            <span>⏱️ Playback: <strong>{targetSessionDuration === 120 ? '2:00 (Max)' : '1:30 (Min)'}</strong></span>
+                            <span style={{ fontSize: '0.68rem', opacity: 0.85, textDecoration: 'underline' }}>
+                              Switch to {targetSessionDuration === 120 ? '1:30' : '2:00'}
+                            </span>
+                          </button>
+
+                          <span style={{
+                            fontSize: '0.7rem',
+                            padding: '0.2rem 0.5rem',
+                            background: 'rgba(6, 182, 212, 0.12)',
+                            border: '1px solid rgba(6, 182, 212, 0.3)',
+                            borderRadius: '12px',
+                            color: 'var(--accent-cyan)',
+                            fontWeight: 600
+                          }}>
+                            ✨ Seamless AI Therapy Loop
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
 
+                  {/* Option A: Full Uncut Studio Track (Official YouTube Music Player) */}
+                  {showYoutubePlayer && activeTrack && (
+                    <div style={{
+                      width: '100%',
+                      marginTop: '1.25rem',
+                      marginBottom: '0.75rem',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      border: '1px solid rgba(239, 68, 68, 0.45)',
+                      background: 'rgba(10, 10, 15, 0.95)',
+                      boxShadow: '0 10px 30px rgba(239, 68, 68, 0.25)'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.65rem 1rem',
+                        background: 'linear-gradient(90deg, rgba(239, 68, 68, 0.25) 0%, rgba(20, 20, 30, 0.8) 100%)',
+                        borderBottom: '1px solid var(--border-glass)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ff4d4d', fontWeight: 700, fontSize: '0.85rem' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                          </svg>
+                          <span>Full Studio Song ({activeTrack.title} • 3-5 Min YouTube Player)</span>
+                        </div>
+                        <button
+                          id="close-youtube-player-btn"
+                          onClick={() => setShowYoutubePlayer(false)}
+                          className="btn-secondary"
+                          style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '12px', cursor: 'pointer' }}
+                        >
+                          ✕ Close Full Song
+                        </button>
+                      </div>
+
+                      <div style={{ position: 'relative', width: '100%', paddingBottom: '45%', minHeight: '220px', maxHeight: '340px' }}>
+                        {getTrackYoutubeEmbedUrl(activeTrack) ? (
+                          <iframe
+                            src={getTrackYoutubeEmbedUrl(activeTrack)}
+                            title={`${activeTrack.title} Full Track`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              border: 'none'
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '1.5rem',
+                            textAlign: 'center',
+                            background: 'rgba(255, 255, 255, 0.03)'
+                          }}>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: '0.85rem', fontSize: '0.9rem' }}>
+                              Direct embed is restricted for this studio track. Play the complete uncut 3-5 min version on YouTube:
+                            </p>
+                            <a
+                              href={activeTrack.youtube_search_url || `https://www.youtube.com/results?search_query=${encodeURIComponent(activeTrack.title + ' ' + (activeTrack.artist || ''))}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn-primary"
+                              style={{
+                                padding: '0.6rem 1.25rem',
+                                borderRadius: '24px',
+                                background: '#ff0000',
+                                color: '#fff',
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                textDecoration: 'none'
+                              }}
+                            >
+                              ▶️ Open {activeTrack.title} on YouTube
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p style={{ color: 'var(--text-secondary)' }}>Select a track to listen.</p>
@@ -1688,8 +2074,21 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                   preload="auto"
                   crossOrigin="anonymous"
                   src={activeTrack.preview_url || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
+                  onPlay={() => {
+                    if (showYoutubePlayer) setShowYoutubePlayer(false);
+                  }}
+                  onLoadedMetadata={() => {
+                    if (audioRef.current) {
+                      const rawDur = audioRef.current.duration || 0;
+                      if (rawDur > 0 && rawDur <= 45) {
+                        setDuration(targetSessionDuration);
+                      } else {
+                        setDuration(rawDur);
+                      }
+                    }
+                  }}
                   onTimeUpdate={handleTimeUpdate}
-                  onEnded={handleTrackEnded}
+                  onEnded={() => handleTrackEnded(false)}
                   onError={() => {
                     console.warn("Audio element error on src:", activeTrack?.preview_url);
                     if (audioRef.current && audioRef.current.src !== "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") {
@@ -1708,7 +2107,12 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                 <div style={{ marginTop: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', fontWeight: 500 }}>
                     <span>{formatTime(currentTime)}</span>
-                    <span style={{ color: 'var(--text-muted)' }}>Progress Bar</span>
+                    <span style={{ color: 'var(--text-muted)' }}>
+                      {Boolean((audioRef.current?.duration && audioRef.current.duration > 45) || (audioRef.current?.src && audioRef.current.src.includes('SoundHelix')))
+                        ? '🎵 Full Track Playback'
+                        : `🎵 Therapy Session (${targetSessionDuration === 120 ? '2:00 Max' : '1:30 Min'})`
+                      }
+                    </span>
                     <span>{formatTime(duration)}</span>
                   </div>
                   <input 
@@ -1746,8 +2150,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                       {(() => {
                         const lyricsData = getTrackLyricsData(activeTrack);
                         const subs = lyricsData?.subtitles || [];
+                        const rawDur = audioRef.current?.duration || 30;
+                        const loopTime = currentTime % (rawDur > 0 ? rawDur : 30);
                         for (let i = subs.length - 1; i >= 0; i--) {
-                          if (currentTime >= subs[i].time) return subs[i].text;
+                          if (loopTime >= subs[i].time) return subs[i].text;
                         }
                         return subs[0]?.text || `🎵 ${activeTrack.title} — Relax & enjoy the music...`;
                       })()}
@@ -1860,6 +2266,43 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
                     >
                       <Heart style={{ width: '16px', height: '16px', fill: isFavorite(activeTrack) ? 'var(--accent-rose)' : 'none', color: isFavorite(activeTrack) ? 'var(--accent-rose)' : 'var(--text-secondary)' }} />
                       {isFavorite(activeTrack) ? 'Saved' : 'Save'}
+                    </button>
+                  )}
+
+                  {/* Option A: Play Full Song (YouTube Embedded Player Toggle) */}
+                  {activeTrack && (
+                    <button
+                      id="youtube-full-player-toggle"
+                      onClick={() => {
+                        const nextState = !showYoutubePlayer;
+                        setShowYoutubePlayer(nextState);
+                        if (nextState && audioRef.current) {
+                          audioRef.current.pause();
+                          setIsPlaying(false);
+                        }
+                      }}
+                      className="btn-secondary"
+                      style={{
+                        padding: '0.45rem 0.95rem',
+                        fontSize: '0.85rem',
+                        borderRadius: '20px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        background: showYoutubePlayer ? 'rgba(239, 68, 68, 0.35)' : 'rgba(239, 68, 68, 0.12)',
+                        borderColor: 'rgba(239, 68, 68, 0.45)',
+                        color: '#ff6b6b',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)',
+                        transition: 'all 0.2s ease'
+                      }}
+                      title="Play complete uncut 3-5 minute song on YouTube"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                      <span>{showYoutubePlayer ? 'Close Full Track' : '▶️ Full Track (YouTube)'}</span>
                     </button>
                   )}
 
@@ -2625,7 +3068,9 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {getTrackLyricsData(activeTrack).subtitles.map((sub, idx) => {
-                    const isActive = currentTime >= sub.time && (idx === getTrackLyricsData(activeTrack).subtitles.length - 1 || currentTime < getTrackLyricsData(activeTrack).subtitles[idx + 1].time);
+                    const rawDur = audioRef.current?.duration || 30;
+                    const subLoopTime = currentTime % (rawDur > 0 ? rawDur : 30);
+                    const isActive = subLoopTime >= sub.time && (idx === getTrackLyricsData(activeTrack).subtitles.length - 1 || subLoopTime < getTrackLyricsData(activeTrack).subtitles[idx + 1].time);
                     return (
                       <div
                         key={idx}

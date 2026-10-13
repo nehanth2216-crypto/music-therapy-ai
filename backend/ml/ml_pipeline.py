@@ -39,10 +39,10 @@ SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Kannada", "Malaya
 # Deep Neural Network Architecture Wrapper Classes
 class TabularTransformerClassifier:
     """Tabular Multi-Head Self-Attention Transformer Neural Network Classifier."""
-    def __init__(self, hidden_dim=128, max_iter=300):
+    def __init__(self, hidden_dim=128, max_iter=400):
         self.mlp = MLPClassifier(
             hidden_layer_sizes=(hidden_dim, hidden_dim // 2, hidden_dim // 4),
-            activation='relu',
+            activation='tanh',
             solver='adam',
             max_iter=max_iter,
             random_state=42
@@ -81,14 +81,22 @@ class LSTMTabularClassifier:
 
 class TabNetWrapper:
     """Attentional Tabular Neural Network (TabNet) Wrapper."""
-    def __init__(self, max_epochs=40):
-        self.model = OfficialTabNetClassifier(verbose=0)
+    def __init__(self, max_epochs=50):
+        self.model = OfficialTabNetClassifier(
+            n_d=16, n_a=16, n_steps=3, gamma=1.2, verbose=0, seed=42
+        )
         self.max_epochs = max_epochs
 
     def fit(self, X, y):
         X_arr = np.array(X, dtype=np.float32)
         y_arr = np.array(y, dtype=np.int64)
-        self.model.fit(X_arr, y_arr, max_epochs=self.max_epochs, patience=10)
+        self.model.fit(
+            X_arr, y_arr,
+            max_epochs=self.max_epochs,
+            patience=15,
+            batch_size=128,
+            virtual_batch_size=64
+        )
         return self
 
     def predict(self, X):
@@ -200,10 +208,10 @@ def run_pipeline():
     models = {
         "LightGBM": lgb.LGBMClassifier(n_estimators=150, learning_rate=0.08, max_depth=6, random_state=42, verbose=-1),
         "CatBoost": cb.CatBoostClassifier(iterations=150, learning_rate=0.08, depth=5, random_seed=42, verbose=0),
-        "TabNet": TabNetWrapper(max_epochs=35),
-        "Multilayer Perceptron (MLP)": MLPClassifier(hidden_layer_sizes=(128, 64, 32), activation='relu', max_iter=300, random_state=42),
+        "TabNet": TabNetWrapper(max_epochs=50),
+        "Multilayer Perceptron (MLP)": MLPClassifier(hidden_layer_sizes=(128, 64, 32), activation='tanh', solver='adam', max_iter=400, random_state=42),
         "LSTM": LSTMTabularClassifier(max_iter=300),
-        "Transformer": TabularTransformerClassifier(max_iter=300)
+        "Transformer": TabularTransformerClassifier(max_iter=400)
     }
     
     metrics_summary = {}

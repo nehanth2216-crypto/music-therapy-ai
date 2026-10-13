@@ -11,6 +11,7 @@ import re
 from urllib.parse import quote_plus
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.orm import Session, joinedload
 
@@ -59,6 +60,11 @@ def load_env():
 load_env()
 
 app = FastAPI(title="HarmonyRec API", version="1.0.0")
+
+# Mount local continuous audio files directory
+AUDIO_STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "public", "audio")
+if os.path.exists(AUDIO_STATIC_DIR):
+    app.mount("/audio", StaticFiles(directory=AUDIO_STATIC_DIR), name="audio")
 
 hybrid_recommender = HybridRecommender()
 weighted_recommender = WeightedSongRecommendationEngine()
@@ -256,9 +262,12 @@ MULTI_LANG_LIBRARY = {
         {"title": "Illuminati (From \"Aavesham\")", "artist": "Sushin Shyam & Dabzee", "duration": "3:13", "album_image": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/29/884e290c-29ed-25d5-7b25-243b89097220/cover.jpg/500x500bb.jpg", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/43/a0/da/43a0daa2-504d-6b7c-c63a-0c8864608a6d/mzaf_7754996064757215177.plus.aac.p.m4a", "is_catalog_verified": True}
     ],
     "English": [
-        {"title": "Weightless (Deep Relaxation)", "artist": "Marconi Union", "duration": "8:08", "album_image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&h=500&fit=crop", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/65/69/07/656907c9-eb54-c59c-72b9-dad8489a0165/mzaf_3316991574698499044.plus.aac.p.m4a", "is_catalog_verified": True},
-        {"title": "Closer (Acoustic Chill)", "artist": "The Chainsmokers", "duration": "4:05", "album_image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/bd/f9/b9/bdf9b9b2-eaa4-4461-6079-aaacc6df7316/mzaf_17327312786932455493.plus.aac.p.m4a", "is_catalog_verified": True},
-        {"title": "Sunset Serenade", "artist": "Lofi Chill Beats", "duration": "3:45", "album_image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&h=500&fit=crop", "preview_url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/65/69/07/656907c9-eb54-c59c-72b9-dad8489a0165/mzaf_3316991574698499044.plus.aac.p.m4a", "is_catalog_verified": True}
+        {"title": "Weightless Lofi Chill", "artist": "Lofi Dreamer Collective", "duration": "3:20", "album_image": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&h=500&fit=crop", "preview_url": "/audio/lofi_chill.mp3", "is_catalog_verified": True},
+        {"title": "Peaceful Piano Reverie", "artist": "Harmonic Solitude", "duration": "5:02", "album_image": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=500&h=500&fit=crop", "preview_url": "/audio/peaceful_piano.mp3", "is_catalog_verified": True},
+        {"title": "Zen Tibetan Meditation", "artist": "Mindfulness Soundscapes", "duration": "5:44", "album_image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=500&h=500&fit=crop", "preview_url": "/audio/zen_meditation.mp3", "is_catalog_verified": True},
+        {"title": "Bansuri Bamboo Flute Healing", "artist": "Pranam Flute Ensemble", "duration": "6:12", "album_image": "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=500&h=500&fit=crop", "preview_url": "/audio/bamboo_flute.mp3", "is_catalog_verified": True},
+        {"title": "Rain & Forest Sleep Soundscape", "artist": "Deep Nature Acoustics", "duration": "6:29", "album_image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500&h=500&fit=crop", "preview_url": "/audio/rain_sleep.mp3", "is_catalog_verified": True},
+        {"title": "Sunny Study Chillhop", "artist": "Study Beats Collective", "duration": "2:45", "album_image": "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=500&h=500&fit=crop", "preview_url": "/audio/study_focus.mp3", "is_catalog_verified": True}
     ]
 }
 

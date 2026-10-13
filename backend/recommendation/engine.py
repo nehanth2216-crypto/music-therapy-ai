@@ -150,51 +150,91 @@ ACTIVITY_COMPATIBILITY = {
     },
     "workout": {
         "workout": 1.0,
+        "exercise": 1.0,
         "party": 0.80,
         "driving": 0.40,
         "walking": 0.40,
         "relaxing": 0.05,
+        "relaxation": 0.05,
         "studying": 0.05
     },
-    "running": {
+    "exercise": {
+        "exercise": 1.0,
         "workout": 1.0,
         "party": 0.80,
         "driving": 0.40,
         "walking": 0.40,
         "relaxing": 0.05,
+        "relaxation": 0.05,
+        "studying": 0.05
+    },
+    "running": {
+        "workout": 1.0,
+        "exercise": 1.0,
+        "party": 0.80,
+        "driving": 0.40,
+        "walking": 0.40,
+        "relaxing": 0.05,
+        "relaxation": 0.05,
         "studying": 0.05
     },
     "party": {
         "party": 1.0,
         "workout": 0.80,
+        "exercise": 0.80,
         "driving": 0.40,
         "walking": 0.30,
         "relaxing": 0.05,
+        "relaxation": 0.05,
         "studying": 0.05
     },
     "relaxing": {
         "relaxing": 1.0,
+        "relaxation": 1.0,
+        "meditation": 0.85,
+        "sleeping": 0.80,
         "studying": 0.70,
         "walking": 0.50,
         "driving": 0.30,
         "party": 0.05,
-        "workout": 0.05
+        "workout": 0.05,
+        "exercise": 0.05
+    },
+    "relaxation": {
+        "relaxation": 1.0,
+        "relaxing": 1.0,
+        "meditation": 0.85,
+        "sleeping": 0.80,
+        "studying": 0.70,
+        "walking": 0.50,
+        "driving": 0.30,
+        "party": 0.05,
+        "workout": 0.05,
+        "exercise": 0.05
     },
     "meditation": {
+        "meditation": 1.0,
         "relaxing": 1.0,
+        "relaxation": 1.0,
+        "sleeping": 0.75,
         "studying": 0.70,
         "walking": 0.40,
         "driving": 0.20,
         "party": 0.05,
-        "workout": 0.05
+        "workout": 0.05,
+        "exercise": 0.05
     },
     "sleeping": {
+        "sleeping": 1.0,
         "relaxing": 1.0,
+        "relaxation": 1.0,
+        "meditation": 0.80,
         "studying": 0.60,
         "walking": 0.20,
         "driving": 0.10,
         "party": 0.05,
-        "workout": 0.05
+        "workout": 0.05,
+        "exercise": 0.05
     },
     "walking": {
         "walking": 1.0,
@@ -337,20 +377,25 @@ GENRE_COMPATIBILITY = {
         "rock": 0.10
     },
     "instrumental": {
+        "instrumental": 1.0,
         "acoustic": 0.95,
         "melody": 0.90,
         "ballad": 0.80,
         "classical": 0.80,
         "folk": 0.70,
+        "lo-fi": 0.85,
         "pop": 0.50,
         "dance": 0.20,
         "rock": 0.20
     },
     "nature sounds": {
+        "nature sounds": 1.0,
         "acoustic": 0.95,
         "melody": 0.85,
         "ballad": 0.80,
         "classical": 0.80,
+        "instrumental": 0.90,
+        "lo-fi": 0.85,
         "folk": 0.70,
         "pop": 0.30,
         "dance": 0.05,
@@ -480,13 +525,28 @@ class WeightedSongRecommendationEngine:
         s_a = (song_act or "").strip().lower()
         u_a = (user_act or "relaxing").strip().lower()
 
+        # Activity normalizations & clinical synonyms
+        act_synonyms = {
+            "exercise": "workout",
+            "gym": "workout",
+            "running": "workout",
+            "relaxation": "relaxing",
+            "calm": "relaxing",
+            "study": "studying",
+            "sleep": "sleeping",
+            "meditate": "meditation",
+            "working": "studying"
+        }
+        s_norm = act_synonyms.get(s_a, s_a)
+        u_norm = act_synonyms.get(u_a, u_a)
+
         if not s_a:
             return 0.20
-        if s_a == u_a:
+        if s_a == u_a or s_norm == u_norm:
             return 1.0
 
-        compat_table = ACTIVITY_COMPATIBILITY.get(u_a, {})
-        return compat_table.get(s_a, 0.05)
+        compat_table = ACTIVITY_COMPATIBILITY.get(u_norm, ACTIVITY_COMPATIBILITY.get(u_a, {}))
+        return compat_table.get(s_norm, compat_table.get(s_a, 0.05))
 
     @staticmethod
     def calculate_genre_match(song_genre: str, user_genre: str) -> float:
@@ -520,7 +580,7 @@ class WeightedSongRecommendationEngine:
         
         # High stress or acute anxiety (>= 7)
         if stress >= 7 or anxiety >= 7:
-            if s_e == "high" or s_a in ["party", "workout"]:
+            if s_e == "high" or s_a in ["party", "workout", "exercise"]:
                 return 0.05  # Severe contraindication for acute stress/anxiety
             if s_m in ["calm", "stressed", "emotional", "romantic"] and s_e in ["low", "medium"]:
                 return 1.0  # Therapeutic nervous system down-regulation
@@ -632,8 +692,8 @@ class WeightedSongRecommendationEngine:
                 return 1.0, "Parasympathetic Vagal Down-Regulation (Calm)"
             return 0.65, "Pacing Transition toward Calm"
 
-        # Clinical case 2: Motor Activation / High Physical Output (Workout / Running / Party)
-        if u_a in ["workout", "running", "party"] or u_e == "high":
+        # Clinical case 2: Motor Activation / High Physical Output (Workout / Running / Party / Exercise)
+        if u_a in ["workout", "running", "party", "exercise"] or u_e == "high":
             if s_e == "high" and (s_g in ["dance", "pop", "rock"] or s_m in ["energetic", "happy"]):
                 return 1.0, "Cardiovascular Rhythm Entrainment & Motor Activation"
             if s_e == "low":
@@ -728,17 +788,32 @@ class WeightedSongRecommendationEngine:
         if lang_match == 0.0:
             return 0.0, [], "Non-matching language"
 
+        # Normalize activities for clinical and matching consistency
+        act_synonyms = {
+            "exercise": "workout",
+            "gym": "workout",
+            "running": "workout",
+            "relaxation": "relaxing",
+            "calm": "relaxing",
+            "study": "studying",
+            "sleep": "sleeping",
+            "meditate": "meditation",
+            "working": "studying"
+        }
+        s_act_norm = act_synonyms.get(s_act.lower(), s_act.lower())
+        user_act_norm = act_synonyms.get(user_act.lower(), user_act.lower())
+
         # 2. Mood Match (20%)
         mood_match = self.calculate_mood_match(s_mood, user_mood)
 
         # 3. Activity Match (20%)
-        act_match = self.calculate_activity_match(s_act, user_act)
+        act_match = self.calculate_activity_match(s_act_norm, user_act_norm)
 
         # 4. Energy Match (15% - Sharpened to eliminate energy clashes)
         energy_match = self.calculate_energy_match(s_energy, user_energy)
 
         # 5. Clinical Stress & Anxiety Fit (10%)
-        therapy_fit = self.calculate_stress_anxiety_fit(s_mood, s_act, s_energy, user_stress, user_anxiety)
+        therapy_fit = self.calculate_stress_anxiety_fit(s_mood, s_act_norm, s_energy, user_stress, user_anxiety)
 
         # 6. Genre Match (5%)
         genre_match = self.calculate_genre_match(s_genre, user_genre)
@@ -748,12 +823,12 @@ class WeightedSongRecommendationEngine:
 
         # 8. Clinical Vector Embedding & ISO Principle Trajectory
         vector_sim = self.calculate_clinical_vector_similarity(
-            user_mood, user_act, user_energy, user_stress, user_anxiety,
-            s_mood, s_act, s_energy, s_genre
+            user_mood, user_act_norm, user_energy, user_stress, user_anxiety,
+            s_mood, s_act_norm, s_energy, s_genre
         )
         iso_fit, iso_stage = self.calculate_iso_principle_trajectory(
-            user_mood, user_energy, user_stress, user_anxiety, user_act,
-            s_mood, s_energy, s_act, s_genre
+            user_mood, user_energy, user_stress, user_anxiety, user_act_norm,
+            s_mood, s_energy, s_act_norm, s_genre
         )
         blended_therapy_fit = (therapy_fit * 0.70) + (iso_fit * 0.30)
 
@@ -772,9 +847,9 @@ class WeightedSongRecommendationEngine:
         score = (base_score * 0.90) + (vector_sim * 100.0 * 0.10)
 
         # Hard conflict penalty: polar opposite energy during intensity-specific activities
-        if user_energy.lower() == "high" and s_energy.lower() == "low" and user_act.lower() in ["workout", "running", "party"]:
+        if user_energy.lower() == "high" and s_energy.lower() == "low" and user_act_norm in ["workout", "running", "party", "exercise"]:
             score *= 0.50  # Heavy penalty for slow lullabies during high-intensity workout
-        if user_energy.lower() == "low" and s_energy.lower() == "high" and user_act.lower() in ["studying", "sleeping", "meditation"]:
+        if user_energy.lower() == "low" and s_energy.lower() == "high" and user_act_norm in ["studying", "sleeping", "meditation", "relaxing", "relaxation"]:
             score *= 0.50  # Heavy penalty for loud party tracks during quiet study/sleep
 
         # Secondary personalization from listening history
