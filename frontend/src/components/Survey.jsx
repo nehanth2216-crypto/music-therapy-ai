@@ -3,7 +3,7 @@ import { ArrowRight, ArrowLeft, Loader2, Music, CheckCircle2, Activity, Heart, M
 
 const GENRES = ["Melody", "Dance", "Pop", "Rock", "Acoustic", "Ballad", "Classical", "Instrumental", "Lo-fi", "Nature Sounds"];
 const MOODS = ["Sad", "Happy", "Tired", "Anxiety", "Angry"];
-const ACTIVITIES = ["Studying", "Working", "Workout", "Running", "Walking", "Driving", "Relaxing", "Meditation", "Sleeping", "Party", "Gaming", "Cooking"];
+const ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"];
 const ENERGIES = ["Low", "Medium", "High"];
 const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
 const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];

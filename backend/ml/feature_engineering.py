@@ -8,7 +8,7 @@ MOODS = [
     "Romantic", "Motivated"
 ]
 SLEEP_QUALITIES = ["Good", "Fair", "Poor"]
-ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation", "Working", "Walking", "Driving"]
+ACTIVITIES = ["Studying", "Sleeping", "Meditation", "Exercise", "Relaxation"]
 GENRES = ["Lo-fi", "Classical", "Nature Sounds", "Instrumental", "Pop", "Melody", "Acoustic", "Ambient"]
 
 THERAPY_CATEGORIES = [
