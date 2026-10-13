@@ -24,7 +24,7 @@ ChartJS.register(
   Filler
 );
 
-const MOODS = ["Calm", "Happy", "Stressed", "Sad", "Emotional", "Romantic", "Energetic", "Anxiety", "Relaxed", "Tired", "Angry", "Focused"];
+const MOODS = ["Sad", "Happy", "Tired", "Anxiety", "Angry"];
 const SUPPORTED_LANGUAGES = ["English", "Telugu", "Hindi", "Tamil", "Malayalam"];
 
 const CURATED_STARTER_TRACKS = [
@@ -429,7 +429,7 @@ const isAuthenticLanguageTrack = (track, targetLang) => {
 
 const getCuratedTracksForLanguageAndMood = (targetLang, targetMood) => {
   const tLang = (targetLang || 'English').toLowerCase().trim();
-  const tMood = (targetMood || 'Calm').toLowerCase().trim();
+  const tMood = (targetMood || 'Happy').toLowerCase().trim();
   const langTracks = CURATED_STARTER_TRACKS.filter(t => t.language && t.language.toLowerCase() === tLang);
   if (langTracks.length === 0) return CURATED_STARTER_TRACKS;
 
@@ -437,12 +437,14 @@ const getCuratedTracksForLanguageAndMood = (targetLang, targetMood) => {
     if (!targetMood) return true;
     const tm = (t.mood || '').toLowerCase();
     return tm === tMood ||
-           (tMood.includes('calm') && (tm.includes('calm') || tm.includes('relax'))) ||
            (tMood.includes('happy') && tm.includes('happy')) ||
-           (tMood.includes('romantic') && tm.includes('romantic')) ||
            (tMood.includes('sad') && tm.includes('sad')) ||
+           (tMood.includes('tired') && (tm.includes('sleep') || tm.includes('relax') || tm.includes('calm') || tm.includes('tired'))) ||
+           (tMood.includes('anxi') && (tm.includes('anxi') || tm.includes('stress') || tm.includes('calm'))) ||
+           (tMood.includes('angr') && (tm.includes('angr') || tm.includes('calm') || tm.includes('sad'))) ||
+           (tMood.includes('calm') && (tm.includes('calm') || tm.includes('relax'))) ||
+           (tMood.includes('romantic') && tm.includes('romantic')) ||
            (tMood.includes('sleep') && (tm.includes('sleep') || tm.includes('relax'))) ||
-           (tMood.includes('anxi') && (tm.includes('anxi') || tm.includes('stress'))) ||
            (tMood.includes('motivat') && tm.includes('motivat')) ||
            (tMood.includes('energet') && tm.includes('energet'));
   });
@@ -643,7 +645,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
   // Audio Player, Lyrics, and Multi-Filter Search Engine State
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [selectedGenre, setSelectedGenre] = useState('Melody');
-  const [selectedMood, setSelectedMood] = useState('Calm');
+  const [selectedMood, setSelectedMood] = useState('Happy');
   const [filterQuery, setFilterQuery] = useState('');
   const [filterLoading, setFilterLoading] = useState(false);
   const [currentTracks, setCurrentTracks] = useState([]);
@@ -677,7 +679,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
   // Daily Journal State
   const [journals, setJournals] = useState([]);
-  const [journalMood, setJournalMood] = useState('Calm');
+  const [journalMood, setJournalMood] = useState('Happy');
   const [journalStress, setJournalStress] = useState(5);
   const [journalText, setJournalText] = useState('');
   const [journalSuccess, setJournalSuccess] = useState('');
@@ -760,10 +762,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         if (strictlyLangTracks.length > 0) {
           setCurrentTracks(strictlyLangTracks);
         } else {
-          const fallbackList = getCuratedTracksForLanguageAndMood(targetLang, latest.mood || 'Calm');
+          const fallbackList = getCuratedTracksForLanguageAndMood(targetLang, latest.mood || 'Happy');
           setCurrentTracks(fallbackList);
         }
-        setCurrentMoodState(latest.result_state || 'Calming');
+        setCurrentMoodState(latest.result_state || 'Happy');
         setLatestSurveyId(latest.id);
         // Set feedback default if already submitted
         setRating(latest.rating || 0);
@@ -773,10 +775,10 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         if (latest.fav_genre) setSelectedGenre(latest.fav_genre);
       } else {
         // Default to curated Telugu songs if user hasn't completed diagnostic survey yet
-        const defaultTracks = getCuratedTracksForLanguageAndMood('Telugu', 'Calm');
+        const defaultTracks = getCuratedTracksForLanguageAndMood('Telugu', 'Happy');
         setCurrentTracks(defaultTracks);
         setSelectedLanguage('Telugu');
-        setSelectedMood('Calm');
+        setSelectedMood('Happy');
       }
 
       if (resFavs.ok && Array.isArray(favsData)) {
@@ -789,7 +791,7 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
 
     } catch (err) {
       setError(err.message);
-      const defaultTracks = getCuratedTracksForLanguageAndMood('Telugu', 'Calm');
+      const defaultTracks = getCuratedTracksForLanguageAndMood('Telugu', 'Happy');
       setCurrentTracks(defaultTracks);
     } finally {
       setLoading(false);
@@ -810,11 +812,11 @@ export default function Dashboard({ token, apiBaseUrl, onViewChange }) {
         setSelectedLanguage(targetLang);
         if (s.mood) setSelectedMood(s.mood);
         if (s.fav_genre) setSelectedGenre(s.fav_genre);
-        setCurrentMoodState(s.result_state || 'Calming');
+        setCurrentMoodState(s.result_state || 'Happy');
         setLatestSurveyId(s.id);
         const sTracks = parseTracksArray(s.tracks);
         const validTracks = sTracks.filter(t => isAuthenticLanguageTrack(t, targetLang));
-        const finalTracks = validTracks.length > 0 ? validTracks : getCuratedTracksForLanguageAndMood(targetLang, s.mood || 'Calm');
+        const finalTracks = validTracks.length > 0 ? validTracks : getCuratedTracksForLanguageAndMood(targetLang, s.mood || 'Happy');
         setCurrentTracks(finalTracks);
         setActiveTrackIndex(0);
         setIsPlaying(true);

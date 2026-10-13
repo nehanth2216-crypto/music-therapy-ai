@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, Loader2, Music, CheckCircle2, Activity, Heart, Moon } from 'lucide-react';
 
 const GENRES = ["Melody", "Dance", "Pop", "Rock", "Acoustic", "Ballad", "Classical", "Instrumental", "Lo-fi", "Nature Sounds"];
-const MOODS = ["Calm", "Sad", "Stressed", "Anxious", "Angry", "Energetic", "Romantic", "Bored", "Focused", "Relaxed", "Tired"];
+const MOODS = ["Sad", "Happy", "Tired", "Anxiety", "Angry"];
 const ACTIVITIES = ["Studying", "Working", "Workout", "Running", "Walking", "Driving", "Relaxing", "Meditation", "Sleeping", "Party", "Gaming", "Cooking"];
 const ENERGIES = ["Low", "Medium", "High"];
 const SLEEP_QUALITIES = ["Good", "Fair", "Poor"];
@@ -17,7 +17,7 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
   // Survey Inputs
   const [age, setAge] = useState(25);
   const [gender, setGender] = useState('Prefer not to say');
-  const [mood, setMood] = useState('Calm');
+  const [mood, setMood] = useState('Happy');
   const [stress, setStress] = useState(5);
   const [sleepQuality, setSleepQuality] = useState('Good');
   const [anxiety, setAnxiety] = useState(5);
@@ -74,7 +74,12 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
           { title: "Samayama", artist: "Hesham Abdul Wahab, Anurag Kulkarni", album: "Hi Nanna", preview_url: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/f3/b0/73/f3b073f5-f84b-88d5-9d46-066aa152d606/mzaf_13123944415807399306.plus.aac.p.m4a", play_url: "https://music.apple.com/us/album/samayama-from-hi-nanna/1707658230?i=1707658237&uo=4", album_image: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b5/04/cd/b504cdb8-d632-4b6b-1b68-10686397ff42/8903431963307_cover.jpg/500x500bb.jpg" }
         ]
       };
-      const found = teluguLibrary[selectedMood] || teluguLibrary["Calm"];
+      const found = teluguLibrary[selectedMood] 
+        || (selectedMood === 'Anxiety' ? teluguLibrary["Anxious"] : null)
+        || (selectedMood === 'Tired' ? teluguLibrary["Sleep"] : null)
+        || (selectedMood === 'Angry' ? teluguLibrary["Sad"] : null)
+        || teluguLibrary["Happy"]
+        || teluguLibrary["Calm"];
       return found.map(t => ({
         ...t,
         language: "Telugu",
@@ -93,7 +98,7 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
         artist: "HarmonyRec AI Ensemble",
         genre: genre || "Lo-fi",
         language: lang || "English",
-        mood: selectedMood || "Calm",
+        mood: selectedMood || "Happy",
         therapy_category: "Stress Relief",
         duration: "4:15",
         score: 95,
@@ -105,7 +110,7 @@ export default function Survey({ token, apiBaseUrl, onViewChange, onSurveyComple
         artist: "Sound Bath Collective",
         genre: "Ambient",
         language: lang || "English",
-        mood: selectedMood || "Calm",
+        mood: selectedMood || "Happy",
         therapy_category: "Relaxation",
         duration: "3:48",
         score: 92,

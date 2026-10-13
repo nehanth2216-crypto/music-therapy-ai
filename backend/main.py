@@ -1052,7 +1052,7 @@ class RecommendationRequest(BaseModel):
     language_pref: Optional[str] = None
     genre: Optional[str] = None
     fav_genre: Optional[str] = None
-    mood: Optional[str] = "Calm"
+    mood: Optional[str] = "Happy"
     activity: Optional[str] = "Relaxing"
     energy: Optional[str] = "Medium"
     stress: Optional[int] = 5
